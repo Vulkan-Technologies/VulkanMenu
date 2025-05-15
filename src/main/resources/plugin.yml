@@ -1,0 +1,6 @@
+name: VulkanMenu
+version: '1.0-SNAPSHOT'
+main: com.vulkantechnologies.menu.VulkanMenu
+api-version: '1.21'
+libraries:
+  - org.spongepowered:configurate-yaml:${configurate.version}
