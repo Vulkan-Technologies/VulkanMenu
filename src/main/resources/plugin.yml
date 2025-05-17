@@ -4,3 +4,6 @@ main: com.vulkantechnologies.menu.VulkanMenu
 api-version: '1.21'
 libraries:
   - org.spongepowered:configurate-yaml:${configurate.version}
+softdepend:
+  - PlaceholderAPI
+  - Vault

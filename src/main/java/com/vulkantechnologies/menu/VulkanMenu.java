@@ -2,6 +2,7 @@ package com.vulkantechnologies.menu;
 
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.vulkantechnologies.menu.command.VMenuCommand;
@@ -11,6 +12,7 @@ import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.service.ConfigurationService;
 import com.vulkantechnologies.menu.service.MenuService;
+import com.vulkantechnologies.menu.service.PluginHookService;
 
 import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
@@ -18,14 +20,27 @@ import lombok.Getter;
 @Getter
 public final class VulkanMenu extends JavaPlugin {
 
+    private static VulkanMenu instance;
+
+    // State
+    private boolean loaded = false;
+    private boolean enabled = false;
+    private boolean disabled = false;
+
     // Configuration
     private ConfigurationService configuration;
 
     // Service
+    private PluginHookService pluginHooks;
     private MenuService menu;
 
     // Commands
     private PaperCommandManager commands;
+
+    @Override
+    public void onLoad() {
+        this.loaded = true;
+    }
 
     @Override
     public void onEnable() {
@@ -34,6 +49,7 @@ public final class VulkanMenu extends JavaPlugin {
         this.configuration.load();
 
         // Manager
+        this.pluginHooks = new PluginHookService(this);
         this.menu = new MenuService();
 
         // Commands
@@ -46,11 +62,27 @@ public final class VulkanMenu extends JavaPlugin {
         List.of(
                 new InventoryListener(this)
         ).forEach(listener -> this.getServer().getPluginManager().registerEvents(listener, this));
+
+        this.pluginHooks.check();
+        Bukkit.getScheduler().runTask(this, () -> this.pluginHooks.retry());
+
+        instance = this;
+
+        this.enabled = true;
     }
 
     @Override
     public void onDisable() {
+        if (!this.enabled)
+            return;
+
         // Commands
         this.commands.unregisterCommands();
+
+        this.disabled = true;
+    }
+
+    public static VulkanMenu get() {
+        return instance;
     }
 }

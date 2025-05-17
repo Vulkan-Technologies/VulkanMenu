@@ -5,16 +5,22 @@ items:
   1:
     slot: 2
     item:
-      type: "DIAMOND_SWORD"
+      material: "DIAMOND_SWORD"
       name: "My sword"
       lore:
         - "This is my sword"
         - "This is my sword"
+    actions:
+      - "[console] gamemode spectator <player>"
   2:
     slot: 4
     item:
-      type: "DIAMOND_SWORD"
+      material: "DIAMOND_SWORD"
       name: "My sword"
       lore:
         - "This is my sword"
         - "This is my sword"
+    actions:
+      - "[player] say Hello"
+    view-requirements:
+      - "[permission] myplugin.command.hello"

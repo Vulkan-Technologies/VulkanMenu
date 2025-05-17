@@ -15,6 +15,10 @@ import com.vulkantechnologies.menu.configuration.serializer.minecraft.AttributeM
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.EnchantmentTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.ItemStackTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.MaterialTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.vulkan.MenuComponentTypeSerializer;
+import com.vulkantechnologies.menu.model.action.Action;
+import com.vulkantechnologies.menu.model.requirement.Requirement;
+import com.vulkantechnologies.menu.registry.Registries;
 
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -37,6 +41,8 @@ public class MenuConfigurationFile {
                         .register(Enchantment.class, EnchantmentTypeSerializer.INSTANCE)
                         .register(Material.class, MaterialTypeSerializer.INSTANCE)
                         .register(ItemStack.class, ItemStackTypeSerializer.INSTANCE)
+                        .register(Action.class, new MenuComponentTypeSerializer(Registries.ACTION, Registries.ACTION_ADAPTER))
+                        .register(Requirement.class, new MenuComponentTypeSerializer(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER))
                 ))
                 .build();
     }

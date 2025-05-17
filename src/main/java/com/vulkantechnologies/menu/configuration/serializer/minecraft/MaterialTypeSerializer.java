@@ -21,8 +21,6 @@ public class MaterialTypeSerializer implements TypeSerializer<Material> {
         Key materialName = node.get(Key.class);
         if (materialName == null)
             throw new SerializationException("No material key found");
-
-        System.out.println("Material name: " + materialName);
         return Registry.MATERIAL.getOrThrow(materialName);
     }
 
