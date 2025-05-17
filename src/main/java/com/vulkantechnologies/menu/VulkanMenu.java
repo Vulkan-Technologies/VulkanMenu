@@ -10,6 +10,7 @@ import com.vulkantechnologies.menu.command.completion.MenuCompletionHandler;
 import com.vulkantechnologies.menu.command.context.MenuContextResolver;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import com.vulkantechnologies.menu.listener.InventoryListener;
+import com.vulkantechnologies.menu.listener.MarkerListener;
 import com.vulkantechnologies.menu.service.ConfigurationService;
 import com.vulkantechnologies.menu.service.MenuService;
 import com.vulkantechnologies.menu.service.PluginHookService;
@@ -50,7 +51,7 @@ public final class VulkanMenu extends JavaPlugin {
 
         // Manager
         this.pluginHooks = new PluginHookService(this);
-        this.menu = new MenuService();
+        this.menu = new MenuService(this);
 
         // Commands
         this.commands = new PaperCommandManager(this);
@@ -64,7 +65,8 @@ public final class VulkanMenu extends JavaPlugin {
 
         // Listeners
         List.of(
-                new InventoryListener(this)
+                new InventoryListener(this),
+                new MarkerListener(this)
         ).forEach(listener -> this.getServer().getPluginManager().registerEvents(listener, this));
 
         this.pluginHooks.check();
