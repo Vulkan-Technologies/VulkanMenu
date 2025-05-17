@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import com.vulkantechnologies.menu.VulkanMenu;
+import com.vulkantechnologies.menu.configuration.CommandConfiguration;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 
 import net.kyori.adventure.text.Component;
@@ -17,9 +18,17 @@ public class MenuCommand extends Command {
     private final MenuConfiguration configuration;
 
     public MenuCommand(VulkanMenu plugin, MenuConfiguration configuration) {
-        super(configuration.openCommand());
+        super(configuration.openCommand().name());
         this.plugin = plugin;
         this.configuration = configuration;
+
+        CommandConfiguration command = configuration.openCommand();
+        if (command.hasAliases())
+            this.setAliases(command.aliases());
+        if (command.hasDescription())
+            this.setDescription(command.description());
+        if (command.hasPermission())
+            this.setPermission(command.permission());
     }
 
     @Override

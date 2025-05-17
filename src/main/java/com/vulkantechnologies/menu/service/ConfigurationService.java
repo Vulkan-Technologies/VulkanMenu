@@ -39,6 +39,12 @@ public class ConfigurationService {
                     .forEach(path -> {
                         try {
                             MenuConfigurationFile file = this.load(path);
+
+                            // Validate
+                            if (file.menu() == null
+                                || !file.menu().validate(this.plugin))
+                                return;
+
                             String id = path.getFileName().toString().replace(".yml", "");
                             this.menus.put(id, file);
                         } catch (MenuConfigurationLoadException e) {
@@ -68,7 +74,7 @@ public class ConfigurationService {
         CommandMap commandMap = Bukkit.getCommandMap();
 
         for (MenuConfigurationFile value : this.menus.values()) {
-            String command = value.menu().openCommand();
+            String command = value.menu().openCommand().name();
             if (command == null || command.isEmpty())
                 continue;
 
@@ -80,7 +86,7 @@ public class ConfigurationService {
         CommandMap commandMap = Bukkit.getCommandMap();
 
         for (MenuConfigurationFile value : this.menus.values()) {
-            String command = value.menu().openCommand();
+            String command = value.menu().openCommand().name();
             if (command == null || command.isEmpty())
                 continue;
 
