@@ -1,6 +1,6 @@
 package com.vulkantechnologies.menu.model.component;
 
-public interface ComponentAdapter<T> {
+public interface MenuComponentAdapter<T extends MenuComponent> {
 
     T parse(String raw);
 

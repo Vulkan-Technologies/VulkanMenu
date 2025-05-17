@@ -11,7 +11,7 @@ items:
   1:
     slot: 2
     item:
-      material: "DIAMOND_SWORD"
+      material: "diamond_sword"
       name: "My sword"
       lore:
         - "This is my sword"
@@ -21,7 +21,7 @@ items:
   2:
     slot: 4
     item:
-      material: "DIAMOND_SWORD"
+      material: "stone_sword"
       name: "My sword"
       lore:
         - "This is my sword"

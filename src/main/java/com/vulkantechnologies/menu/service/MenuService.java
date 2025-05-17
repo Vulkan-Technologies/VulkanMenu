@@ -1,7 +1,7 @@
 package com.vulkantechnologies.menu.service;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.entity.Player;
@@ -16,21 +16,24 @@ public class MenuService {
     private final List<Menu> menus = new CopyOnWriteArrayList<>();
 
     public void openMenu(Player player, MenuConfiguration configuration) {
+        if (!configuration.canOpen(player))
+            return;
+
         Menu menu = new Menu(player, configuration);
         this.menus.add(menu);
 
         player.openInventory(menu.getInventory());
 
-        Collection<Action> openActions = configuration.openActions().values();
+        Map<String, Action> openActions = configuration.openActions();
         if (openActions != null)
-            openActions.forEach(action -> action.accept(player));
+            openActions.values().forEach(action -> action.accept(player));
     }
 
     public void closeMenu(Player player, Menu menu) {
-        Collection<Action> closeActions = menu.configuration().closeActions().values();
+        Map<String, Action> closeActions = menu.configuration().closeActions();
 
         if (closeActions != null)
-            closeActions.forEach(action -> action.accept(player));
+            closeActions.values().forEach(action -> action.accept(player));
 
         this.menus.remove(menu);
     }

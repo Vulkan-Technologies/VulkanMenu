@@ -23,7 +23,7 @@ public class ComponentTypeSerializer implements TypeSerializer<Component> {
 
         String value = node.getString();
         if (value == null)
-            throw new SerializationException("Component cannot be null");
+            throw new SerializationException("MenuComponent cannot be null");
 
         return MINI_MESSAGE.deserialize(value);
     }

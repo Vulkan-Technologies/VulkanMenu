@@ -41,8 +41,8 @@ public class MenuConfigurationFile {
                         .register(Enchantment.class, EnchantmentTypeSerializer.INSTANCE)
                         .register(Material.class, MaterialTypeSerializer.INSTANCE)
                         .register(ItemStack.class, ItemStackTypeSerializer.INSTANCE)
-                        .register(Action.class, new MenuComponentTypeSerializer(Registries.ACTION, Registries.ACTION_ADAPTER))
-                        .register(Requirement.class, new MenuComponentTypeSerializer(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER))
+                        .register(Action.class, new MenuComponentTypeSerializer<>(Registries.ACTION, Registries.ACTION_ADAPTER))
+                        .register(Requirement.class, new MenuComponentTypeSerializer<>(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER))
                 ))
                 .build();
     }

@@ -6,9 +6,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.vulkantechnologies.menu.annotation.ComponentName;
-import com.vulkantechnologies.menu.model.Component;
+import com.vulkantechnologies.menu.model.component.MenuComponent;
 
-public class ComponentRegistry<E extends Component> {
+public class ComponentRegistry<E extends MenuComponent> {
 
     private final Map<String, Class<? extends E>> entries = new ConcurrentHashMap<>();
 

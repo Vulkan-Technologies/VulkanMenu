@@ -4,9 +4,9 @@ import java.util.function.Predicate;
 
 import org.bukkit.entity.Player;
 
-import com.vulkantechnologies.menu.model.Component;
+import com.vulkantechnologies.menu.model.component.MenuComponent;
 
-public interface Requirement extends Predicate<Player>, Component {
+public interface Requirement extends Predicate<Player>, MenuComponent {
 
 
 }
