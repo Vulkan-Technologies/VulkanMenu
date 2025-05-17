@@ -30,4 +30,18 @@ public class VMenuCommand extends BaseCommand {
     public void onOpen(Player player, MenuConfiguration menu) {
         this.plugin.menu().openMenu(player, menu);
     }
+
+    @Subcommand("reload")
+    public void onReload(CommandSender sender) {
+        sender.sendMessage(Component.text("Reloading VulkanMenu..."));
+        try {
+            this.plugin.configuration().load();
+            sender.sendMessage(Component.text("VulkanMenu reloaded.")
+                    .appendSpace()
+                    .append(Component.text("With " + this.plugin.configuration().menus().size() + " menus.")));
+        } catch (Exception e) {
+            sender.sendMessage(Component.text("Failed to reload VulkanMenu: " + e.getMessage()));
+            e.printStackTrace();
+        }
+    }
 }

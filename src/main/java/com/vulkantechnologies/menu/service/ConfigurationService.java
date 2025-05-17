@@ -28,6 +28,7 @@ public class ConfigurationService {
         this.createDataFolder();
 
         this.plugin.getSLF4JLogger().info("Loading menus...");
+        this.menus.clear();
 
         try (Stream<Path> pathStream = Files.walk(dataFolder)) {
             pathStream.filter(path -> path.toString().endsWith(".yml"))
@@ -40,6 +41,7 @@ public class ConfigurationService {
                             this.plugin.getSLF4JLogger().error("Failed to load menu configuration: {}", path, e);
                         }
                     });
+            this.plugin.getSLF4JLogger().info("Loaded {} menus", this.menus.size());
         } catch (IOException e) {
             this.plugin.getSLF4JLogger().error("Failed to load menus", e);
         }
