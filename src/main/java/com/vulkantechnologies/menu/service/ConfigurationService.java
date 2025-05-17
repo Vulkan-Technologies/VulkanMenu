@@ -78,7 +78,7 @@ public class ConfigurationService {
             if (command == null || command.isEmpty())
                 continue;
 
-            commandMap.register(command, new MenuCommand(this.plugin, value.menu()));
+            commandMap.register("vulkanmenu", new MenuCommand(this.plugin, value.menu()));
         }
     }
 

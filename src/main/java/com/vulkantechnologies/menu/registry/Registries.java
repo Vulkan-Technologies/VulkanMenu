@@ -30,7 +30,8 @@ public class Registries {
                 ConsoleCommandAction.class,
                 PlayerCommandAction.class,
                 MessageAction.class,
-                CloseInventoryAction.class
+                CloseInventoryAction.class,
+                PlayerCommandAction.class
         ).forEach(ACTION::register);
 
         // Requirement
