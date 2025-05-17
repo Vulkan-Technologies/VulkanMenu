@@ -1,21 +1,39 @@
 package com.vulkantechnologies.menu.model.configuration;
 
+import java.lang.annotation.Annotation;
+
 import org.jetbrains.annotations.Nullable;
 
-import com.vulkantechnologies.menu.model.CompactAdapter;
+import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 
-public record WrappedConstructorParameter(Class<?> type, CompactAdapter<?> deserializer,
+public record WrappedConstructorParameter(Class<?> type, Annotation[] annotations, CompactAdapter<?> deserializer,
                                           @Nullable Class<?> genericType) {
 
     public boolean hasGenericType() {
         return genericType != null;
     }
 
-    public static WrappedConstructorParameter of(Class<?> type, CompactAdapter<?> deserializer) {
-        return new WrappedConstructorParameter(type, deserializer, null);
+    public boolean hasAnnotations() {
+        return annotations != null && annotations.length > 0;
     }
 
-    public static WrappedConstructorParameter of(Class<?> type, CompactAdapter<?> deserializer, Class<?> genericType) {
-        return new WrappedConstructorParameter(type, deserializer, genericType);
+    public boolean hasAnnotation(Class<? extends Annotation> annotation) {
+        if (annotations == null)
+            return false;
+
+        for (Annotation a : annotations) {
+            if (a.annotationType() == annotation)
+                return true;
+        }
+
+        return false;
+    }
+
+    public static WrappedConstructorParameter of(Class<?> type, Annotation[] annotations, CompactAdapter<?> deserializer) {
+        return new WrappedConstructorParameter(type, annotations, deserializer, null);
+    }
+
+    public static WrappedConstructorParameter of(Class<?> type, Annotation[] annotations, CompactAdapter<?> deserializer, Class<?> genericType) {
+        return new WrappedConstructorParameter(type, annotations, deserializer, genericType);
     }
 }

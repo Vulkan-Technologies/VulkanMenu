@@ -8,7 +8,11 @@ import com.vulkantechnologies.menu.model.action.minecraft.CloseInventoryAction;
 import com.vulkantechnologies.menu.model.action.minecraft.ConsoleCommandAction;
 import com.vulkantechnologies.menu.model.action.minecraft.MessageAction;
 import com.vulkantechnologies.menu.model.action.minecraft.PlayerCommandAction;
-import com.vulkantechnologies.menu.model.action.vulkan.*;
+import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
+import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
+import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
+import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAction;
+import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
@@ -53,12 +57,12 @@ public class Registries {
 
         // Compact
         List.of(
-                new CompactBooleanAdapter(),
-                new CompactDoubleAdapter(),
-                new CompactIntegerAdapter(),
-                new CompactBooleanAdapter(),
-                new CompactStringAdapter(),
-                new CompactComponentAdapter()
+                CompactBooleanAdapter.INSTANCE,
+                CompactDoubleAdapter.INSTANCE,
+                CompactIntegerAdapter.INSTANCE,
+                CompactBooleanAdapter.INSTANCE,
+                CompactStringAdapter.INSTANCE,
+                CompactComponentAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
     }
 }

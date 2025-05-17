@@ -1,22 +1,24 @@
 package com.vulkantechnologies.menu.utils;
 
+import com.vulkantechnologies.menu.configuration.adapter.compact.CompactBooleanAdapter;
+import com.vulkantechnologies.menu.configuration.adapter.compact.CompactDoubleAdapter;
+import com.vulkantechnologies.menu.configuration.adapter.compact.CompactIntegerAdapter;
+import com.vulkantechnologies.menu.configuration.adapter.compact.CompactStringAdapter;
+import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
+
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class VariableUtils {
 
-    public static Object parseValue(String str, Class<?> type) {
-        if (type == Integer.class)
-            return Integer.parseInt(str);
-        else if (type == Double.class)
-            return Double.parseDouble(str);
-        else if (type == Long.class)
-            return Long.parseLong(str);
-        else if (type == Float.class)
-            return Float.parseFloat(str);
-        else if (type == Boolean.class)
-            return Boolean.parseBoolean(str);
-        return str;
+    public static CompactAdapter<?> findAdapter(String value) {
+        if (isInteger(value))
+            return CompactIntegerAdapter.INSTANCE;
+        else if (isDouble(value))
+            return CompactDoubleAdapter.INSTANCE;
+        else if (isBoolean(value))
+            return CompactBooleanAdapter.INSTANCE;
+        return CompactStringAdapter.INSTANCE;
     }
 
     public static Class<?> getType(String str) {

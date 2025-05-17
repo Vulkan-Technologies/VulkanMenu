@@ -14,7 +14,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
+import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
+import com.vulkantechnologies.menu.utils.VariableUtils;
 
 import lombok.Data;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -27,7 +30,7 @@ public class Menu implements InventoryHolder {
     private final MenuConfiguration configuration;
     private final Inventory inventory;
     private final List<MenuItem> items;
-    private final List<MenuVariable> variables;
+    private final List<MenuVariable<?>> variables;
 
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
@@ -37,6 +40,11 @@ public class Menu implements InventoryHolder {
         this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title());
         this.items = new ArrayList<>(configuration.items().values());
 
+        this.configuration.variables().forEach((key, value) -> {
+            CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
+
+            this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
+        });
 
         this.build();
     }
@@ -77,7 +85,7 @@ public class Menu implements InventoryHolder {
                 .findFirst();
     }
 
-    public Optional<MenuVariable> variable(String name) {
+    public Optional<MenuVariable<?>> variable(String name) {
         return this.variables
                 .stream()
                 .filter(variable -> variable.name().equals(name))
@@ -90,7 +98,7 @@ public class Menu implements InventoryHolder {
                 .anyMatch(variable -> variable.name().equals(name));
     }
 
-    public void addVariable(MenuVariable variable) {
+    public void addVariable(MenuVariable<?> variable) {
         this.variables.add(variable);
     }
 
@@ -99,7 +107,7 @@ public class Menu implements InventoryHolder {
     }
 
     @Unmodifiable
-    public List<MenuVariable> variables() {
+    public List<MenuVariable<?>> variables() {
         return List.copyOf(this.variables);
     }
 

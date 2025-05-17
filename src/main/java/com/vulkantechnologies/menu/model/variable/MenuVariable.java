@@ -3,17 +3,27 @@ package com.vulkantechnologies.menu.model.variable;
 
 import org.jetbrains.annotations.NotNull;
 
-import lombok.Data;
+import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
+import com.vulkantechnologies.menu.model.adapter.CompactContext;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
-@Data
-public class MenuVariable implements TagResolver.Single {
+@AllArgsConstructor
+@Getter
+public class MenuVariable<T> implements TagResolver.Single {
 
     private final String name;
-    private final Class<?> type;
-    private Object value;
+    private final Class<T> type;
+    private final CompactAdapter<T> adapter;
+    private T value;
 
+    public MenuVariable<T> value(String value) {
+        this.value = this.adapter.adapt(new CompactContext(value));
+        return this;
+    }
 
     @Override
     public @NotNull String key() {

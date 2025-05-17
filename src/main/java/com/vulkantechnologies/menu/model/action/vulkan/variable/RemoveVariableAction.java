@@ -1,4 +1,4 @@
-package com.vulkantechnologies.menu.model.action.vulkan;
+package com.vulkantechnologies.menu.model.action.vulkan.variable;
 
 import org.bukkit.entity.Player;
 

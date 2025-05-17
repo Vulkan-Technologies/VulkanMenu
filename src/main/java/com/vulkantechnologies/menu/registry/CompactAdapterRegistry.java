@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Unmodifiable;
 
-import com.vulkantechnologies.menu.model.CompactAdapter;
+import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 
 public class CompactAdapterRegistry {
 

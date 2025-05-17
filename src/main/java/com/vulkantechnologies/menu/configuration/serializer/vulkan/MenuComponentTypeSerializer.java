@@ -1,5 +1,6 @@
 package com.vulkantechnologies.menu.configuration.serializer.vulkan;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
@@ -16,6 +17,7 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.component.MenuComponent;
 import com.vulkantechnologies.menu.model.configuration.WrappedConstructor;
 import com.vulkantechnologies.menu.model.configuration.WrappedConstructorParameter;
@@ -64,11 +66,14 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
             throw new SerializationException("No suitable constructor found for component: " + componentName);
         WrappedConstructor componentConstructor = constructor.get();
 
+        // Create context
+        CompactContext context = new CompactContext(raw, componentConstructor);
+
         // Parse arguments
         List<Object> constructorArguments = new ArrayList<>();
         String finalRaw = raw;
         for (WrappedConstructorParameter parameter : componentConstructor.parameters()) {
-            Object argument = parseArgument(parameter, finalRaw);
+            Object argument = parseArgument(context, parameter, finalRaw);
             if (argument == null && !parameter.type().isAnnotationPresent(Nullable.class))
                 throw new SerializationException("Argument cannot be null: " + parameter.type().getSimpleName());
             constructorArguments.add(argument);
@@ -86,14 +91,11 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
         throw new UnsupportedOperationException("Serialization is not supported");
     }
 
-    private Object parseArgument(WrappedConstructorParameter parameter, String raw) throws SerializationException {
+    private Object parseArgument(CompactContext context, WrappedConstructorParameter parameter, String raw) throws SerializationException {
         // Regular deserialization
         if (!parameter.hasGenericType()) {
-            if (parameter.type().equals(String.class))
-                return raw;
-
             try {
-                return parameter.deserializer().adapt(raw);
+                return parameter.deserializer().adapt(context);
             } catch (Exception e) {
                 throw new SerializationException("Failed to deserialize argument: " + parameter.type().getSimpleName());
             }
@@ -101,10 +103,10 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
 
         // Generic deserialization
         if (parameter.type().equals(List.class))
-            return Arrays.stream(raw.split(";"))
+            return Arrays.stream(raw.split(","))
                     .map(s -> {
                         try {
-                            return parseArgument(WrappedConstructorParameter.of(parameter.genericType(), parameter.deserializer()), s);
+                            return parseArgument(context, WrappedConstructorParameter.of(parameter.genericType(), parameter.annotations(), parameter.deserializer()), s);
                         } catch (SerializationException e) {
                             throw new RuntimeException(e);
                         }
@@ -116,8 +118,8 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
         throw new SerializationException("Unsupported generic type: " + parameter.genericType());
     }
 
-    private Optional<WrappedConstructor> findSuitableConstructor(Class<?> actionClass) {
-        Constructor<?> constructor = Arrays.stream(actionClass.getDeclaredConstructors())
+    private Optional<WrappedConstructor> findSuitableConstructor(Class<?> componentClass) {
+        Constructor<?> constructor = Arrays.stream(componentClass.getDeclaredConstructors())
                 .filter(c -> Arrays.stream(c.getGenericParameterTypes())
                         .allMatch(paramType -> {
                             Class<?> rawType = paramType instanceof ParameterizedType
@@ -140,11 +142,15 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
         if (constructor == null)
             return Optional.empty();
 
-        WrappedConstructor wrappedConstructor = new WrappedConstructor(actionClass, constructor);
+        int index = 0;
+        Annotation[][] annotations = constructor.getParameterAnnotations();
+        WrappedConstructor wrappedConstructor = new WrappedConstructor(componentClass, constructor);
         for (Type parameterType : constructor.getGenericParameterTypes()) {
             Class<?> rawType = parameterType instanceof ParameterizedType
                     ? (Class<?>) ((ParameterizedType) parameterType).getRawType()
                     : (Class<?>) parameterType;
+
+            Annotation[] parameterAnnotations = annotations[index++];
 
             Registries.COMPACT_ADAPTER
                     .findEntry(deserializer -> {
@@ -157,13 +163,13 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
                         return false;
                     }).ifPresent(deserializer -> {
                         if (deserializer.type().equals(rawType)) {
-                            wrappedConstructor.parameters().add(WrappedConstructorParameter.of(rawType, deserializer));
+                            wrappedConstructor.parameters().add(WrappedConstructorParameter.of(rawType, parameterAnnotations, deserializer));
                             return;
                         }
 
                         Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
                         if (genericType != null)
-                            wrappedConstructor.parameters().add(WrappedConstructorParameter.of(rawType, deserializer, genericType));
+                            wrappedConstructor.parameters().add(WrappedConstructorParameter.of(rawType, parameterAnnotations, deserializer, genericType));
                     });
         }
         return Optional.of(wrappedConstructor);
