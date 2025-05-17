@@ -54,9 +54,14 @@ public final class VulkanMenu extends JavaPlugin {
 
         // Commands
         this.commands = new PaperCommandManager(this);
+        this.commands.enableUnstableAPI("help");
+        this.commands.enableUnstableAPI("brigadier");
         this.commands.getCommandContexts().registerContext(MenuConfiguration.class, new MenuContextResolver(this));
         this.commands.getCommandCompletions().registerAsyncCompletion("menus", new MenuCompletionHandler(this));
         this.commands.registerCommand(new VMenuCommand());
+
+        // Commands map
+        this.configuration.registerCommands();
 
         // Listeners
         List.of(
@@ -75,6 +80,9 @@ public final class VulkanMenu extends JavaPlugin {
     public void onDisable() {
         if (!this.enabled)
             return;
+
+        // Configuration
+        this.configuration.unregisterCommands();
 
         // Commands
         this.commands.unregisterCommands();

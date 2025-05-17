@@ -7,6 +7,7 @@ import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 
 import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import net.kyori.adventure.text.Component;
 
@@ -43,5 +44,10 @@ public class VMenuCommand extends BaseCommand {
             sender.sendMessage(Component.text("Failed to reload VulkanMenu: " + e.getMessage()));
             e.printStackTrace();
         }
+    }
+
+    @HelpCommand
+    public void doHelp(CommandSender sender, CommandHelp help) {
+        help.showHelp();
     }
 }

@@ -9,9 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
+import com.vulkantechnologies.menu.command.menu.MenuCommand;
 import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
 import com.vulkantechnologies.menu.exception.MenuConfigurationLoadException;
 
@@ -58,6 +62,32 @@ public class ConfigurationService {
             throw new MenuConfigurationLoadException("Failed to load configuration", e);
         }
         return file;
+    }
+
+    public void registerCommands() {
+        CommandMap commandMap = Bukkit.getCommandMap();
+
+        for (MenuConfigurationFile value : this.menus.values()) {
+            String command = value.menu().openCommand();
+            if (command == null || command.isEmpty())
+                continue;
+
+            commandMap.register(command, new MenuCommand(this.plugin, value.menu()));
+        }
+    }
+
+    public void unregisterCommands() {
+        CommandMap commandMap = Bukkit.getCommandMap();
+
+        for (MenuConfigurationFile value : this.menus.values()) {
+            String command = value.menu().openCommand();
+            if (command == null || command.isEmpty())
+                continue;
+
+            Command cmd = commandMap.getCommand(command);
+            if (cmd != null)
+                cmd.unregister(commandMap);
+        }
     }
 
     public Optional<MenuConfigurationFile> findByName(String id) {
