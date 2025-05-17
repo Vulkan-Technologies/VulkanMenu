@@ -28,24 +28,24 @@ public class MenuService {
     }
 
     public void openMenu(Player player, MenuConfiguration configuration) {
-        if (!configuration.canOpen(player))
+        Menu menu = new Menu(player, configuration);
+        if (!menu.canOpen(player))
             return;
 
-        Menu menu = new Menu(player, configuration);
         this.menus.add(menu);
 
         player.openInventory(menu.getInventory());
 
         Map<String, Action> openActions = configuration.openActions();
         if (openActions != null)
-            openActions.values().forEach(action -> action.accept(player));
+            openActions.values().forEach(action -> action.accept(player, menu));
     }
 
     public void closeMenu(Player player, Menu menu) {
         Map<String, Action> closeActions = menu.configuration().closeActions();
 
         if (closeActions != null)
-            closeActions.values().forEach(action -> action.accept(player));
+            closeActions.values().forEach(action -> action.accept(player, menu));
 
         this.menus.remove(menu);
     }

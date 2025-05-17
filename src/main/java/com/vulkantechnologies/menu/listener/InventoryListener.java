@@ -25,10 +25,10 @@ public class InventoryListener implements Listener {
 
         e.setCancelled(true);
         menu.getItem(e.getSlot())
-                .filter(item -> item.canClick(player))
+                .filter(item -> item.canClick(player, menu))
                 .ifPresent(item -> {
                     for (Action action : item.actions()) {
-                        action.accept(player);
+                        action.accept(player, menu);
                     }
                 });
     }

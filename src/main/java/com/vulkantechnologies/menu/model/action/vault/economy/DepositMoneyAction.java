@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.hook.implementation.VaultPluginHook;
 import com.vulkantechnologies.menu.model.action.HookAction;
+import com.vulkantechnologies.menu.model.menu.Menu;
 
 import net.milkbowl.vault.economy.Economy;
 
@@ -26,7 +27,7 @@ public class DepositMoneyAction extends HookAction<VaultPluginHook> {
     }
 
     @Override
-    protected void performAction(Player player, VaultPluginHook hook) {
+    protected void performAction(Player player, Menu menu, VaultPluginHook hook) {
         Economy economy = hook.economy();
 
         if (currency != null) {

@@ -1,10 +1,12 @@
 package com.vulkantechnologies.menu.model.action;
 
-import java.util.function.Consumer;
-
 import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.model.component.MenuComponent;
+import com.vulkantechnologies.menu.model.menu.Menu;
 
-public interface Action extends Consumer<Player>, MenuComponent {
+public interface Action extends MenuComponent {
+
+    void accept(Player player, Menu menu);
+
 }

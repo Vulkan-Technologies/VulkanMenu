@@ -8,6 +8,9 @@ import com.vulkantechnologies.menu.model.action.minecraft.CloseInventoryAction;
 import com.vulkantechnologies.menu.model.action.minecraft.ConsoleCommandAction;
 import com.vulkantechnologies.menu.model.action.minecraft.MessageAction;
 import com.vulkantechnologies.menu.model.action.minecraft.PlayerCommandAction;
+import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
+import com.vulkantechnologies.menu.model.action.vulkan.RemoveVariableAction;
+import com.vulkantechnologies.menu.model.action.vulkan.SetVariableAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
@@ -31,7 +34,10 @@ public class Registries {
                 PlayerCommandAction.class,
                 MessageAction.class,
                 CloseInventoryAction.class,
-                PlayerCommandAction.class
+                PlayerCommandAction.class,
+                OpenMenuAction.class,
+                SetVariableAction.class,
+                RemoveVariableAction.class
         ).forEach(ACTION::register);
 
         // Requirement

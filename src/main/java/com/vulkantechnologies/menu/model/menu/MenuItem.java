@@ -17,21 +17,21 @@ public record MenuItem(int slot, ItemStack item, List<Action> actions,
                        @Nullable List<Requirement> viewRequirements,
                        Map<String, WrappedRequirement> clickRequirements) {
 
-    public boolean canClick(Player player) {
+    public boolean canClick(Player player, Menu menu) {
         if (this.clickRequirements == null || this.clickRequirements.isEmpty())
             return true;
 
         return this.clickRequirements.values()
                 .stream()
-                .anyMatch(requirement -> requirement.test(player));
+                .anyMatch(requirement -> requirement.test(player, menu));
     }
 
-    public boolean shouldShow(Player player) {
+    public boolean shouldShow(Player player, Menu menu) {
         if (this.viewRequirements == null || this.viewRequirements.isEmpty())
             return true;
 
         return this.viewRequirements
                 .stream()
-                .anyMatch(requirement -> requirement.test(player));
+                .anyMatch(requirement -> requirement.test(player, menu));
     }
 }

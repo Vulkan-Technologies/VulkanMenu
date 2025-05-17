@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.hook.implementation.VaultPluginHook;
 import com.vulkantechnologies.menu.model.action.HookAction;
+import com.vulkantechnologies.menu.model.menu.Menu;
 
 @ComponentName("remove-permission")
 public class RemovePermissionAction extends HookAction<VaultPluginHook> {
@@ -17,7 +18,7 @@ public class RemovePermissionAction extends HookAction<VaultPluginHook> {
     }
 
     @Override
-    protected void performAction(Player player, VaultPluginHook hook) {
+    protected void performAction(Player player, Menu menu, VaultPluginHook hook) {
         hook.permission().playerRemove(player, this.permission);
     }
 
