@@ -51,8 +51,11 @@ public class MenuComponentTypeSerializer<T extends Component> implements TypeSer
 
         try {
             Constructor<? extends Component> constructor = (Constructor<? extends Component>) componentType.getConstructors()[0];
-            if (constructor.getParameterCount() != 1)
+            if (constructor.getParameterCount() == 0)
+                return (T) constructor.newInstance();
+            else if (constructor.getParameterCount() != 1)
                 throw new SerializationException("Component type " + componentName + " does not have a constructor that takes a String");
+
             Class<?> parameterType = constructor.getParameterTypes()[0];
             if (parameterType.isAssignableFrom(String.class))
                 return (T) constructor.newInstance(raw);

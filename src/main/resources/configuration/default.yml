@@ -1,6 +1,12 @@
 title: <rainbow>My cool menu
 size: 18
 open-command: trs
+
+open-requirements:
+  permission:
+    requirement: "[permission] myplugin.command.hello"
+    deny-actions:
+      - "[message] You don't have permission to use this item"
 items:
   1:
     slot: 2
@@ -11,7 +17,7 @@ items:
         - "This is my sword"
         - "This is my sword"
     actions:
-      - "[console] gamemode spectator <player>"
+      - "[message] Hello"
   2:
     slot: 4
     item:
@@ -21,6 +27,9 @@ items:
         - "This is my sword"
         - "This is my sword"
     actions:
-      - "[player] say Hello"
+      - "[message] Hello"
     view-requirements:
-      - "[permission] myplugin.command.hello"
+      permission:
+        requirement: "[permission] myplugin.command.hello"
+        deny-actions:
+          - "[message] You don't have permission to use this item"

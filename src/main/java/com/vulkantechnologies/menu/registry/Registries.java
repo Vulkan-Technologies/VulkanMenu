@@ -1,7 +1,11 @@
 package com.vulkantechnologies.menu.registry;
 
+import java.util.List;
+
 import com.vulkantechnologies.menu.model.action.Action;
+import com.vulkantechnologies.menu.model.action.minecraft.CloseInventoryAction;
 import com.vulkantechnologies.menu.model.action.minecraft.ConsoleCommandAction;
+import com.vulkantechnologies.menu.model.action.minecraft.MessageAction;
 import com.vulkantechnologies.menu.model.action.minecraft.PlayerCommandAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
@@ -21,8 +25,12 @@ public class Registries {
     static {
         // -- Component
         // Action
-        ACTION.register(ConsoleCommandAction.class);
-        ACTION.register(PlayerCommandAction.class);
+        List.of(
+                ConsoleCommandAction.class,
+                PlayerCommandAction.class,
+                MessageAction.class,
+                CloseInventoryAction.class
+        ).forEach(action -> ACTION.register(action));
 
         // Requirement
         REQUIREMENT.register(PermissionRequirement.class);
