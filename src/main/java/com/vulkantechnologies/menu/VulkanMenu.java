@@ -1,6 +1,8 @@
 package com.vulkantechnologies.menu;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,6 +13,7 @@ import com.vulkantechnologies.menu.command.context.MenuContextResolver;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.listener.MarkerListener;
+import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.service.ConfigurationService;
 import com.vulkantechnologies.menu.service.MenuService;
 import com.vulkantechnologies.menu.service.PluginHookService;
@@ -30,6 +33,9 @@ public final class VulkanMenu extends JavaPlugin {
 
     // Configuration
     private ConfigurationService configuration;
+
+    // Placeholders
+    private final Set<PlaceholderProcessor> placeholderProcessors = new HashSet<>();
 
     // Service
     private PluginHookService pluginHooks;

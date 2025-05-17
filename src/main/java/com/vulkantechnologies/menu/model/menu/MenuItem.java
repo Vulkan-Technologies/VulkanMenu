@@ -4,18 +4,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
-import com.vulkantechnologies.menu.model.requirement.WrappedRequirement;
+import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
+import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
 @ConfigSerializable
-public record MenuItem(int slot, ItemStack item, List<Action> actions,
+public record MenuItem(int slot, ItemWrapper item, List<Action> actions,
                        @Nullable List<Requirement> viewRequirements,
-                       Map<String, WrappedRequirement> clickRequirements) {
+                       Map<String, RequirementWrapper> clickRequirements) {
 
     public boolean canClick(Player player, Menu menu) {
         if (this.clickRequirements == null || this.clickRequirements.isEmpty())

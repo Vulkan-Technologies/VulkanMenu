@@ -18,14 +18,14 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
-import net.kyori.adventure.text.Component;
+import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 
-public class ItemStackTypeSerializer implements TypeSerializer<ItemStack> {
+public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
-    public static final ItemStackTypeSerializer INSTANCE = new ItemStackTypeSerializer();
+    public static final ItemWrapperTypeSerializer INSTANCE = new ItemWrapperTypeSerializer();
 
     @Override
-    public ItemStack deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
+    public ItemWrapper deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
         Material material = node.node("material").get(Material.class);
         if (material == null)
             throw new SerializationException("Material is null");
@@ -35,14 +35,14 @@ public class ItemStackTypeSerializer implements TypeSerializer<ItemStack> {
         ItemMeta meta = item.getItemMeta();
 
         // Display name
-        Component displayName = node.node("name").get(Component.class);
+        String displayName = node.node("name").get(String.class);
         if (displayName != null)
-            meta.displayName(displayName);
+            meta.setDisplayName(displayName);
 
         // Lore
-        List<Component> lore = node.node("lore").getList(Component.class);
+        List<String> lore = node.node("lore").getList(String.class);
         if (lore != null)
-            meta.lore(lore);
+            meta.setLore(lore);
 
         // Enchantments
         ConfigurationNode enchantments = node.node("enchantments");
@@ -106,11 +106,12 @@ public class ItemStackTypeSerializer implements TypeSerializer<ItemStack> {
         // TODO: Implement PDC
 
         item.setItemMeta(meta);
-        return item;
+
+        return new ItemWrapper(item, displayName, lore);
     }
 
     @Override
-    public void serialize(@NotNull Type type, @Nullable ItemStack obj, @NotNull ConfigurationNode node) throws SerializationException {
+    public void serialize(@NotNull Type type, @Nullable ItemWrapper obj, @NotNull ConfigurationNode node) throws SerializationException {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

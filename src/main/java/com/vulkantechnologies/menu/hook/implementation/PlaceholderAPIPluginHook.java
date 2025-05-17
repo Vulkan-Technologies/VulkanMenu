@@ -17,11 +17,15 @@ public class PlaceholderAPIPluginHook implements PluginHook, PlaceholderProcesso
     @Override
     public void onSuccess() {
         this.plugin.getSLF4JLogger().info("Successfully hooked into PlaceholderAPI!");
+
+        this.plugin.placeholderProcessors().add(this);
     }
 
     @Override
     public void onFailure() {
         this.plugin.getSLF4JLogger().error("Failed to hook into PlaceholderAPI!");
+
+        this.plugin.placeholderProcessors().remove(this);
     }
 
     @Override

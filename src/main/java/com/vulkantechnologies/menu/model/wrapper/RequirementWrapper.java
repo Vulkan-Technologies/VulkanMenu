@@ -1,4 +1,4 @@
-package com.vulkantechnologies.menu.model.requirement;
+package com.vulkantechnologies.menu.model.wrapper;
 
 import java.util.List;
 
@@ -8,9 +8,10 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
+import com.vulkantechnologies.menu.model.requirement.Requirement;
 
 @ConfigSerializable
-public record WrappedRequirement(Requirement requirement,
+public record RequirementWrapper(Requirement requirement,
                                  @Nullable List<Action> denyActions) {
 
     public boolean test(Player player, Menu menu) {

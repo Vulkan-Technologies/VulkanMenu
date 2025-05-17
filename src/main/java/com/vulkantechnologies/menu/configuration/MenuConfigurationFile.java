@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
@@ -13,11 +12,12 @@ import com.vulkantechnologies.menu.configuration.serializer.adventure.ComponentT
 import com.vulkantechnologies.menu.configuration.serializer.adventure.KeyTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.AttributeModifierTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.EnchantmentTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.minecraft.ItemStackTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.minecraft.ItemWrapperTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.MaterialTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.vulkan.MenuComponentTypeSerializer;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
+import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
 
 import lombok.Getter;
@@ -40,7 +40,7 @@ public class MenuConfigurationFile {
                         .register(AttributeModifier.class, AttributeModifierTypeSerializer.INSTANCE)
                         .register(Enchantment.class, EnchantmentTypeSerializer.INSTANCE)
                         .register(Material.class, MaterialTypeSerializer.INSTANCE)
-                        .register(ItemStack.class, ItemStackTypeSerializer.INSTANCE)
+                        .register(ItemWrapper.class, ItemWrapperTypeSerializer.INSTANCE)
                         .register(Action.class, new MenuComponentTypeSerializer<>(Registries.ACTION, Registries.ACTION_ADAPTER))
                         .register(Requirement.class, new MenuComponentTypeSerializer<>(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER))
                 ))

@@ -8,7 +8,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.MenuItem;
-import com.vulkantechnologies.menu.model.requirement.WrappedRequirement;
+import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
 import net.kyori.adventure.text.Component;
 
@@ -16,7 +16,7 @@ import net.kyori.adventure.text.Component;
 public record MenuConfiguration(Component title, int size, @Nullable CommandConfiguration openCommand,
                                 Map<String, MenuItem> items,
                                 @Nullable Map<String, Action> openActions, @Nullable Map<String, Action> closeActions,
-                                @Nullable Map<String, WrappedRequirement> openRequirements) {
+                                @Nullable Map<String, RequirementWrapper> openRequirements) {
 
     public boolean validate(VulkanMenu plugin) {
         // Size validation
@@ -47,6 +47,19 @@ public record MenuConfiguration(Component title, int size, @Nullable CommandConf
                 return false;
             }
         }
+
+        // Variables
+//        if (this.variables != null)
+//            for (Map.Entry<String, Object> entry : this.variables.entrySet()) {
+//                String name = entry.getKey();
+//                Object value = entry.getValue();
+//
+//                if (!Key.parseable(name)) {
+//                    plugin.getLogger().warning("Variable name '" + name + "' is not a valid Key.");
+//                    this.variables.remove(name);
+//                    continue;
+//                }
+//            }
 
         return true;
     }
