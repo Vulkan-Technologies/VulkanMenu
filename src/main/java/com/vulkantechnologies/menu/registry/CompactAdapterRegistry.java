@@ -21,10 +21,6 @@ public class CompactAdapterRegistry {
         return (CompactAdapter<T>) this.adapters.get(type);
     }
 
-    public <T> CompactAdapter<T> getOrDefault(Class<T> type, CompactAdapter<T> defaultAdapter) {
-        return (CompactAdapter<T>) this.adapters.getOrDefault(type, defaultAdapter);
-    }
-
     public <T> boolean contains(Class<T> type) {
         return this.adapters.containsKey(type);
     }
