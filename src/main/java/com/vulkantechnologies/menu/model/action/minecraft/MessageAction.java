@@ -2,7 +2,9 @@ package com.vulkantechnologies.menu.model.action.minecraft;
 
 import org.bukkit.entity.Player;
 
+import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.annotation.ComponentName;
+import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 
@@ -15,7 +17,12 @@ public record MessageAction(String message) implements Action {
 
     @Override
     public void accept(Player player, Menu menu) {
-        player.sendMessage(MINI_MESSAGE.deserialize(message, menu.variableResolver()));
+        String formatted = message;
+        for (PlaceholderProcessor placeholderProcessor : VulkanMenu.get().placeholderProcessors()) {
+            formatted = placeholderProcessor.process(player, formatted);
+        }
+
+        player.sendMessage(MINI_MESSAGE.deserialize(formatted, menu.variableResolver()));
     }
 
 }

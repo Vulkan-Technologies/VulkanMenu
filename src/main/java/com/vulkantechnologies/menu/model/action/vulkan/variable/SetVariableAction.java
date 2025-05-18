@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
+import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.annotation.Single;
+import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
@@ -24,10 +26,16 @@ public record SetVariableAction(@Single String name, @Single String value) imple
         MenuVariable<?> variable = menu.variable(name)
                 .orElseThrow(() -> new IllegalArgumentException("Variable not found: " + name));
 
+        // Inject placeholders
+        String formattedValue = value;
+        for (PlaceholderProcessor placeholderProcessor : VulkanMenu.get().placeholderProcessors()) {
+            formattedValue = placeholderProcessor.process(player, formattedValue);
+        }
+
         // Check if the value contains any operators
-        if (value.matches(".*[+\\-*/%].*")) {
+        if (formattedValue.matches(".*[+\\-*/%].*")) {
             // Parse variables name
-            String[] parts = value.split("[+\\-*/%]");
+            String[] parts = formattedValue.split("[+\\-*/%]");
             List<String> variablesName = new ArrayList<>();
             for (String part : parts) {
                 part = part.trim();
@@ -45,7 +53,7 @@ public record SetVariableAction(@Single String name, @Single String value) imple
             // Compile expression
             EvaluationEnvironment env = new EvaluationEnvironment();
             env.setVariableNames(variablesName.toArray(String[]::new));
-            CompiledExpression exp = Crunch.compileExpression(value, env);
+            CompiledExpression exp = Crunch.compileExpression(formattedValue, env);
 
             // Evaluate expression
             double[] values = new double[variablesName.size()];
@@ -72,7 +80,7 @@ public record SetVariableAction(@Single String name, @Single String value) imple
             return;
         }
 
-        variable.value(value);
+        variable.value(formattedValue);
     }
 
 }
