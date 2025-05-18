@@ -18,7 +18,9 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import com.vulkantechnologies.menu.model.provider.ItemStackProvider;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
+import com.vulkantechnologies.menu.registry.Registries;
 
 public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
@@ -26,12 +28,23 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
     @Override
     public ItemWrapper deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
-        Material material = node.node("material").get(Material.class);
-        if (material == null)
-            throw new SerializationException("Material is null");
-        int amount = node.node("amount").getInt(1);
+        String rawMaterial = node.node("material").getString();
+        ItemStack item;
+        if (rawMaterial.contains(":")) {
+            String[] materialParts = rawMaterial.split(":");
+            ItemStackProvider provider = Registries.ITEM_PROVIDERS.findByPrefix(materialParts[0])
+                    .orElseThrow(() -> new SerializationException("Invalid item provider: " + materialParts[0]));
+            item = provider.provide(materialParts[1]);
+        } else {
+            Material material = Material.matchMaterial(rawMaterial);
+            if (material == null)
+                throw new SerializationException("Invalid material: " + rawMaterial);
+            item = new ItemStack(material);
+        }
 
-        ItemStack item = new ItemStack(material, amount);
+        int amount = node.node("amount").getInt(1);
+        item.setAmount(amount);
+
         ItemMeta meta = item.getItemMeta();
 
         // Display name

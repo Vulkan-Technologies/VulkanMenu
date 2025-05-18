@@ -10,7 +10,6 @@ import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
-import com.vulkantechnologies.menu.model.provider.BukkitItemStackProvider;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
@@ -81,9 +80,5 @@ public class Registries {
                 CompactComponentWrapperAdapter.INSTANCE,
                 CompactTitleWrapperAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
-
-        // -- Misc
-        // ItemStackProvider
-        ITEM_PROVIDERS.register(new BukkitItemStackProvider());
     }
 }
