@@ -9,6 +9,7 @@ import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
+import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import net.kyori.adventure.text.Component;
 
 @CommandAlias("vmenu")
@@ -18,6 +19,7 @@ public class VMenuCommand extends BaseCommand {
     private VulkanMenu plugin;
 
     @Default
+    @Description("Shows the VulkanMenu version and help.")
     public void onDefault(CommandSender sender) {
         sender.sendMessage(Component.text("VulkanMenu v")
                 .append(Component.text(plugin.getDescription().getVersion()))
@@ -26,6 +28,16 @@ public class VMenuCommand extends BaseCommand {
     }
 
     @Subcommand("open")
+    @Description("Opens a the specified menu to the player.")
+    @CommandCompletion("@players @menus")
+    @Syntax("<player> <menu>")
+    @CommandPermission("vmenu.open")
+    public void onOpen(Player player, OnlinePlayer target, MenuConfiguration menu) {
+        this.plugin.menu().openMenu(target.getPlayer(), menu);
+    }
+
+    @Subcommand("open")
+    @Description("Opens a the specified menu.")
     @CommandCompletion("@menus")
     @Syntax("<menu>")
     public void onOpen(Player player, MenuConfiguration menu) {
@@ -33,6 +45,8 @@ public class VMenuCommand extends BaseCommand {
     }
 
     @Subcommand("reload")
+    @Description("Reloads the VulkanMenu configuration.")
+    @CommandPermission("vmenu.reload")
     public void onReload(CommandSender sender) {
         sender.sendMessage(Component.text("Reloading VulkanMenu..."));
         try {

@@ -12,7 +12,10 @@ import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAc
 import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
+import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.StringLenghtRequirement;
 
 public class Registries {
 
@@ -43,13 +46,17 @@ public class Registries {
                 ActionBarAction.class,
                 SoundAction.class,
                 BroadcastSoundAction.class,
-                BroadcastAction.class
+                BroadcastAction.class,
+                TitleAction.class
         ).forEach(ACTION::register);
 
         // Requirement
         List.of(
                 PermissionRequirement.class,
-                ExperienceRequirement.class
+                ExperienceRequirement.class,
+                IsNearRequirement.class,
+                RegexRequirement.class,
+                StringLenghtRequirement.class
         ).forEach(REQUIREMENT::register);
 
         // -- Adapters
@@ -67,7 +74,8 @@ public class Registries {
                 CompactComponentAdapter.INSTANCE,
                 CompactLocationAdapter.INSTANCE,
                 CompactSoundAdapter.INSTANCE,
-                CompactComponentWrapperAdapter.INSTANCE
+                CompactComponentWrapperAdapter.INSTANCE,
+                CompactTitleWrapperAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
     }
 }

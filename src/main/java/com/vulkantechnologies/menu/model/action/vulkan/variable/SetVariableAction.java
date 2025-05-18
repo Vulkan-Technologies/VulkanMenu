@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.annotation.Single;
-import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
@@ -27,10 +26,7 @@ public record SetVariableAction(@Single String name, @Single String value) imple
                 .orElseThrow(() -> new IllegalArgumentException("Variable not found: " + name));
 
         // Inject placeholders
-        String formattedValue = value;
-        for (PlaceholderProcessor placeholderProcessor : VulkanMenu.get().placeholderProcessors()) {
-            formattedValue = placeholderProcessor.process(player, formattedValue);
-        }
+        String formattedValue = VulkanMenu.get().processPlaceholders(player, value);
 
         // Check if the value contains any operators
         if (formattedValue.matches(".*[+\\-*/%].*")) {

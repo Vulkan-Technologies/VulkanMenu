@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.menu.Menu;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -39,9 +38,6 @@ public record ItemWrapper(ItemStack itemStack, String displayName, List<String> 
     }
 
     private String format(Player player, String text) {
-        for (PlaceholderProcessor placeholderProcessor : VulkanMenu.get().placeholderProcessors()) {
-            text = placeholderProcessor.process(player, text);
-        }
-        return text;
+        return VulkanMenu.get().processPlaceholders(player, text);
     }
 }

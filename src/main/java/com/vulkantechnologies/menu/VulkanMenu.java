@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.vulkantechnologies.menu.command.VMenuCommand;
@@ -95,6 +96,15 @@ public final class VulkanMenu extends JavaPlugin {
         this.commands.unregisterCommands();
 
         this.disabled = true;
+    }
+
+    public String processPlaceholders(Player player, String text) {
+        text = text.replace("<player>", player.getName());
+
+        for (PlaceholderProcessor processor : this.placeholderProcessors) {
+            text = processor.process(player, text);
+        }
+        return text;
     }
 
     public static VulkanMenu get() {

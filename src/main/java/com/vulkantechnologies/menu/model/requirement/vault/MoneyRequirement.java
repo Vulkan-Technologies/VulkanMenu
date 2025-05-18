@@ -1,4 +1,4 @@
-package com.vulkantechnologies.menu.model.requirement.minecraft;
+package com.vulkantechnologies.menu.model.requirement.vault;
 
 import org.bukkit.entity.Player;
 

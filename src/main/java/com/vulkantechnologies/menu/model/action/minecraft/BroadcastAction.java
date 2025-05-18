@@ -14,7 +14,7 @@ public record BroadcastAction(ComponentWrapper component) implements Action {
     @Override
     public void accept(Player player, Menu menu) {
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            onlinePlayer.sendMessage(component.build());
+            onlinePlayer.sendMessage(component.build(player, menu));
         }
     }
 

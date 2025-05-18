@@ -11,7 +11,7 @@ import com.vulkantechnologies.menu.model.action.vault.economy.DepositMoneyAction
 import com.vulkantechnologies.menu.model.action.vault.economy.WithdrawMoneyAction;
 import com.vulkantechnologies.menu.model.action.vault.permission.AddPermissionAction;
 import com.vulkantechnologies.menu.model.action.vault.permission.RemovePermissionAction;
-import com.vulkantechnologies.menu.model.requirement.minecraft.MoneyRequirement;
+import com.vulkantechnologies.menu.model.requirement.vault.MoneyRequirement;
 import com.vulkantechnologies.menu.registry.Registries;
 
 import lombok.Getter;

@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.hook.PluginHook;
+import com.vulkantechnologies.menu.hook.implementation.ItemsAdderPluginHook;
 import com.vulkantechnologies.menu.hook.implementation.PlaceholderAPIPluginHook;
 import com.vulkantechnologies.menu.hook.implementation.VaultPluginHook;
 
@@ -19,7 +20,8 @@ public class PluginHookService {
         // Register hooks
         List.of(
                 new VaultPluginHook(plugin),
-                new PlaceholderAPIPluginHook(plugin)
+                new PlaceholderAPIPluginHook(plugin),
+                new ItemsAdderPluginHook(plugin)
         ).forEach(this::register);
     }
 
