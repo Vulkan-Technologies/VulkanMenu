@@ -4,10 +4,7 @@ import java.util.List;
 
 import com.vulkantechnologies.menu.configuration.adapter.compact.*;
 import com.vulkantechnologies.menu.model.action.Action;
-import com.vulkantechnologies.menu.model.action.minecraft.CloseInventoryAction;
-import com.vulkantechnologies.menu.model.action.minecraft.ConsoleCommandAction;
-import com.vulkantechnologies.menu.model.action.minecraft.MessageAction;
-import com.vulkantechnologies.menu.model.action.minecraft.PlayerCommandAction;
+import com.vulkantechnologies.menu.model.action.minecraft.*;
 import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
@@ -41,7 +38,12 @@ public class Registries {
                 SetVariableAction.class,
                 RemoveVariableAction.class,
                 RefreshAction.class,
-                RefreshSlotAction.class
+                RefreshSlotAction.class,
+                TeleportAction.class,
+                ActionBarAction.class,
+                SoundAction.class,
+                BroadcastSoundAction.class,
+                BroadcastAction.class
         ).forEach(ACTION::register);
 
         // Requirement
@@ -62,7 +64,10 @@ public class Registries {
                 CompactIntegerAdapter.INSTANCE,
                 CompactBooleanAdapter.INSTANCE,
                 CompactStringAdapter.INSTANCE,
-                CompactComponentAdapter.INSTANCE
+                CompactComponentAdapter.INSTANCE,
+                CompactLocationAdapter.INSTANCE,
+                CompactSoundAdapter.INSTANCE,
+                CompactComponentWrapperAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
     }
 }
