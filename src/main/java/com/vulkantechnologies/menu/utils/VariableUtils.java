@@ -21,18 +21,8 @@ public class VariableUtils {
         return CompactStringAdapter.INSTANCE;
     }
 
-    public static Class<?> getType(String str) {
-        if (isInteger(str))
-            return Integer.class;
-        else if (isDouble(str))
-            return Double.class;
-        else if (isLong(str))
-            return Long.class;
-        else if (isFloat(str))
-            return Float.class;
-        else if (isBoolean(str))
-            return Boolean.class;
-        return String.class;
+    public static boolean isNumeric(String str) {
+        return str != null && str.matches("-?\\d+(\\.\\d+)?");
     }
 
     public static boolean isInteger(String str) {

@@ -154,7 +154,8 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
 
             Registries.COMPACT_ADAPTER
                     .findEntry(deserializer -> {
-                        if (deserializer.type().equals(rawType))
+                        if (deserializer.type().equals(rawType)
+                            || deserializer.type().equals(getWrapperType(rawType)))
                             return true;
 
                         Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
@@ -173,6 +174,26 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
                     });
         }
         return Optional.of(wrappedConstructor);
+    }
+
+    private Class<?> getWrapperType(Class<?> type) {
+        if (type.equals(Integer.class))
+            return int.class;
+        if (type.equals(Long.class))
+            return long.class;
+        if (type.equals(Double.class))
+            return double.class;
+        if (type.equals(Float.class))
+            return float.class;
+        if (type.equals(Short.class))
+            return short.class;
+        if (type.equals(Byte.class))
+            return byte.class;
+        if (type.equals(Character.class))
+            return char.class;
+        if (type.equals(Boolean.class))
+            return boolean.class;
+        return type;
     }
 
 
