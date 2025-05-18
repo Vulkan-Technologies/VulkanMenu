@@ -24,6 +24,6 @@ public class ComponentWrapperTypeSerializer implements TypeSerializer<ComponentW
 
     @Override
     public void serialize(@NotNull Type type, @Nullable ComponentWrapper obj, @NotNull ConfigurationNode node) throws SerializationException {
-
+        node.set(obj == null ? null : obj.content());
     }
 }

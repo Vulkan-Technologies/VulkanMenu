@@ -5,6 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import lombok.Builder;
+
+@Builder
 @ConfigSerializable
 public record CommandConfiguration(String name, @Nullable List<String> aliases, @Nullable String description, @Nullable String permission) {
 

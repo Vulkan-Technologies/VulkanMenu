@@ -30,6 +30,10 @@ public class ComponentTypeSerializer implements TypeSerializer<Component> {
 
     @Override
     public void serialize(@NotNull Type type, @Nullable Component obj, @NotNull ConfigurationNode node) throws SerializationException {
-        throw new UnsupportedOperationException("Serialization is not supported");
+        if (obj == null) {
+            node.raw(null);
+            return;
+        }
+        node.set(MINI_MESSAGE.serialize(obj));
     }
 }

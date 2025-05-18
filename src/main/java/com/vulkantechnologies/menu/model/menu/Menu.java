@@ -40,7 +40,7 @@ public class Menu implements InventoryHolder {
         this.player = player;
         this.configuration = configuration;
         this.variables = new CopyOnWriteArrayList<>();
-        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title());
+        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
         this.items = new ArrayList<>(configuration.items().values());
         this.cachedItems = new ItemStack[configuration.size() + 36];
 

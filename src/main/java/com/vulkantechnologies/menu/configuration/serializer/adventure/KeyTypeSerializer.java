@@ -28,6 +28,11 @@ public class KeyTypeSerializer implements TypeSerializer<Key> {
 
     @Override
     public void serialize(@NotNull Type type, @Nullable Key obj, @NotNull ConfigurationNode node) throws SerializationException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (obj == null) {
+            node.raw(null);
+            return;
+        }
+
+        node.set(obj.asMinimalString());
     }
 }

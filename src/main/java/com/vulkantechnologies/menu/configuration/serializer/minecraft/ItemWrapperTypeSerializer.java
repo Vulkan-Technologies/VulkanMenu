@@ -115,9 +115,6 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
         boolean enchantmentGlintOverride = node.node("enchantment-glint-override").getBoolean();
         meta.setEnchantmentGlintOverride(enchantmentGlintOverride);
 
-        // PDC
-        // TODO: Implement PDC
-
         item.setItemMeta(meta);
 
         return new ItemWrapper(item, displayName, lore);

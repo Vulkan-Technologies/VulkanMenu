@@ -30,6 +30,15 @@ public class EnchantmentTypeSerializer implements TypeSerializer<Enchantment> {
 
     @Override
     public void serialize(Type type, @Nullable Enchantment obj, ConfigurationNode node) throws SerializationException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (obj == null) {
+            node.raw(null);
+            return;
+        }
+
+        Key key = obj.getKey();
+        if (key == null)
+            throw new SerializationException("No enchantment key found");
+
+        node.set(key);
     }
 }

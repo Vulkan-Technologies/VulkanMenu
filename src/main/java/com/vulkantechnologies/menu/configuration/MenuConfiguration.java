@@ -8,13 +8,15 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.MenuItem;
+import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
+import lombok.Builder;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 
+@Builder
 @ConfigSerializable
-public record MenuConfiguration(Component title, int size, @Nullable CommandConfiguration openCommand,
+public record MenuConfiguration(ComponentWrapper title, int size, @Nullable CommandConfiguration openCommand,
                                 Map<String, MenuItem> items,
                                 @Nullable Map<String, Action> openActions, @Nullable Map<String, Action> closeActions,
                                 @Nullable Map<String, RequirementWrapper> openRequirements,

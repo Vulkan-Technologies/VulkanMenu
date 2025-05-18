@@ -29,6 +29,14 @@ public class AttributeModifierTypeSerializer implements TypeSerializer<Attribute
 
     @Override
     public void serialize(Type type, @Nullable AttributeModifier obj, ConfigurationNode node) throws SerializationException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (obj == null) {
+            node.raw(null);
+            return;
+        }
+
+        node.node("key").set(obj.key());
+        node.node("amount").set(obj.getAmount());
+        node.node("operation").set(obj.getOperation());
+        node.node("slot").set(obj.getSlotGroup());
     }
 }
