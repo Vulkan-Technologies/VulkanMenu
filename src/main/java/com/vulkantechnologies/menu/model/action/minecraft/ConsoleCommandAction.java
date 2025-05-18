@@ -13,6 +13,6 @@ public record ConsoleCommandAction(String command) implements Action {
     public void accept(Player player, Menu menu) {
         String formattedCommand = command.replace("<player>", player.getName());
 
-        player.performCommand(formattedCommand);
+        player.performCommand(menu.injectVariable(formattedCommand));
     }
 }

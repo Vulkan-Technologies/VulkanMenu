@@ -14,7 +14,7 @@ public record PlayerCommandAction(String command) implements Action {
         if (command == null || command.isEmpty())
             return;
 
-        player.performCommand(command);
+        player.performCommand(menu.injectVariable(command));
     }
 
 }

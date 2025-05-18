@@ -6,14 +6,16 @@ import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @ComponentName("message")
-public record MessageAction(Component message) implements Action {
+public record MessageAction(String message) implements Action {
+
+    public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     @Override
     public void accept(Player player, Menu menu) {
-        player.sendMessage(message);
+        player.sendMessage(MINI_MESSAGE.deserialize(message, menu.variableResolver()));
     }
 
 }

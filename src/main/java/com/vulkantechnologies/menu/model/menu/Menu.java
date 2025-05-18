@@ -115,6 +115,13 @@ public class Menu implements InventoryHolder {
         return TagResolver.resolver(this.variables.toArray(TagResolver[]::new));
     }
 
+    public String injectVariable(String text) {
+        for (MenuVariable<?> variable : this.variables) {
+            text = text.replace("<variable-" + variable.name() + ">", variable.value().toString());
+        }
+        return text;
+    }
+
     @Override
     public @NotNull Inventory getInventory() {
         return this.inventory;

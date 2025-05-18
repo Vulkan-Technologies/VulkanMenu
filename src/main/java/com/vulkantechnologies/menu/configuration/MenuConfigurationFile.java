@@ -14,9 +14,11 @@ import com.vulkantechnologies.menu.configuration.serializer.minecraft.AttributeM
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.EnchantmentTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.ItemWrapperTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.MaterialTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.vulkan.ComponentWrapperTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.vulkan.MenuComponentTypeSerializer;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
+import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
 
@@ -43,6 +45,7 @@ public class MenuConfigurationFile {
                         .register(ItemWrapper.class, ItemWrapperTypeSerializer.INSTANCE)
                         .register(Action.class, new MenuComponentTypeSerializer<>(Registries.ACTION, Registries.ACTION_ADAPTER))
                         .register(Requirement.class, new MenuComponentTypeSerializer<>(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER))
+                        .register(ComponentWrapper.class, ComponentWrapperTypeSerializer.INSTANCE)
                 ))
                 .build();
     }
