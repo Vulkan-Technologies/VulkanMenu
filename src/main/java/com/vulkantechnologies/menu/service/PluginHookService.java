@@ -22,7 +22,8 @@ public class PluginHookService {
                 new ItemsAdderPluginHook(plugin),
                 new OraxenPluginHook(plugin),
                 new NexoPluginHook(plugin),
-                new PacketEventsPluginHook(plugin)
+                new PacketEventsPluginHook(plugin),
+                new HeadDatabasePluginHook(plugin)
         ).forEach(this::register);
     }
 
