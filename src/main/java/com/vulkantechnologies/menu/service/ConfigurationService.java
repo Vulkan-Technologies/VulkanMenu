@@ -100,6 +100,13 @@ public class ConfigurationService {
         return Optional.ofNullable(this.menus.get(id));
     }
 
+    public void register(String id, MenuConfigurationFile menu) {
+        if (this.menus.containsKey(id)) {
+            this.plugin.getSLF4JLogger().warn("Menu with id {} already exists, overwriting", id);
+        }
+        this.menus.put(id, menu);
+    }
+
     public void unregister(String id) {
         this.menus.remove(id);
     }

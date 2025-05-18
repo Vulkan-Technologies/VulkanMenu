@@ -9,13 +9,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.vulkantechnologies.menu.command.VMenuCommand;
+import com.vulkantechnologies.menu.command.completion.ImporterCompletionHandler;
 import com.vulkantechnologies.menu.command.completion.MenuCompletionHandler;
+import com.vulkantechnologies.menu.command.context.ImporterContextResolver;
 import com.vulkantechnologies.menu.command.context.MenuContextResolver;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.listener.MarkerListener;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
+import com.vulkantechnologies.menu.model.importer.ConfigurationImporter;
 import com.vulkantechnologies.menu.service.ConfigurationService;
+import com.vulkantechnologies.menu.service.ImportService;
 import com.vulkantechnologies.menu.service.MenuService;
 import com.vulkantechnologies.menu.service.PluginHookService;
 
@@ -41,6 +45,7 @@ public final class VulkanMenu extends JavaPlugin {
     // Service
     private PluginHookService pluginHooks;
     private MenuService menu;
+    private ImportService importService;
 
     // Commands
     private PaperCommandManager commands;
@@ -59,12 +64,15 @@ public final class VulkanMenu extends JavaPlugin {
         // Manager
         this.pluginHooks = new PluginHookService(this);
         this.menu = new MenuService(this);
+        this.importService = new ImportService(this);
 
         // Commands
         this.commands = new PaperCommandManager(this);
         this.commands.enableUnstableAPI("help");
         this.commands.getCommandContexts().registerContext(MenuConfiguration.class, new MenuContextResolver(this));
+        this.commands.getCommandContexts().registerContext(ConfigurationImporter.class, new ImporterContextResolver(this));
         this.commands.getCommandCompletions().registerAsyncCompletion("menus", new MenuCompletionHandler(this));
+        this.commands.getCommandCompletions().registerAsyncCompletion("importers", new ImporterCompletionHandler(this));
         this.commands.registerCommand(new VMenuCommand());
 
         // Commands map

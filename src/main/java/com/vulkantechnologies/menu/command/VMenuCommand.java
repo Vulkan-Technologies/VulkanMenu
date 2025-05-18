@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.model.importer.ConfigurationImporter;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
@@ -42,6 +43,22 @@ public class VMenuCommand extends BaseCommand {
     @Syntax("<menu>")
     public void onOpen(Player player, MenuConfiguration menu) {
         this.plugin.menu().openMenu(player, menu);
+    }
+
+    @Subcommand("import")
+    @Description("Import all menus from the specified importer.")
+    @CommandCompletion("@importers")
+    @Syntax("<importer>")
+    @CommandPermission("vmenu.import")
+    public void onImport(CommandSender sender, ConfigurationImporter importer) {
+        sender.sendMessage(Component.text("Importing menus from " + importer.pluginName() + "..."));
+        try {
+            this.plugin.importService().importMenus(importer);
+            sender.sendMessage(Component.text("Imported " + this.plugin.configuration().menus().size() + " menus."));
+        } catch (Exception e) {
+            sender.sendMessage(Component.text("Failed to import menus: " + e.getMessage()));
+            e.printStackTrace();
+        }
     }
 
     @Subcommand("reload")
