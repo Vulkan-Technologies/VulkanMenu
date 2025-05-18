@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.hook.PluginHook;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
+import com.vulkantechnologies.menu.model.provider.ItemsAdderItemStackProvider;
+import com.vulkantechnologies.menu.registry.Registries;
 
 import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class ItemsAdderPluginHook implements PluginHook, PlaceholderProcessor {
         this.plugin.getSLF4JLogger().info("Successfully hooked into ItemsAdder!");
 
         this.plugin.placeholderProcessors().add(this);
+        Registries.ITEM_PROVIDERS.register(new ItemsAdderItemStackProvider());
     }
 
     @Override
