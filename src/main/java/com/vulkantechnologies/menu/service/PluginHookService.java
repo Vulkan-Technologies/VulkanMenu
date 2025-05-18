@@ -21,7 +21,8 @@ public class PluginHookService {
                 new PlaceholderAPIPluginHook(plugin),
                 new ItemsAdderPluginHook(plugin),
                 new OraxenPluginHook(plugin),
-                new NexoPluginHook(plugin)
+                new NexoPluginHook(plugin),
+                new PacketEventsPluginHook(plugin)
         ).forEach(this::register);
     }
 

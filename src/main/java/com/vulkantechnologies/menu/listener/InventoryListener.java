@@ -20,11 +20,14 @@ public class InventoryListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)
+            || e.getClickedInventory() == null
             || !(e.getInventory().getHolder(false) instanceof Menu menu))
             return;
 
         e.setCancelled(true);
-        menu.getItem(e.getSlot())
+
+        int slot = e.getRawSlot();
+        menu.getItem(slot)
                 .filter(item -> item.canClick(player, menu))
                 .ifPresent(item -> {
                     for (Action action : item.actions()) {

@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.menu.Menu;
+import com.vulkantechnologies.menu.utils.ItemMarker;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -33,7 +34,7 @@ public record ItemWrapper(ItemStack itemStack, String displayName, List<String> 
                         .toList());
             }
         });
-
+        ItemMarker.mark(item);
         return item;
     }
 

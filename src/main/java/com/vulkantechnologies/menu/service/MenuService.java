@@ -2,8 +2,10 @@ package com.vulkantechnologies.menu.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -47,7 +49,15 @@ public class MenuService {
         if (closeActions != null)
             closeActions.values().forEach(action -> action.accept(player, menu));
 
+        Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
+
         this.menus.remove(menu);
+    }
+
+    public Optional<Menu> findByPlayer(Player player) {
+        return this.menus.stream()
+                .filter(menu -> menu.player().getUniqueId().equals(player.getUniqueId()))
+                .findFirst();
     }
 
     public void addMenu(Menu menu) {

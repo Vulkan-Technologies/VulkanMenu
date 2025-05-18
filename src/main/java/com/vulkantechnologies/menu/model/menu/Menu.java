@@ -7,9 +7,11 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -31,6 +33,7 @@ public class Menu implements InventoryHolder {
     private final Inventory inventory;
     private final List<MenuItem> items;
     private final List<MenuVariable<?>> variables;
+    private final ItemStack[] cachedItems;
 
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
@@ -39,6 +42,7 @@ public class Menu implements InventoryHolder {
         this.variables = new CopyOnWriteArrayList<>();
         this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title());
         this.items = new ArrayList<>(configuration.items().values());
+        this.cachedItems = new ItemStack[configuration.size() + 36];
 
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
@@ -46,7 +50,7 @@ public class Menu implements InventoryHolder {
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
 
-        this.build();
+        this.build(true);
     }
 
     public boolean canOpen(Player player) {
@@ -61,21 +65,54 @@ public class Menu implements InventoryHolder {
 
     public void refresh(int slot) {
         this.inventory.clear(slot);
-        this.getItem(slot).ifPresent(item -> this.inventory.setItem(slot, item.item().build(player, this)));
+        this.getItem(slot).ifPresent(item -> {
+            ItemStack itemStack = item.item().build(player, this);
+            if (item.slot() < this.configuration.size())
+                this.inventory.setItem(slot, itemStack);
+            this.cachedItems[slot] = itemStack;
+        });
     }
 
     public void refresh() {
         this.inventory.clear();
-        this.build();
+
+        List<ItemStack> items = this.build(false);
+        for (int i = 0; i < items.size(); i++) {
+            this.inventory.setItem(i, items.get(i));
+        }
     }
 
-    private void build() {
-        for (MenuItem item : this.items) {
-            if (!item.shouldShow(player, this))
-                continue;
+    public List<ItemStack> build(boolean bottom) {
+        List<ItemStack> items = new ArrayList<>();
 
-            this.inventory.setItem(item.slot(), item.item().build(player, this));
+        int size = this.configuration.size();
+
+        // Top inventory
+        for (int i = 0; i < size; i++) {
+            this.getItem(i)
+                    .filter(item -> item.shouldShow(player, this))
+                    .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
+                            () -> items.add(new ItemStack(Material.AIR)));
+
+            // Cache the item
+            this.cachedItems[i] = items.get(i);
         }
+
+        // Bottom inventory
+        if (!bottom)
+            return items;
+
+        for (int i = 0; i < 36; i++) {
+            this.getItem(i + size)
+                    .filter(item -> item.shouldShow(player, this))
+                    .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
+                            () -> items.add(new ItemStack(Material.AIR)));
+
+            // Cache the item
+            this.cachedItems[i] = items.get(i);
+        }
+
+        return items;
     }
 
     public Optional<MenuItem> getItem(int slot) {
