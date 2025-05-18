@@ -5,6 +5,8 @@ import java.util.List;
 import com.vulkantechnologies.menu.configuration.adapter.compact.*;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.action.minecraft.*;
+import com.vulkantechnologies.menu.model.action.minecraft.meta.RemoveMetaAction;
+import com.vulkantechnologies.menu.model.action.minecraft.meta.SetMetaAction;
 import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
@@ -12,6 +14,7 @@ import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAc
 import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
+import com.vulkantechnologies.menu.model.requirement.minecraft.HasMetaRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
@@ -50,7 +53,9 @@ public class Registries {
                 SoundAction.class,
                 BroadcastSoundAction.class,
                 BroadcastAction.class,
-                TitleAction.class
+                TitleAction.class,
+                SetMetaAction.class,
+                RemoveMetaAction.class
         ).forEach(ACTION::register);
 
         // Requirement
@@ -59,7 +64,8 @@ public class Registries {
                 ExperienceRequirement.class,
                 IsNearRequirement.class,
                 RegexRequirement.class,
-                StringLenghtRequirement.class
+                StringLenghtRequirement.class,
+                HasMetaRequirement.class
         ).forEach(REQUIREMENT::register);
 
         // -- Adapters
@@ -78,7 +84,8 @@ public class Registries {
                 CompactLocationAdapter.INSTANCE,
                 CompactSoundAdapter.INSTANCE,
                 CompactComponentWrapperAdapter.INSTANCE,
-                CompactTitleWrapperAdapter.INSTANCE
+                CompactTitleWrapperAdapter.INSTANCE,
+                CompactKeyAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
     }
 }
