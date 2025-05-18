@@ -7,3 +7,4 @@ libraries:
 softdepend:
   - PlaceholderAPI
   - Vault
+  - ItemsAdder

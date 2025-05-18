@@ -52,6 +52,11 @@
             <id>redempt</id>
             <url>https://redempt.dev</url>
         </repository>
+        <!-- itemsadder -->
+        <repository>
+            <id>matteodev</id>
+            <url>https://maven.devs.beer/</url>
+        </repository>
     </repositories>
 
     <!-- dependencies -->
@@ -102,6 +107,13 @@
             <groupId>com.github.Redempt</groupId>
             <artifactId>Crunch</artifactId>
             <version>2.0.3</version>
+        </dependency>
+        <!-- itemsadder -->
+        <dependency>
+            <groupId>dev.lone</groupId>
+            <artifactId>api-itemsadder</artifactId>
+            <version>4.0.10</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
