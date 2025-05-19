@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -45,6 +47,9 @@ public final class VulkanMenu extends JavaPlugin {
     // Commands
     private PaperCommandManager commands;
 
+    // Metrics
+    private Metrics metrics;
+
     @Override
     public void onLoad() {
         this.loaded = true;
@@ -76,8 +81,13 @@ public final class VulkanMenu extends JavaPlugin {
                 new MarkerListener(this)
         ).forEach(listener -> this.getServer().getPluginManager().registerEvents(listener, this));
 
+        // Hooks
         this.pluginHooks.check();
         Bukkit.getScheduler().runTask(this, () -> this.pluginHooks.retry());
+
+        // Metrics
+        this.metrics = new Metrics(this, 25916);
+        this.metrics.addCustomChart(new SingleLineChart("menu_count", () -> this.menu.menus().size()));
 
         instance = this;
 
@@ -88,6 +98,9 @@ public final class VulkanMenu extends JavaPlugin {
     public void onDisable() {
         if (!this.enabled)
             return;
+
+        // Metrics
+        this.metrics.shutdown();
 
         // Configuration
         this.configuration.unregisterCommands();

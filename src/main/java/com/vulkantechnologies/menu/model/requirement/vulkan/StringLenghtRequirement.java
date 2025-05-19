@@ -7,7 +7,7 @@ import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 
-@ComponentName("string-length")
+@ComponentName("string-lenght")
 public record StringLenghtRequirement(int min, int max, String value) implements Requirement {
 
     @Override

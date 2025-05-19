@@ -89,15 +89,12 @@ public class Menu implements InventoryHolder {
 
         // Top inventory
         for (int i = 0; i < size; i++) {
-            int finalI = i;
-            this.getItem(i)
+            ItemStack itemStack = this.getItem(i)
                     .filter(item -> item.shouldShow(player, this))
-                    .ifPresentOrElse(item -> {
-                                ItemStack itemStack = item.item().build(player, this);
-                                items.add(itemStack);
-                                this.inventory.setItem(finalI, itemStack);
-                            },
-                            () -> items.add(new ItemStack(Material.AIR)));
+                    .map(item -> item.item().build(player, this))
+                    .orElse(new ItemStack(Material.AIR));
+            items.add(itemStack);
+            this.inventory.setItem(i, itemStack);
 
             // Cache the item
             this.cachedItems[i] = items.get(i);
