@@ -15,7 +15,6 @@ public class HeadDatabasePluginHook implements PluginHook {
     @Override
     public void onSuccess() {
         this.plugin.getSLF4JLogger().info("Successfully hooked into HeadDatabase!");
-
         Registries.ITEM_PROVIDERS.register(new HeadDatabaseItemProvider());
     }
 

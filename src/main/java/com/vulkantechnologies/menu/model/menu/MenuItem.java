@@ -13,9 +13,16 @@ import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
 @ConfigSerializable
-public record MenuItem(int slot, ItemWrapper item, List<Action> actions,
+public record MenuItem(List<Integer> slots, ItemWrapper item, List<Action> actions,
                        @Nullable List<Requirement> viewRequirements,
                        Map<String, RequirementWrapper> clickRequirements) {
+
+    public boolean hasSlot(int slot) {
+        if (this.slots == null || this.slots.isEmpty())
+            return true;
+
+        return this.slots.contains(slot);
+    }
 
     public boolean canClick(Player player, Menu menu) {
         if (this.clickRequirements == null || this.clickRequirements.isEmpty())

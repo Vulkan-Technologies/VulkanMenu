@@ -67,7 +67,7 @@ public class Menu implements InventoryHolder {
         this.inventory.clear(slot);
         this.getItem(slot).ifPresent(item -> {
             ItemStack itemStack = item.item().build(player, this);
-            if (item.slot() < this.configuration.size())
+            if (slot < this.configuration.size())
                 this.inventory.setItem(slot, itemStack);
             this.cachedItems[slot] = itemStack;
         });
@@ -89,9 +89,14 @@ public class Menu implements InventoryHolder {
 
         // Top inventory
         for (int i = 0; i < size; i++) {
+            int finalI = i;
             this.getItem(i)
                     .filter(item -> item.shouldShow(player, this))
-                    .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
+                    .ifPresentOrElse(item -> {
+                                ItemStack itemStack = item.item().build(player, this);
+                                items.add(itemStack);
+                                this.inventory.setItem(finalI, itemStack);
+                            },
                             () -> items.add(new ItemStack(Material.AIR)));
 
             // Cache the item
@@ -118,7 +123,7 @@ public class Menu implements InventoryHolder {
     public Optional<MenuItem> getItem(int slot) {
         return this.items
                 .stream()
-                .filter(item -> item.slot() == slot)
+                .filter(item -> item.hasSlot(slot))
                 .findFirst();
     }
 

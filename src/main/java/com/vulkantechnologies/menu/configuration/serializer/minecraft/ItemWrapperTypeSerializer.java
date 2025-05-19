@@ -28,15 +28,17 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
     @Override
     public ItemWrapper deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
-        String rawMaterial = node.node("material").getString();
         ItemStack item;
+
+        ConfigurationNode materialNode = node.node("material");
+        String rawMaterial = materialNode.getString();
         if (rawMaterial.contains(":")) {
             String[] materialParts = rawMaterial.split(":");
             ItemStackProvider provider = Registries.ITEM_PROVIDERS.findByPrefix(materialParts[0])
                     .orElseThrow(() -> new SerializationException("Invalid item provider: " + materialParts[0]));
             item = provider.provide(materialParts[1]);
         } else {
-            Material material = Material.matchMaterial(rawMaterial);
+            Material material = materialNode.get(Material.class);
             if (material == null)
                 throw new SerializationException("Invalid material: " + rawMaterial);
             item = new ItemStack(material);

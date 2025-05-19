@@ -50,7 +50,6 @@ public class MenuService {
             closeActions.values().forEach(action -> action.accept(player, menu));
 
         Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
-
         this.menus.remove(menu);
     }
 

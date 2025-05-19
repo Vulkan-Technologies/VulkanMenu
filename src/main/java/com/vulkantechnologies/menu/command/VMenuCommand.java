@@ -12,7 +12,7 @@ import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import net.kyori.adventure.text.Component;
 
-@CommandAlias("vmenu")
+@CommandAlias("vmenu|vm")
 public class VMenuCommand extends BaseCommand {
 
     @Dependency
@@ -42,6 +42,17 @@ public class VMenuCommand extends BaseCommand {
     @Syntax("<menu>")
     public void onOpen(Player player, MenuConfiguration menu) {
         this.plugin.menu().openMenu(player, menu);
+    }
+
+    @Subcommand("list")
+    @Description("Lists all available menus.")
+    @CommandPermission("vmenu.list")
+    public void onList(CommandSender sender) {
+        sender.sendMessage(Component.text("Available menus:"));
+        this.plugin.configuration()
+                .menus()
+                .values()
+                .forEach(menu -> sender.sendMessage(Component.text("- " + menu)));
     }
 
     @Subcommand("reload")
