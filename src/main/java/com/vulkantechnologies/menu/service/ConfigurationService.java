@@ -55,6 +55,8 @@ public class ConfigurationService {
         } catch (IOException e) {
             this.plugin.getSLF4JLogger().error("Failed to load menus", e);
         }
+
+        this.registerCommands();
     }
 
     public MenuConfigurationFile load(Path path) throws MenuConfigurationLoadException {
@@ -75,7 +77,9 @@ public class ConfigurationService {
 
         for (MenuConfigurationFile value : this.menus.values()) {
             String command = value.menu().openCommand().name();
-            if (command == null || command.isEmpty())
+            if (command == null
+                || command.isEmpty()
+                || commandMap.getCommand(command) != null)
                 continue;
 
             commandMap.register("vulkanmenu", new MenuCommand(this.plugin, value.menu()));

@@ -72,9 +72,6 @@ public final class VulkanMenu extends JavaPlugin {
         this.commands.getCommandCompletions().registerAsyncCompletion("menus", new MenuCompletionHandler(this));
         this.commands.registerCommand(new VMenuCommand());
 
-        // Commands map
-        this.configuration.registerCommands();
-
         // Listeners
         List.of(
                 new InventoryListener(this),

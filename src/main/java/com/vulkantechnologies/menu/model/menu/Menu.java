@@ -65,7 +65,7 @@ public class Menu implements InventoryHolder {
 
     public void refresh(int slot) {
         this.inventory.clear(slot);
-        this.getItem(slot).ifPresent(item -> {
+        this.getShownItem(slot).ifPresent(item -> {
             ItemStack itemStack = item.item().build(player, this);
             if (slot < this.configuration.size())
                 this.inventory.setItem(slot, itemStack);
@@ -89,8 +89,7 @@ public class Menu implements InventoryHolder {
 
         // Top inventory
         for (int i = 0; i < size; i++) {
-            ItemStack itemStack = this.getItem(i)
-                    .filter(item -> item.shouldShow(player, this))
+            ItemStack itemStack = this.getShownItem(i)
                     .map(item -> item.item().build(player, this))
                     .orElse(new ItemStack(Material.AIR));
             items.add(itemStack);
@@ -105,7 +104,7 @@ public class Menu implements InventoryHolder {
             return items;
 
         for (int i = 0; i < 36; i++) {
-            this.getItem(i + size)
+            this.getShownItem(i)
                     .filter(item -> item.shouldShow(player, this))
                     .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
                             () -> items.add(new ItemStack(Material.AIR)));
@@ -115,6 +114,26 @@ public class Menu implements InventoryHolder {
         }
 
         return items;
+    }
+
+    public Optional<MenuItem> getShownItem(int slot) {
+        return this.items
+                .stream()
+                .sorted((item1, item2) -> {
+                    if (item1.priority() == item2.priority())
+                        return 0;
+                    return item1.priority() > item2.priority() ? -1 : 1;
+                })
+                .filter(item -> item.hasSlot(slot))
+                .filter(item -> item.shouldShow(player, this))
+                .findFirst();
+    }
+
+    public List<MenuItem> items(int slot) {
+        return this.items
+                .stream()
+                .filter(item -> item.hasSlot(slot))
+                .toList();
     }
 
     public Optional<MenuItem> getItem(int slot) {

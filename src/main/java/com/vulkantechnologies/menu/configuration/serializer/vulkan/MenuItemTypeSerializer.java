@@ -40,6 +40,8 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
             slots.add(slotNode.getInt());
         }
 
+        int priority = node.node("priority").getInt(0);
+
         ItemWrapper wrapper = node.get(ItemWrapper.class);
         List<Action> actions = node.node("actions").getList(Action.class);
         List<Requirement> viewRequirements = node.node("view-requirements").getList(Requirement.class);
@@ -51,7 +53,7 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
                 clickRequirements.put(name, requirement);
             }
         }
-        return new MenuItem(slots, wrapper, actions, viewRequirements, clickRequirements);
+        return new MenuItem(slots, priority, wrapper, actions, viewRequirements, clickRequirements);
     }
 
     @Override

@@ -13,7 +13,7 @@ import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
 @ConfigSerializable
-public record MenuItem(List<Integer> slots, ItemWrapper item, List<Action> actions,
+public record MenuItem(List<Integer> slots, int priority, ItemWrapper item, List<Action> actions,
                        @Nullable List<Requirement> viewRequirements,
                        Map<String, RequirementWrapper> clickRequirements) {
 
