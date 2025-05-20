@@ -38,15 +38,7 @@ public class ConfigurationService {
             pathStream.filter(path -> path.toString().endsWith(".yml"))
                     .forEach(path -> {
                         try {
-                            MenuConfigurationFile file = this.load(path);
-
-                            // Validate
-                            if (file.menu() == null
-                                || !file.menu().validate(this.plugin))
-                                return;
-
-                            String id = path.getFileName().toString().replace(".yml", "");
-                            this.menus.put(id, file);
+                            this.load(path);
                         } catch (MenuConfigurationLoadException e) {
                             this.plugin.getSLF4JLogger().error("Failed to load menu configuration: {}", path, e);
                         }
@@ -66,6 +58,14 @@ public class ConfigurationService {
         MenuConfigurationFile file = new MenuConfigurationFile(path);
         try {
             file.load();
+
+            if (file.menu() == null
+                || !file.menu().validate(this.plugin))
+                throw new MenuConfigurationLoadException("Invalid menu configuration");
+
+            String id = path.getFileName().toString().replace(".yml", "");
+            file.id(id);
+            this.menus.put(id, file);
         } catch (Exception e) {
             throw new MenuConfigurationLoadException("Failed to load configuration", e);
         }
@@ -106,6 +106,13 @@ public class ConfigurationService {
 
     public void unregister(String id) {
         this.menus.remove(id);
+    }
+
+    public Optional<MenuConfigurationFile> findByPath(Path path) {
+        return this.menus.values()
+                .stream()
+                .filter(menu -> menu.path().equals(path))
+                .findFirst();
     }
 
     private void createDataFolder() {

@@ -24,4 +24,6 @@ public record ComponentWrapper(String content) {
         String formatted = VulkanMenu.get().processPlaceholders(player, this.content);
         return MINI_MESSAGE.deserialize(formatted, menu.variableResolver());
     }
+
+
 }

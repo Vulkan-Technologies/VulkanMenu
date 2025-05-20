@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class MenuConfigurationFile extends ConfigurationFile {
 
+    private String id;
     private MenuConfiguration menu;
 
     public MenuConfigurationFile(Path path) {

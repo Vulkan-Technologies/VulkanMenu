@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.vulkantechnologies.menu.command.LiveConfigurationCommand;
 import com.vulkantechnologies.menu.command.VMenuCommand;
 import com.vulkantechnologies.menu.command.completion.MenuCompletionHandler;
 import com.vulkantechnologies.menu.command.context.MenuContextResolver;
@@ -18,6 +19,7 @@ import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.listener.MarkerListener;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.service.ConfigurationService;
+import com.vulkantechnologies.menu.service.FileWatcherService;
 import com.vulkantechnologies.menu.service.MenuService;
 import com.vulkantechnologies.menu.service.PluginHookService;
 
@@ -43,6 +45,7 @@ public final class VulkanMenu extends JavaPlugin {
     // Service
     private PluginHookService pluginHooks;
     private MenuService menu;
+    private FileWatcherService fileWatcher;
 
     // Commands
     private PaperCommandManager commands;
@@ -61,9 +64,10 @@ public final class VulkanMenu extends JavaPlugin {
         this.configuration = new ConfigurationService(this);
         this.configuration.load();
 
-        // Manager
+        // Services
         this.pluginHooks = new PluginHookService(this);
         this.menu = new MenuService(this);
+        this.fileWatcher = new FileWatcherService(this);
 
         // Commands
         this.commands = new PaperCommandManager(this);
@@ -71,6 +75,7 @@ public final class VulkanMenu extends JavaPlugin {
         this.commands.getCommandContexts().registerContext(MenuConfiguration.class, new MenuContextResolver(this));
         this.commands.getCommandCompletions().registerAsyncCompletion("menus", new MenuCompletionHandler(this));
         this.commands.registerCommand(new VMenuCommand());
+        this.commands.registerCommand(new LiveConfigurationCommand());
 
         // Listeners
         List.of(
@@ -104,6 +109,9 @@ public final class VulkanMenu extends JavaPlugin {
 
         // Commands
         this.commands.unregisterCommands();
+
+        // Services
+        this.fileWatcher.stop();
 
         this.disabled = true;
     }

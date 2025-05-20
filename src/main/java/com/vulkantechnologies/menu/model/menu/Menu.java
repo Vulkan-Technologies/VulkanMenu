@@ -77,8 +77,11 @@ public class Menu implements InventoryHolder {
         this.inventory.clear();
 
         List<ItemStack> items = this.build(false);
-        for (int i = 0; i < items.size(); i++) {
-            this.inventory.setItem(i, items.get(i));
+        for (int slot = 0; slot < items.size(); slot++) {
+            ItemStack itemStack = items.get(slot);
+
+            if (slot < this.configuration.size())
+                this.inventory.setItem(slot, itemStack);
         }
     }
 
@@ -96,7 +99,7 @@ public class Menu implements InventoryHolder {
             this.inventory.setItem(i, itemStack);
 
             // Cache the item
-            this.cachedItems[i] = items.get(i);
+            this.cachedItems[i] = itemStack;
         }
 
         // Bottom inventory
