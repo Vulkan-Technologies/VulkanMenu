@@ -54,4 +54,7 @@ public class VMenuAPI {
         return plugin.menu().findByPlayer(player);
     }
 
+    public static void openMenu(Player player, String menuId) {
+        plugin.menu().openMenu(player, menuId);
+    }
 }
