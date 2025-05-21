@@ -12,8 +12,11 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.event.VMenuCloseEvent;
+import com.vulkantechnologies.menu.event.VMenuOpenEvent;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
+import com.vulkantechnologies.menu.utils.TaskUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,16 +34,25 @@ public class MenuService {
     }
 
     public void openMenu(Player player, MenuConfiguration configuration) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        TaskUtils.runSync(() -> {
             Menu menu = new Menu(player, configuration);
-            if (!menu.canOpen(player)) {
-                return;
-            }
 
+            // Event
+            VMenuOpenEvent event = new VMenuOpenEvent(player, menu);
+            if (!event.callEvent())
+                return;
+
+            // Requirements
+            if (!menu.canOpen(player))
+                return;
+
+            // Register
             this.menus.add(menu);
 
+            // Open
             player.openInventory(menu.getInventory());
 
+            // Actions
             Map<String, Action> openActions = configuration.openActions();
             if (openActions != null)
                 openActions.values().forEach(action -> action.accept(player, menu));
@@ -48,17 +60,24 @@ public class MenuService {
     }
 
     public void closeMenu(Player player, Menu menu) {
-        Map<String, Action> closeActions = menu.configuration().closeActions();
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        TaskUtils.runSync(() -> {
+            // Action
+            Map<String, Action> closeActions = menu.configuration().closeActions();
             if (closeActions != null)
                 closeActions.values().forEach(action -> action.accept(player, menu));
 
-            player.closeInventory();
-        });
+            // Event
+            new VMenuCloseEvent(player, menu).callEvent();
 
-        Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
-        this.menus.remove(menu);
+            // Close
+            player.closeInventory();
+
+            // Update inventory
+            Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
+
+            // Remove menu
+            this.menus.remove(menu);
+        });
     }
 
     public Optional<Menu> findByPlayer(Player player) {
