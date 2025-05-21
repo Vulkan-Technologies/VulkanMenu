@@ -93,6 +93,8 @@ public final class VulkanMenu extends JavaPlugin {
 
         instance = this;
 
+        VMenuAPI.init(this);
+
         this.enabled = true;
     }
 
