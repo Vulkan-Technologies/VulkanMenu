@@ -5,6 +5,7 @@ import java.nio.file.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.VulkanMenu;
@@ -67,9 +68,11 @@ public class FileWatcherService {
                                                 this.plugin.configuration().unregister(menuConfigurationFile.id());
                                                 this.plugin.configuration().load(path);
 
-                                                for (Player player : players) {
-                                                    this.plugin.menu().openMenu(player, menuConfigurationFile.menu());
-                                                }
+                                                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                                    for (Player player : players) {
+                                                        this.plugin.menu().openMenu(player, menuConfigurationFile.id());
+                                                    }
+                                                }, 2);
                                             } catch (Exception e) {
                                                 this.plugin.getSLF4JLogger().error("Failed to reload menu configuration: {}", path, e);
                                             }

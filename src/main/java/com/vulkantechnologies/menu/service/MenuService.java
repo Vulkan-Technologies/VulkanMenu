@@ -69,9 +69,6 @@ public class MenuService {
             // Event
             new VMenuCloseEvent(player, menu).callEvent();
 
-            // Close
-            player.closeInventory();
-
             // Update inventory
             Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
 
@@ -93,14 +90,11 @@ public class MenuService {
                 .forEach(menu -> {
                     Player player = menu.player();
                     players.add(player);
-                    Map<String, Action> closeActions = menu.configuration().closeActions();
 
-                    if (closeActions != null)
-                        closeActions.values().forEach(action -> action.accept(player, menu));
+                    TaskUtils.runSync(player::closeInventory);
 
-                    Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
-                    this.menus.remove(menu);
-                });
+                    this.closeMenu(player, menu);
+                 });
         return players;
     }
 
