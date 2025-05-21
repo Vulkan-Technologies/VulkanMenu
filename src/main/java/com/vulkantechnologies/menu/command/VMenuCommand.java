@@ -11,6 +11,9 @@ import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 @CommandAlias("vmenu|vm")
 public class VMenuCommand extends BaseCommand {
@@ -48,11 +51,25 @@ public class VMenuCommand extends BaseCommand {
     @Description("Lists all available menus.")
     @CommandPermission("vmenu.list")
     public void onList(CommandSender sender) {
-        sender.sendMessage(Component.text("Available menus:"));
+        sender.sendMessage(Component.text("Available menus:", NamedTextColor.GRAY));
         this.plugin.configuration()
                 .menus()
                 .values()
-                .forEach(menu -> sender.sendMessage(Component.text("- " + menu)));
+                .forEach(menu -> {
+                    Component hoverText = Component.text("Size: ", NamedTextColor.GRAY).append(Component.text(menu.menu().size(), NamedTextColor.AQUA))
+                            .appendNewline()
+                            .append(Component.text("Items: ", NamedTextColor.GRAY).append(Component.text(menu.menu().items().size(), NamedTextColor.AQUA)))
+                            .appendNewline()
+                            .append(Component.text("Variables: ", NamedTextColor.GRAY).append(Component.text(menu.menu().variables().size(), NamedTextColor.AQUA)))
+                            .appendNewline()
+                            .appendNewline()
+                            .append(Component.text("Click to open this menu.", NamedTextColor.GRAY));
+
+                    sender.sendMessage(Component.text("- ", NamedTextColor.GRAY)
+                            .append(Component.text(menu.id(), NamedTextColor.AQUA)
+                                    .hoverEvent(HoverEvent.showText(hoverText))
+                                    .clickEvent(ClickEvent.runCommand("/vmenu open " + menu.id()))));
+                });
     }
 
     @Subcommand("reload")
