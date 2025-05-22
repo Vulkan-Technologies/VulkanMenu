@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.hook.PluginHook;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
+import com.vulkantechnologies.menu.model.requirement.papi.PlaceholderRequirement;
+import com.vulkantechnologies.menu.registry.Registries;
 
 import lombok.RequiredArgsConstructor;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -19,6 +21,7 @@ public class PlaceholderAPIPluginHook implements PluginHook, PlaceholderProcesso
         this.plugin.getSLF4JLogger().info("Successfully hooked into PlaceholderAPI!");
 
         this.plugin.placeholderProcessors().add(this);
+        Registries.REQUIREMENT.register(PlaceholderRequirement.class);
     }
 
     @Override
