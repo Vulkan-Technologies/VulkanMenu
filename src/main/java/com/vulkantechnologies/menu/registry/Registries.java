@@ -17,6 +17,8 @@ import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequire
 import com.vulkantechnologies.menu.model.requirement.minecraft.HasMetaRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.CompareRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.ContainsRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.StringLenghtRequirement;
 
@@ -65,7 +67,9 @@ public class Registries {
                 IsNearRequirement.class,
                 RegexRequirement.class,
                 StringLenghtRequirement.class,
-                HasMetaRequirement.class
+                HasMetaRequirement.class,
+                CompareRequirement.class,
+                ContainsRequirement.class
         ).forEach(REQUIREMENT::register);
 
         // -- Adapters

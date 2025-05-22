@@ -1,4 +1,4 @@
-package com.vulkantechnologies.menu.model.requirement.papi;
+package com.vulkantechnologies.menu.model.requirement.vulkan;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,8 +11,8 @@ import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.utils.VariableUtils;
 
-@ComponentName("placeholder")
-public record PlaceholderRequirement(String raw) implements Requirement {
+@ComponentName("compare")
+public record CompareRequirement(String raw) implements Requirement {
 
     public static final Pattern PATTERN = Pattern.compile("(.*)(>=|<=|==|>|<|!=)(.*)");
 
