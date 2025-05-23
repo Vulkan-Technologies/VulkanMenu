@@ -88,6 +88,28 @@ public class VMenuCommand extends BaseCommand {
         }
     }
 
+    @Subcommand("reload")
+    @Description("Reloads the specified menu.")
+    @CommandPermission("vmenu.reload")
+    @CommandCompletion("@menus")
+    @Syntax("<menu>")
+    public void onReload(CommandSender sender, String menu) {
+        this.plugin.configuration()
+                .findByName(menu)
+                .ifPresentOrElse(menuConfigurationFile -> {
+                    String id = menuConfigurationFile.id();
+                    sender.sendMessage(Component.text("Reloading menu " + id + "..."));
+                    try {
+                        this.plugin.configuration().load(menuConfigurationFile.path());
+                        sender.sendMessage(Component.text("Menu " + id + " reloaded."));
+                    } catch (Exception e) {
+                        sender.sendMessage(Component.text("Failed to reload menu " + id + ": " + e.getMessage()));
+                        e.printStackTrace();
+                    }
+                }, () -> sender.sendMessage(Component.text("Menu " + menu + " not found.")));
+    }
+
+
     @HelpCommand
     public void doHelp(CommandSender sender, CommandHelp help) {
         help.showHelp();
