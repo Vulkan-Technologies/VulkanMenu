@@ -22,7 +22,7 @@ public class FileWatcherService {
 
     private final ExpiringMap<Path, Boolean> fileCache = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.CREATED)
-            .expiration(1, TimeUnit.SECONDS)
+            .expiration(5, TimeUnit.SECONDS)
             .build();
 
     public FileWatcherService(VulkanMenu plugin) {

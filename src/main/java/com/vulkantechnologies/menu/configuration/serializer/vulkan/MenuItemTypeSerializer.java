@@ -55,6 +55,7 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
 
         Map<String, RequirementWrapper> clickRequirements = this.deserializeRequirements(node, "click-requirements");
         return new MenuItem(
+                node.key().toString(),
                 slots,
                 priority,
                 wrapper,

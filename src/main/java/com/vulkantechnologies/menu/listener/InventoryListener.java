@@ -23,7 +23,8 @@ public class InventoryListener implements Listener {
             || !(e.getInventory().getHolder(false) instanceof Menu menu))
             return;
 
-        e.setCancelled(true);
+        if (e.getCurrentItem() != null && !e.getCurrentItem().isEmpty())
+            e.setCancelled(true);
 
         int slot = e.getRawSlot();
         menu.getItem(slot)

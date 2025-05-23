@@ -1,9 +1,6 @@
 package com.vulkantechnologies.menu.model.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
@@ -34,6 +31,7 @@ public class Menu implements InventoryHolder {
     private final List<MenuItem> items;
     private final List<MenuVariable<?>> variables;
     private final ItemStack[] cachedItems;
+    private int stateId;
 
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
@@ -50,7 +48,7 @@ public class Menu implements InventoryHolder {
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
 
-        this.build(true);
+        this.build();
     }
 
     public boolean canOpen(Player player) {
@@ -67,8 +65,7 @@ public class Menu implements InventoryHolder {
         this.inventory.clear(slot);
         this.getShownItem(slot).ifPresent(item -> {
             ItemStack itemStack = item.item().build(player, this);
-            if (slot < this.configuration.size())
-                this.inventory.setItem(slot, itemStack);
+            this.setItem(slot, itemStack);
             this.cachedItems[slot] = itemStack;
         });
     }
@@ -76,19 +73,18 @@ public class Menu implements InventoryHolder {
     public void refresh() {
         this.inventory.clear();
 
-        List<ItemStack> items = this.build(false);
+        List<ItemStack> items = this.build();
         for (int slot = 0; slot < items.size(); slot++) {
             ItemStack itemStack = items.get(slot);
-
-            if (slot < this.configuration.size())
-                this.inventory.setItem(slot, itemStack);
+            this.setItem(slot, itemStack);
         }
     }
 
-    public List<ItemStack> build(boolean bottom) {
+    public List<ItemStack> build() {
         List<ItemStack> items = new ArrayList<>();
 
         int size = this.configuration.size();
+        Arrays.fill(this.cachedItems, new ItemStack(Material.AIR));
 
         // Top inventory
         for (int i = 0; i < size; i++) {
@@ -96,18 +92,14 @@ public class Menu implements InventoryHolder {
                     .map(item -> item.item().build(player, this))
                     .orElse(new ItemStack(Material.AIR));
             items.add(itemStack);
-            this.inventory.setItem(i, itemStack);
+            this.setItem(i, itemStack);
 
             // Cache the item
             this.cachedItems[i] = itemStack;
         }
 
-        // Bottom inventory
-        if (!bottom)
-            return items;
-
         for (int i = 0; i < 36; i++) {
-            this.getShownItem(i)
+            this.getShownItem(size + i)
                     .filter(item -> item.shouldShow(player, this))
                     .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
                             () -> items.add(new ItemStack(Material.AIR)));
@@ -116,20 +108,38 @@ public class Menu implements InventoryHolder {
             this.cachedItems[i] = items.get(i);
         }
 
+
         return items;
     }
 
     public Optional<MenuItem> getShownItem(int slot) {
-        return this.items
-                .stream()
-                .sorted((item1, item2) -> {
-                    if (item1.priority() == item2.priority())
-                        return 0;
-                    return item1.priority() > item2.priority() ? -1 : 1;
-                })
-                .filter(item -> item.hasSlot(slot))
-                .filter(item -> item.shouldShow(player, this))
-                .findFirst();
+        List<MenuItem> menuItems = new ArrayList<>();
+
+        // Search by slot
+        for (MenuItem item : this.items) {
+            if (item.hasSlot(slot))
+                menuItems.add(item);
+        }
+
+        if (menuItems.isEmpty())
+            return Optional.empty();
+
+        // Sort by priority
+        menuItems.sort((item1, item2) -> {
+            if (item1.priority() == item2.priority())
+                return 0;
+            return item1.priority() > item2.priority() ? -1 : 1;
+        });
+
+        // Filter by requirements
+        menuItems.removeIf(item -> !item.shouldShow(player, this));
+
+        // Return the first item
+        if (menuItems.isEmpty())
+            return Optional.empty();
+
+        // Return the first item
+        return Optional.of(menuItems.getFirst());
     }
 
     public List<MenuItem> items(int slot) {
@@ -151,6 +161,11 @@ public class Menu implements InventoryHolder {
                 .stream()
                 .filter(variable -> variable.name().equals(name))
                 .findFirst();
+    }
+
+    private void setItem(int slot, ItemStack item) {
+        if (slot < this.configuration.size())
+            this.inventory.setItem(slot, item);
     }
 
     public boolean hasVariable(String name) {
@@ -186,5 +201,10 @@ public class Menu implements InventoryHolder {
     @Override
     public @NotNull Inventory getInventory() {
         return this.inventory;
+    }
+
+    public int incrementStateId() {
+        this.stateId = this.stateId + 1 & 32767;
+        return this.stateId;
     }
 }
