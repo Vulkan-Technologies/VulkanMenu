@@ -13,7 +13,7 @@ public record StringLenghtRequirement(int min, int max, String value) implements
     @Override
     public boolean test(Player player, Menu menu) {
         // Process placeholders
-        String formattedValue = VulkanMenu.get().processPlaceholders(player, value);
+        String formattedValue = VulkanMenu.get().processPlaceholders(player, menu, value);
 
         // Check if the length of the string is within the specified range
         return formattedValue.length() >= min && formattedValue.length() <= max;
