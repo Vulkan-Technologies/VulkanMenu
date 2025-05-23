@@ -14,15 +14,14 @@ import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
 @ConfigSerializable
-public record MenuItem(List<Integer> slots, int priority, ItemWrapper item, List<Action> actions,
-                       List<Action> rightClickActions,
-                       List<Action> leftClickActions,
-                       List<Action> middleClickActions,
+public record MenuItem(List<Integer> slots, int priority, ItemWrapper item, @Nullable List<Action> actions,
+                       @Nullable List<Action> rightClickActions,
+                       @Nullable List<Action> leftClickActions,
+                       @Nullable List<Action> middleClickActions,
+                       @Nullable List<Action> leftShiftClickActions,
+                       @Nullable List<Action> rightShiftClickActions,
                        @Nullable List<Requirement> viewRequirements,
-                       Map<String, RequirementWrapper> clickRequirements,
-                       Map<String, RequirementWrapper> leftClickRequirements,
-                       Map<String, RequirementWrapper> rightClickRequirements,
-                       Map<String, RequirementWrapper> middleClickRequirements) {
+                       Map<String, RequirementWrapper> clickRequirements) {
 
     public boolean hasSlot(int slot) {
         if (this.slots == null || this.slots.isEmpty())
@@ -33,25 +32,28 @@ public record MenuItem(List<Integer> slots, int priority, ItemWrapper item, List
 
     public void handleClick(Player player, Menu menu, ClickType clickType) {
         switch (clickType) {
-            case LEFT -> handleClick(player, menu, this.leftClickActions, this.leftClickRequirements, true);
-            case RIGHT -> handleClick(player, menu, this.rightClickActions, this.rightClickRequirements, true);
-            case MIDDLE -> handleClick(player, menu, this.middleClickActions, this.middleClickRequirements, true);
-            default -> handleClick(player, menu, this.actions, this.clickRequirements, false);
+            case LEFT -> handleClick(player, menu, this.leftClickActions, true);
+            case RIGHT -> handleClick(player, menu, this.rightClickActions, true);
+            case MIDDLE -> handleClick(player, menu, this.middleClickActions, true);
+            case SHIFT_LEFT -> handleClick(player, menu, this.leftShiftClickActions, true);
+            case SHIFT_RIGHT -> handleClick(player, menu, this.rightShiftClickActions, true);
+            default -> handleClick(player, menu, this.actions, false);
         }
     }
 
-    private void handleClick(Player player, Menu menu, List<Action> actions, Map<String, RequirementWrapper> requirements, boolean useDefault) {
+    private void handleClick(Player player, Menu menu, List<Action> actions, boolean useDefault) {
         if (actions == null
-            || actions.isEmpty()
-            || requirements == null
-            || requirements.isEmpty()
-            || !requirements.values()
-                .stream()
-                .allMatch(requirement -> requirement.test(player, menu))) {
+            || actions.isEmpty()) {
             if (useDefault)
-                handleClick(player, menu, this.actions, this.clickRequirements, false);
+                handleClick(player, menu, this.actions, false);
             return;
         }
+
+        // Requirements
+        if (clickRequirements.values()
+                .stream()
+                .anyMatch(requirement -> !requirement.test(player, menu)))
+            return;
 
         for (Action action : actions) {
             action.accept(player, menu);

@@ -90,7 +90,12 @@ public class ConfigurationService {
             || commandMap.getCommand(command) != null)
             return;
 
-        commandMap.register("vulkanmenu", new MenuCommand(this.plugin, configuration));
+        MenuCommand cmd = new MenuCommand(this.plugin, configuration);
+        commandMap.register("vulkanmenu", cmd);
+
+        Map<String, Command> knownCommands = commandMap.getKnownCommands();
+        if (!knownCommands.containsKey(command))
+            knownCommands.put(command, cmd);
     }
 
     public void unregisterCommands(MenuConfiguration configuration) {
@@ -105,6 +110,10 @@ public class ConfigurationService {
         Command cmd = commandMap.getCommand(command);
         if (cmd != null)
             cmd.unregister(commandMap);
+
+        Map<String, Command> knownCommands = commandMap.getKnownCommands();
+        knownCommands.remove(command);
+        knownCommands.remove("vulkanmenu:" + command);
     }
 
     public void unregisterCommands() {

@@ -37,13 +37,9 @@ public class MenuService {
         TaskUtils.runSync(() -> {
             Menu menu = new Menu(player, configuration);
 
-            // Event
+            // Event & requirements check
             VMenuOpenEvent event = new VMenuOpenEvent(player, menu);
-            if (!event.callEvent())
-                return;
-
-            // Requirements
-            if (!menu.canOpen(player))
+            if (!event.callEvent() || !menu.canOpen(player))
                 return;
 
             // Register
@@ -94,7 +90,7 @@ public class MenuService {
                     TaskUtils.runSync(player::closeInventory);
 
                     this.closeMenu(player, menu);
-                 });
+                });
         return players;
     }
 
