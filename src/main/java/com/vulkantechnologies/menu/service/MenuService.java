@@ -2,7 +2,6 @@ package com.vulkantechnologies.menu.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -49,18 +48,18 @@ public class MenuService {
             player.openInventory(menu.getInventory());
 
             // Actions
-            Map<String, Action> openActions = configuration.openActions();
+            List<Action> openActions = configuration.openActions();
             if (openActions != null)
-                openActions.values().forEach(action -> action.accept(player, menu));
+                openActions.forEach(action -> action.accept(player, menu));
         });
     }
 
     public void closeMenu(Player player, Menu menu) {
         TaskUtils.runSync(() -> {
             // Action
-            Map<String, Action> closeActions = menu.configuration().closeActions();
+            List<Action> closeActions = menu.configuration().closeActions();
             if (closeActions != null)
-                closeActions.values().forEach(action -> action.accept(player, menu));
+                closeActions.forEach(action -> action.accept(player, menu));
 
             // Event
             new VMenuCloseEvent(player, menu).callEvent();

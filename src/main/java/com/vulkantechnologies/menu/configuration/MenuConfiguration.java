@@ -1,5 +1,6 @@
 package com.vulkantechnologies.menu.configuration;
 
+import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +19,22 @@ import net.kyori.adventure.key.Key;
 @ConfigSerializable
 public record MenuConfiguration(ComponentWrapper title, int size, @Nullable CommandConfiguration openCommand,
                                 Map<String, MenuItem> items,
-                                @Nullable Map<String, Action> openActions, @Nullable Map<String, Action> closeActions,
+                                @Nullable List<Action> openActions, @Nullable List<Action> closeActions,
                                 @Nullable Map<String, RequirementWrapper> openRequirements,
-                                Map<String, String> variables) {
+                                Map<String, String> variables, Refresh refresh) {
+
+    @ConfigSerializable
+    public record Refresh(int interval, int delay, List<Action> actions) {
+
+        public boolean hasInterval() {
+            return this.interval > 0;
+        }
+
+        public boolean hasDelay() {
+            return this.delay > 0;
+        }
+
+    }
 
     public boolean validate(VulkanMenu plugin) {
         // Size validation

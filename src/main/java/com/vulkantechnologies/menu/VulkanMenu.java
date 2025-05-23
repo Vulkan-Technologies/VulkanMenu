@@ -23,6 +23,7 @@ import com.vulkantechnologies.menu.service.ConfigurationService;
 import com.vulkantechnologies.menu.service.FileWatcherService;
 import com.vulkantechnologies.menu.service.MenuService;
 import com.vulkantechnologies.menu.service.PluginHookService;
+import com.vulkantechnologies.menu.task.MenuRefreshTask;
 
 import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
@@ -47,6 +48,9 @@ public final class VulkanMenu extends JavaPlugin {
     private PluginHookService pluginHooks;
     private MenuService menu;
     private FileWatcherService fileWatcher;
+
+    // Task
+    private MenuRefreshTask refreshTask;
 
     // Commands
     private PaperCommandManager commands;
@@ -88,6 +92,10 @@ public final class VulkanMenu extends JavaPlugin {
         this.pluginHooks.check();
         Bukkit.getScheduler().runTask(this, () -> this.pluginHooks.retry());
 
+        // Tasks
+        this.refreshTask = new MenuRefreshTask(this);
+        this.refreshTask.runTaskTimer(this, 0L, 1L);
+
         // Metrics
         this.metrics = new Metrics(this, 25916);
         this.metrics.addCustomChart(new SingleLineChart("menu_count", () -> this.menu.menus().size()));
@@ -115,6 +123,9 @@ public final class VulkanMenu extends JavaPlugin {
 
         // Services
         this.fileWatcher.stop();
+
+        // Tasks
+        this.refreshTask.cancel();
 
         this.disabled = true;
     }

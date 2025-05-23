@@ -31,7 +31,10 @@ public class Menu implements InventoryHolder {
     private final List<MenuItem> items;
     private final List<MenuVariable<?>> variables;
     private final ItemStack[] cachedItems;
-    private int stateId;
+
+    // Refresh
+    private long creationTime;
+    private long lastRefreshTime;
 
     // TODO: Implement menu item caching
 
@@ -50,6 +53,8 @@ public class Menu implements InventoryHolder {
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
 
+        this.creationTime = System.currentTimeMillis();
+        this.lastRefreshTime = System.currentTimeMillis();
         this.build();
     }
 
@@ -203,10 +208,5 @@ public class Menu implements InventoryHolder {
     @Override
     public @NotNull Inventory getInventory() {
         return this.inventory;
-    }
-
-    public int incrementStateId() {
-        this.stateId = this.stateId + 1 & 32767;
-        return this.stateId;
     }
 }
