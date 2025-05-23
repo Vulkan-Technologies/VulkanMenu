@@ -14,8 +14,7 @@ import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 
 @ConfigSerializable
-public record MenuItem(String id,
-                       List<Integer> slots, int priority, ItemWrapper item, @Nullable List<Action> actions,
+public record MenuItem(String id, ItemSlot slot, int priority, ItemWrapper item, @Nullable List<Action> actions,
                        @Nullable List<Action> rightClickActions,
                        @Nullable List<Action> leftClickActions,
                        @Nullable List<Action> middleClickActions,
@@ -24,11 +23,8 @@ public record MenuItem(String id,
                        @Nullable List<Requirement> viewRequirements,
                        Map<String, RequirementWrapper> clickRequirements) {
 
-    public boolean hasSlot(int slot) {
-        if (this.slots == null || this.slots.isEmpty())
-            return false;
-
-        return this.slots.contains(slot);
+    public boolean hasSlot(Player player, Menu menu, int slot) {
+        return this.slot.slots(player, menu).contains(slot);
     }
 
     public void handleClick(Player player, Menu menu, ClickType clickType) {

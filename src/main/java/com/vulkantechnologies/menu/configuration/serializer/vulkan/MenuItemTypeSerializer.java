@@ -1,7 +1,6 @@
 package com.vulkantechnologies.menu.configuration.serializer.vulkan;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import com.vulkantechnologies.menu.model.action.Action;
+import com.vulkantechnologies.menu.model.menu.ItemSlot;
 import com.vulkantechnologies.menu.model.menu.MenuItem;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
@@ -24,21 +24,7 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
 
     @Override
     public MenuItem deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
-        ConfigurationNode slotNode = node.node("slot");
-        ConfigurationNode slotsNode = node.node("slots");
-
-        List<Integer> slots = new ArrayList<>();
-        if (slotNode.virtual()) {
-            if (slotsNode.virtual()) {
-                throw new SerializationException("No slot or slots defined");
-            } else {
-                for (ConfigurationNode slot : slotsNode.childrenList()) {
-                    slots.add(slot.getInt());
-                }
-            }
-        } else {
-            slots.add(slotNode.getInt());
-        }
+        ItemSlot slot = node.node("slot").get(ItemSlot.class);
 
         int priority = node.node("priority").getInt(0);
 
@@ -56,7 +42,7 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
         Map<String, RequirementWrapper> clickRequirements = this.deserializeRequirements(node, "click-requirements");
         return new MenuItem(
                 node.key().toString(),
-                slots,
+                slot,
                 priority,
                 wrapper,
                 actions,
@@ -71,7 +57,7 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
     }
 
     @Override
-    public void serialize(Type type, @Nullable MenuItem obj, ConfigurationNode node) throws SerializationException {
+    public void serialize(@NotNull Type type, @Nullable MenuItem obj, @NotNull ConfigurationNode node) throws SerializationException {
 
     }
 

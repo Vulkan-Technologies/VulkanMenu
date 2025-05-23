@@ -33,6 +33,8 @@ public class Menu implements InventoryHolder {
     private final ItemStack[] cachedItems;
     private int stateId;
 
+    // TODO: Implement menu item caching
+
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
         this.player = player;
@@ -117,7 +119,7 @@ public class Menu implements InventoryHolder {
 
         // Search by slot
         for (MenuItem item : this.items) {
-            if (item.hasSlot(slot))
+            if (item.hasSlot(this.player, this, slot))
                 menuItems.add(item);
         }
 
@@ -145,14 +147,14 @@ public class Menu implements InventoryHolder {
     public List<MenuItem> items(int slot) {
         return this.items
                 .stream()
-                .filter(item -> item.hasSlot(slot))
+                .filter(item -> item.hasSlot(this.player, this, slot))
                 .toList();
     }
 
     public Optional<MenuItem> getItem(int slot) {
         return this.items
                 .stream()
-                .filter(item -> item.hasSlot(slot))
+                .filter(item -> item.hasSlot(this.player, this, slot))
                 .findFirst();
     }
 
