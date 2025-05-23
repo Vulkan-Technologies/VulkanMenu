@@ -13,9 +13,10 @@ public record ContainsRequirement(@Single String value, String raw) implements R
 
     @Override
     public boolean test(Player player, Menu menu) {
-        String processedRaw = VulkanMenu.get().processPlaceholders(player, raw);
-        String processedValue = VulkanMenu.get().processPlaceholders(player, value);
+        String processedRaw = VulkanMenu.get().processPlaceholders(player, menu, raw);
+        String processedValue = VulkanMenu.get().processPlaceholders(player, menu, value);
 
         return processedRaw.contains(processedValue);
     }
+
 }

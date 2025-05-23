@@ -18,6 +18,7 @@ import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.listener.MarkerListener;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
+import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.service.ConfigurationService;
 import com.vulkantechnologies.menu.service.FileWatcherService;
 import com.vulkantechnologies.menu.service.MenuService;
@@ -116,6 +117,10 @@ public final class VulkanMenu extends JavaPlugin {
         this.fileWatcher.stop();
 
         this.disabled = true;
+    }
+
+    public String processPlaceholders(Player player, Menu menu, String text) {
+        return menu.injectVariable(processPlaceholders(player, text));
     }
 
     public String processPlaceholders(Player player, String text) {

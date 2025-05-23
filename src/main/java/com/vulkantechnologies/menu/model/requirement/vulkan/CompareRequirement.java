@@ -22,10 +22,10 @@ public record CompareRequirement(String raw) implements Requirement {
         if (!matcher.matches() || matcher.groupCount() != 3)
             throw new IllegalArgumentException("Invalid placeholder format: " + raw);
 
-
-        String rawStart = VulkanMenu.get().processPlaceholders(player, matcher.group(1)).trim();
+        VulkanMenu plugin = VulkanMenu.get();
+        String rawStart = plugin.processPlaceholders(player, menu, matcher.group(1)).trim();
         String operator = matcher.group(2).trim();
-        String rawEnd = VulkanMenu.get().processPlaceholders(player, matcher.group(3)).trim();
+        String rawEnd = plugin.processPlaceholders(player, menu, matcher.group(3)).trim();
 
         if (operator.equalsIgnoreCase("==")) {
             if (VariableUtils.isNumeric(rawStart) && VariableUtils.isNumeric(rawEnd))

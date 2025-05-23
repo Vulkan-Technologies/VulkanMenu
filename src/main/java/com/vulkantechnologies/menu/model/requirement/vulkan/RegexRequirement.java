@@ -15,7 +15,7 @@ public record RegexRequirement(String value) implements Requirement {
     @Override
     public boolean test(Player player, Menu menu) {
         // Process placeholders
-        String formattedValue = VulkanMenu.get().processPlaceholders(player, value);
+        String formattedValue = VulkanMenu.get().processPlaceholders(player, menu, value);
 
 
         Pattern pattern = Pattern.compile(formattedValue);
