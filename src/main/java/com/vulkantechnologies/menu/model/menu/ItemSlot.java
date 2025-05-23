@@ -13,7 +13,7 @@ public record ItemSlot(String placeholder, int slot, List<Integer> slots) {
         List<Integer> slots = new ArrayList<>();
         if (this.slots != null)
             slots.addAll(this.slots);
-        if (slot > 0)
+        if (slot >= 0)
             slots.add(slot);
         if (placeholder != null && !placeholder.isEmpty()) {
             String processedPlaceholder = VulkanMenu.get().processPlaceholders(player, menu, placeholder);

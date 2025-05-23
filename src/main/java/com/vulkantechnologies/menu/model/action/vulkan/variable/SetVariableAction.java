@@ -21,7 +21,7 @@ import redempt.crunch.functional.EvaluationEnvironment;
 @ComponentName("set-variable")
 public record SetVariableAction(@Single String name, @Single String value) implements Action {
 
-    private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0]+");
+    private static final Pattern PATTERN = Pattern.compile("[a-zA-Z]+");
 
     @Override
     public void accept(Player player, Menu menu) {
@@ -31,7 +31,6 @@ public record SetVariableAction(@Single String name, @Single String value) imple
         // Inject placeholders
         String formattedValue = VulkanMenu.get().processPlaceholders(player, value);
 
-
         // Check if the value contains any operators
         if (formattedValue.matches(".*[+\\-*/%].*")) {
             // Extract variable names
@@ -39,17 +38,13 @@ public record SetVariableAction(@Single String name, @Single String value) imple
             Matcher matcher = PATTERN.matcher(formattedValue);
             while (matcher.find()) {
                 String variableName = matcher.group();
-                System.out.println("Found variable: " + variableName);
 
                 // Check if the variable exists in the menu
-                if (menu.variable(variableName).isPresent()) {
+                if (menu.variable(variableName).isPresent())
                     variablesName.add(variableName);
-                    System.out.println("Added variable: " + variableName);
-                } else
+                else
                     throw new IllegalArgumentException("Variable not found: " + variableName);
             }
-
-            System.out.println("Variables: " + variablesName.stream().reduce("", (a, b) -> a + ", " + b));
 
             // Compile expression
             EvaluationEnvironment env = new EvaluationEnvironment();

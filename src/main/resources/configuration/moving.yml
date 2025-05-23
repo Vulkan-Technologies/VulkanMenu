@@ -1,0 +1,20 @@
+title: <gradient:aqua:blue>Look at my moving item
+size: 54
+
+variables:
+  slot: 0
+
+refresh:
+  delay: 40
+  actions:
+    - "[set-variable] slot (slot+1)"
+
+items:
+  moving:
+    slot: <variable-slot>
+    material: "bedrock"
+    name: "Moving item"
+    lore:
+      - "Did you noticed?"
+      - ""
+      - "Yes, it is moving!"

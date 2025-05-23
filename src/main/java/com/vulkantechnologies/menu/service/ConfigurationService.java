@@ -151,6 +151,7 @@ public class ConfigurationService {
 
             this.saveResource("configuration/default.yml", dataFolder.resolve("default.yml"));
             this.saveResource("configuration/variables.yml", dataFolder.resolve("variables.yml"));
+            this.saveResource("configuration/moving.yml", dataFolder.resolve("moving.yml"));
         } catch (IOException e) {
             this.plugin.getSLF4JLogger().error("Failed to create data folder", e);
         }

@@ -59,8 +59,8 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
         }
 
         // Open command validation
-        if (this.openCommand != null) {
-            if (this.openCommand.name() == null || this.openCommand.name().isEmpty()) {
+        if (this.openCommand != null && this.openCommand.name() != null) {
+            if (this.openCommand.name().isEmpty()) {
                 plugin.getLogger().warning("Menu open command name cannot be null or empty.");
                 return false;
             }
