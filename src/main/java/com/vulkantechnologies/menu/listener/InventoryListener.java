@@ -7,7 +7,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 
 import lombok.RequiredArgsConstructor;
@@ -28,12 +27,7 @@ public class InventoryListener implements Listener {
 
         int slot = e.getRawSlot();
         menu.getItem(slot)
-                .filter(item -> item.canClick(player, menu))
-                .ifPresent(item -> {
-                    for (Action action : item.actions()) {
-                        action.accept(player, menu);
-                    }
-                });
+                .ifPresent(item -> item.handleClick(player, menu, e.getClick()));
     }
 
     @EventHandler

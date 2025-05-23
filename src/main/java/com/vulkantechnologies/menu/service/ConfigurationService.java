@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.command.menu.MenuCommand;
+import com.vulkantechnologies.menu.configuration.MenuConfiguration;
 import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
 import com.vulkantechnologies.menu.exception.MenuConfigurationLoadException;
 
@@ -34,6 +35,9 @@ public class ConfigurationService {
         this.plugin.getSLF4JLogger().info("Loading menus...");
         this.menus.clear();
 
+        // Unregister commands
+        this.unregisterCommands();
+
         try (Stream<Path> pathStream = Files.walk(dataFolder)) {
             pathStream.filter(path -> path.toString().endsWith(".yml"))
                     .forEach(path -> {
@@ -47,8 +51,6 @@ public class ConfigurationService {
         } catch (IOException e) {
             this.plugin.getSLF4JLogger().error("Failed to load menus", e);
         }
-
-        this.registerCommands();
     }
 
     public MenuConfigurationFile load(Path path) throws MenuConfigurationLoadException {
@@ -59,44 +61,55 @@ public class ConfigurationService {
         try {
             file.load();
 
+            // Validate configuration
             if (file.menu() == null
                 || !file.menu().validate(this.plugin))
                 throw new MenuConfigurationLoadException("Invalid menu configuration");
 
+            // Register menu
             String id = path.getFileName().toString().replace(".yml", "");
             file.id(id);
             this.menus.put(id, file);
+
+            // Register command
+            this.registerCommand(file.menu());
         } catch (Exception e) {
             throw new MenuConfigurationLoadException("Failed to load configuration", e);
         }
         return file;
     }
 
-    public void registerCommands() {
+    public void registerCommand(MenuConfiguration configuration) {
+        if (configuration.openCommand() == null)
+            return;
+
         CommandMap commandMap = Bukkit.getCommandMap();
+        String command = configuration.openCommand().name();
+        if (command == null
+            || command.isEmpty()
+            || commandMap.getCommand(command) != null)
+            return;
 
-        for (MenuConfigurationFile value : this.menus.values()) {
-            String command = value.menu().openCommand().name();
-            if (command == null
-                || command.isEmpty()
-                || commandMap.getCommand(command) != null)
-                continue;
+        commandMap.register("vulkanmenu", new MenuCommand(this.plugin, configuration));
+    }
 
-            commandMap.register("vulkanmenu", new MenuCommand(this.plugin, value.menu()));
-        }
+    public void unregisterCommands(MenuConfiguration configuration) {
+        if (configuration.openCommand() == null)
+            return;
+
+        CommandMap commandMap = Bukkit.getCommandMap();
+        String command = configuration.openCommand().name();
+        if (command == null || command.isEmpty())
+            return;
+
+        Command cmd = commandMap.getCommand(command);
+        if (cmd != null)
+            cmd.unregister(commandMap);
     }
 
     public void unregisterCommands() {
-        CommandMap commandMap = Bukkit.getCommandMap();
-
         for (MenuConfigurationFile value : this.menus.values()) {
-            String command = value.menu().openCommand().name();
-            if (command == null || command.isEmpty())
-                continue;
-
-            Command cmd = commandMap.getCommand(command);
-            if (cmd != null)
-                cmd.unregister(commandMap);
+            this.unregisterCommands(value.menu());
         }
     }
 
@@ -105,7 +118,11 @@ public class ConfigurationService {
     }
 
     public void unregister(String id) {
-        this.menus.remove(id);
+        MenuConfigurationFile file = this.menus.remove(id);
+        if (file == null)
+            return;
+
+        this.unregisterCommands(file.menu());
     }
 
     public Optional<MenuConfigurationFile> findByPath(Path path) {
