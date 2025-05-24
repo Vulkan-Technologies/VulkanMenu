@@ -2,6 +2,9 @@ update-checker:
   enabled: true
   notification: true
 
+# If set to true, the live reload feature will be enabled by default.
+live-reload-enabled: false
+
 messages:
   # Reload
   reloading: "<gray>Reloading <aqua>VulkanMenu</aqua> configuration..."

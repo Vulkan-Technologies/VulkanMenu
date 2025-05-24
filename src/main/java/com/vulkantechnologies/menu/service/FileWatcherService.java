@@ -27,6 +27,9 @@ public class FileWatcherService {
 
     public FileWatcherService(VulkanMenu plugin) {
         this.plugin = plugin;
+
+        if (this.plugin.mainConfiguration().liveReloadEnabled())
+            this.start();
     }
 
     public void start() {

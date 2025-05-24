@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 import com.vulkantechnologies.menu.model.menu.Menu;
@@ -22,8 +23,12 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 @Getter
 public class MainConfiguration extends ConfigurationFile {
 
+    @Comment("Configuration for the update checker.")
     private UpdateChecker updateChecker;
-    private Map<String, ComponentWrapper> messages = new HashMap<>();
+    @Comment("Messages used in the plugin, keyed by their identifier.")
+    private final Map<String, ComponentWrapper> messages = new HashMap<>();
+    @Comment("If set to true, the live reload feature will be enabled by default.")
+    private boolean liveReloadEnabled;
 
     public MainConfiguration(Path path) {
         super(path);
@@ -33,6 +38,7 @@ public class MainConfiguration extends ConfigurationFile {
     public void load(CommentedConfigurationNode root) {
         try {
             this.updateChecker = root.node("update-checker").get(UpdateChecker.class);
+            this.liveReloadEnabled = root.node("live-reload-enabled").getBoolean(false);
 
             ConfigurationNode messagesNode = root.node("messages");
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : messagesNode.childrenMap().entrySet()) {
