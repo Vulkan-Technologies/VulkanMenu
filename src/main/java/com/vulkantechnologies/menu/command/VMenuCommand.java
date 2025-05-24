@@ -1,10 +1,14 @@
 package com.vulkantechnologies.menu.command;
 
+import java.io.IOException;
+import java.nio.file.Files;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.utils.DumpUtils;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
@@ -109,6 +113,37 @@ public class VMenuCommand extends BaseCommand {
                 }, () -> sender.sendMessage(Component.text("Menu " + menu + " not found.")));
     }
 
+    @Subcommand("dump")
+    @Description("Dumps the specified menu to the console.")
+    @CommandPermission("vmenu.dump")
+    @CommandCompletion("@menus")
+    @Syntax("<menu>")
+    public void onDump(CommandSender sender, String menu) {
+        this.plugin.configuration()
+                .findByName(menu)
+                .ifPresentOrElse(menuConfigurationFile -> {
+                    String id = menuConfigurationFile.id();
+                    sender.sendMessage(Component.text("Dumping menu " + id + "..."));
+
+                    try {
+                        String content = Files.readString(menuConfigurationFile.path());
+                        DumpUtils.createDump(content)
+                                .whenComplete((url, throwable) -> {
+                                    if (throwable != null) {
+                                        sender.sendMessage(Component.text("Failed to create dump: " + throwable.getMessage()));
+                                        throwable.printStackTrace();
+                                        return;
+                                    }
+
+                                    sender.sendMessage(Component.text("Dump created: " + url)
+                                            .hoverEvent(HoverEvent.showText(Component.text("Click to open the dump.")))
+                                            .clickEvent(ClickEvent.openUrl(url)));
+                                });
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to read menu file", e);
+                    }
+                }, () -> sender.sendMessage(Component.text("Menu " + menu + " not found.")));
+    }
 
     @HelpCommand
     public void doHelp(CommandSender sender, CommandHelp help) {
