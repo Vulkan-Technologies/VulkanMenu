@@ -9,9 +9,6 @@ import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.menu.CommandConfiguration;
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-
 public class MenuCommand extends Command {
 
     private final VulkanMenu plugin;
@@ -34,7 +31,7 @@ public class MenuCommand extends Command {
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be executed by a player.", NamedTextColor.RED));
+            this.plugin.mainConfiguration().sendMessage(sender, "player-only-command");
             return true;
         }
 

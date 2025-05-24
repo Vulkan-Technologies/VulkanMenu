@@ -18,6 +18,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 @CommandAlias("vmenu|vm")
 public class VMenuCommand extends BaseCommand {
@@ -55,7 +57,7 @@ public class VMenuCommand extends BaseCommand {
     @Description("Lists all available menus.")
     @CommandPermission("vmenu.list")
     public void onList(CommandSender sender) {
-        sender.sendMessage(Component.text("Available menus:", NamedTextColor.GRAY));
+        this.plugin.mainConfiguration().sendMessage(sender, "menu-list-header");
         this.plugin.configuration()
                 .menus()
                 .values()
@@ -69,10 +71,16 @@ public class VMenuCommand extends BaseCommand {
                             .appendNewline()
                             .append(Component.text("Click to open this menu.", NamedTextColor.GRAY));
 
-                    sender.sendMessage(Component.text("- ", NamedTextColor.GRAY)
-                            .append(Component.text(menu.id(), NamedTextColor.AQUA)
-                                    .hoverEvent(HoverEvent.showText(hoverText))
-                                    .clickEvent(ClickEvent.runCommand("/vmenu open " + menu.id()))));
+                    this.plugin.mainConfiguration().sendMessage(
+                            sender,
+                            "menu-list-item",
+                            Placeholder.component(
+                                    "menu",
+                                    Component.text(menu.id(), NamedTextColor.AQUA)
+                                            .hoverEvent(HoverEvent.showText(hoverText))
+                                            .clickEvent(ClickEvent.runCommand("/vmenu open " + menu.id()))
+                            )
+                    );
                 });
     }
 
@@ -80,15 +88,14 @@ public class VMenuCommand extends BaseCommand {
     @Description("Reloads the VulkanMenu configuration.")
     @CommandPermission("vmenu.reload")
     public void onReload(CommandSender sender) {
-        sender.sendMessage(Component.text("Reloading VulkanMenu..."));
+        this.plugin.mainConfiguration().sendMessage(sender, "reloading");
         try {
             this.plugin.configuration().load();
             this.plugin.mainConfiguration().load();
-            sender.sendMessage(Component.text("VulkanMenu reloaded.")
-                    .appendSpace()
-                    .append(Component.text("With " + this.plugin.configuration().menus().size() + " menus.")));
+
+            this.plugin.mainConfiguration().sendMessage(sender, "reload-success");
         } catch (Exception e) {
-            sender.sendMessage(Component.text("Failed to reload VulkanMenu: " + e.getMessage()));
+            this.plugin.mainConfiguration().sendMessage(sender, "reload-failed");
             e.printStackTrace();
         }
     }
@@ -99,19 +106,21 @@ public class VMenuCommand extends BaseCommand {
     @CommandCompletion("@menus")
     @Syntax("<menu>")
     public void onReload(CommandSender sender, String menu) {
+        TagResolver menuResolver = Placeholder.parsed("menu", menu);
+
         this.plugin.configuration()
                 .findByName(menu)
                 .ifPresentOrElse(menuConfigurationFile -> {
-                    String id = menuConfigurationFile.id();
-                    sender.sendMessage(Component.text("Reloading menu " + id + "..."));
+                    this.plugin.mainConfiguration().sendMessage(sender, "reloading-menu", menuResolver);
                     try {
                         this.plugin.configuration().load(menuConfigurationFile.path());
-                        sender.sendMessage(Component.text("Menu " + id + " reloaded."));
+
+                        this.plugin.mainConfiguration().sendMessage(sender, "reload-menu-success", menuResolver);
                     } catch (Exception e) {
-                        sender.sendMessage(Component.text("Failed to reload menu " + id + ": " + e.getMessage()));
+                        this.plugin.mainConfiguration().sendMessage(sender, "reload-menu-failed", menuResolver);
                         e.printStackTrace();
                     }
-                }, () -> sender.sendMessage(Component.text("Menu " + menu + " not found.")));
+                }, () -> this.plugin.mainConfiguration().sendMessage(sender, "menu-not-found", menuResolver));
     }
 
     @Subcommand("dump")
@@ -120,30 +129,37 @@ public class VMenuCommand extends BaseCommand {
     @CommandCompletion("@menus")
     @Syntax("<menu>")
     public void onDump(CommandSender sender, String menu) {
+        TagResolver menuResolver = Placeholder.parsed("menu", menu);
+
         this.plugin.configuration()
                 .findByName(menu)
                 .ifPresentOrElse(menuConfigurationFile -> {
-                    String id = menuConfigurationFile.id();
-                    sender.sendMessage(Component.text("Dumping menu " + id + "..."));
+                    this.plugin.mainConfiguration().sendMessage(sender, "dumping-menu", menuResolver);
 
                     try {
                         String content = Files.readString(menuConfigurationFile.path());
                         DumpUtils.createDump(content)
                                 .whenComplete((url, throwable) -> {
                                     if (throwable != null) {
-                                        sender.sendMessage(Component.text("Failed to create dump: " + throwable.getMessage()));
+                                        this.plugin.mainConfiguration().sendMessage(sender, "dump-menu-failed", menuResolver);
                                         throwable.printStackTrace();
                                         return;
                                     }
 
-                                    sender.sendMessage(Component.text("Dump created: " + url)
-                                            .hoverEvent(HoverEvent.showText(Component.text("Click to open the dump.")))
-                                            .clickEvent(ClickEvent.openUrl(url)));
+                                    this.plugin.mainConfiguration().sendMessage(
+                                            sender,
+                                            "dump-menu-success",
+                                            menuResolver,
+                                            Placeholder.component("url", Component.text(url)
+                                                    .hoverEvent(HoverEvent.showText(Component.text("Click to open the dump.")))
+                                                    .clickEvent(ClickEvent.openUrl(url)))
+                                    );
                                 });
                     } catch (IOException e) {
+                        this.plugin.mainConfiguration().sendMessage(sender, "dump-menu-failed", menuResolver);
                         throw new RuntimeException("Failed to read menu file", e);
                     }
-                }, () -> sender.sendMessage(Component.text("Menu " + menu + " not found.")));
+                }, () -> this.plugin.mainConfiguration().sendMessage(sender, "menu-not-found", menuResolver));
     }
 
     @HelpCommand

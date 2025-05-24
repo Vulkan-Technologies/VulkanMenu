@@ -7,6 +7,7 @@ import com.vulkantechnologies.menu.service.FileWatcherService;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
 @CommandAlias("vmenu|vm")
 @Subcommand("live")
@@ -20,23 +21,28 @@ public class LiveConfigurationCommand extends BaseCommand {
     @Description("Toggles the live configuration.")
     public void onToggle(CommandSender sender) {
         FileWatcherService fileWatcher = this.plugin.fileWatcher();
-        if (fileWatcher.isEnabled()) {
+
+        if (fileWatcher.isEnabled())
             fileWatcher.stop();
-            sender.sendMessage("Live configuration disabled.");
-        } else {
+        else
             fileWatcher.start();
-            sender.sendMessage("Live configuration enabled.");
-        }
+
+        this.plugin.mainConfiguration().sendMessage(
+                sender,
+                "live-reload-toggle",
+                Placeholder.component("status", this.plugin.mainConfiguration().messageAsComponent(fileWatcher.isEnabled() ? "enabled" : "disabled"))
+        );
     }
 
     @Subcommand("status")
     @Description("Shows the status of the live configuration.")
     public void onStatus(CommandSender sender) {
         FileWatcherService fileWatcher = this.plugin.fileWatcher();
-        if (fileWatcher.isEnabled()) {
-            sender.sendMessage("Live configuration is enabled.");
-        } else {
-            sender.sendMessage("Live configuration is disabled.");
-        }
+
+        this.plugin.mainConfiguration().sendMessage(
+                sender,
+                "live-reload-status",
+                Placeholder.component("status", this.plugin.mainConfiguration().messageAsComponent(fileWatcher.isEnabled() ? "enabled" : "disabled"))
+        );
     }
 }
