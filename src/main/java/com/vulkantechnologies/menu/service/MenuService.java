@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.event.VMenuCloseEvent;
 import com.vulkantechnologies.menu.event.VMenuOpenEvent;
 import com.vulkantechnologies.menu.model.action.Action;

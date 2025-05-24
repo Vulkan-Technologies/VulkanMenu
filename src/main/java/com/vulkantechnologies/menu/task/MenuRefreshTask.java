@@ -5,7 +5,7 @@ import java.util.List;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 

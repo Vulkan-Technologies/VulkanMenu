@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.utils.DumpUtils;
 
 import co.aikar.commands.BaseCommand;
@@ -83,6 +83,7 @@ public class VMenuCommand extends BaseCommand {
         sender.sendMessage(Component.text("Reloading VulkanMenu..."));
         try {
             this.plugin.configuration().load();
+            this.plugin.mainConfiguration().load();
             sender.sendMessage(Component.text("VulkanMenu reloaded.")
                     .appendSpace()
                     .append(Component.text("With " + this.plugin.configuration().menus().size() + " menus.")));

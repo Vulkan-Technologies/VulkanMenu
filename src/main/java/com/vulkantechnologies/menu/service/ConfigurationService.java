@@ -16,8 +16,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.command.menu.MenuCommand;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
-import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfigurationFile;
 import com.vulkantechnologies.menu.exception.MenuConfigurationLoadException;
 
 import lombok.RequiredArgsConstructor;
@@ -40,6 +40,7 @@ public class ConfigurationService {
 
         try (Stream<Path> pathStream = Files.walk(dataFolder)) {
             pathStream.filter(path -> path.toString().endsWith(".yml"))
+                    .filter(path -> !path.getFileName().toString().equals("config.yml"))
                     .forEach(path -> {
                         try {
                             this.load(path);
@@ -149,9 +150,12 @@ public class ConfigurationService {
         try {
             Files.createDirectories(dataFolder);
 
-            this.saveResource("configuration/default.yml", dataFolder.resolve("default.yml"));
-            this.saveResource("configuration/variables.yml", dataFolder.resolve("variables.yml"));
-            this.saveResource("configuration/moving.yml", dataFolder.resolve("moving.yml"));
+            Path menusFolder = dataFolder.resolve("menus");
+
+            this.saveResource("configuration/config.yml", dataFolder.resolve("config.yml"));
+            this.saveResource("configuration/menus/default.yml", menusFolder.resolve("default.yml"));
+            this.saveResource("configuration/menus/variables.yml", menusFolder.resolve("variables.yml"));
+            this.saveResource("configuration/menus/moving.yml", menusFolder.resolve("moving.yml"));
         } catch (IOException e) {
             this.plugin.getSLF4JLogger().error("Failed to create data folder", e);
         }
@@ -160,6 +164,15 @@ public class ConfigurationService {
     private void saveResource(String resourcePath, Path path) {
         if (Files.exists(path))
             return;
+
+        if (!Files.isDirectory(path.getParent())) {
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                this.plugin.getSLF4JLogger().error("Failed to create directories for resource: {}", resourcePath, e);
+                return;
+            }
+        }
 
         try (InputStream inputStream = this.plugin.getResource(resourcePath)) {
             if (inputStream == null) {

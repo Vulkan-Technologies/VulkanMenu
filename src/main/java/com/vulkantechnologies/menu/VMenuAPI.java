@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.bukkit.entity.Player;
 
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
-import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfigurationFile;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.menu.Menu;

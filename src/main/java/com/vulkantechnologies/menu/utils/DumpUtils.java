@@ -36,6 +36,15 @@ public class DumpUtils {
         });
     }
 
+    public static String get(String reqURL) throws IOException {
+        URL url = new URL(reqURL);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", getUserAgent());
+
+        return connectionToString(con);
+    }
+
     public static String post(String reqURL, String postContent) throws IOException {
         URL url = new URL(reqURL);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

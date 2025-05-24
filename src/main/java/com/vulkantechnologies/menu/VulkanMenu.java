@@ -14,15 +14,14 @@ import com.vulkantechnologies.menu.command.LiveConfigurationCommand;
 import com.vulkantechnologies.menu.command.VMenuCommand;
 import com.vulkantechnologies.menu.command.completion.MenuCompletionHandler;
 import com.vulkantechnologies.menu.command.context.MenuContextResolver;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.MainConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.listener.MarkerListener;
+import com.vulkantechnologies.menu.listener.UpdateListener;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.menu.Menu;
-import com.vulkantechnologies.menu.service.ConfigurationService;
-import com.vulkantechnologies.menu.service.FileWatcherService;
-import com.vulkantechnologies.menu.service.MenuService;
-import com.vulkantechnologies.menu.service.PluginHookService;
+import com.vulkantechnologies.menu.service.*;
 import com.vulkantechnologies.menu.task.MenuRefreshTask;
 
 import co.aikar.commands.PaperCommandManager;
@@ -40,6 +39,7 @@ public final class VulkanMenu extends JavaPlugin {
 
     // Configuration
     private ConfigurationService configuration;
+    private MainConfiguration mainConfiguration;
 
     // Placeholders
     private final Set<PlaceholderProcessor> placeholderProcessors = new HashSet<>();
@@ -48,6 +48,7 @@ public final class VulkanMenu extends JavaPlugin {
     private PluginHookService pluginHooks;
     private MenuService menu;
     private FileWatcherService fileWatcher;
+    private UpdateService updates;
 
     // Task
     private MenuRefreshTask refreshTask;
@@ -69,10 +70,15 @@ public final class VulkanMenu extends JavaPlugin {
         this.configuration = new ConfigurationService(this);
         this.configuration.load();
 
+        // Main configuration
+        this.mainConfiguration = new MainConfiguration(this.getDataPath().resolve("config.yml"));
+        this.mainConfiguration.load();
+
         // Services
         this.pluginHooks = new PluginHookService(this);
         this.menu = new MenuService(this);
         this.fileWatcher = new FileWatcherService(this);
+        this.updates = new UpdateService(this);
 
         // Commands
         this.commands = new PaperCommandManager(this);
@@ -85,7 +91,8 @@ public final class VulkanMenu extends JavaPlugin {
         // Listeners
         List.of(
                 new InventoryListener(this),
-                new MarkerListener(this)
+                new MarkerListener(this),
+                new UpdateListener(this)
         ).forEach(listener -> this.getServer().getPluginManager().registerEvents(listener, this));
 
         // Hooks
@@ -100,10 +107,13 @@ public final class VulkanMenu extends JavaPlugin {
         this.metrics = new Metrics(this, 25916);
         this.metrics.addCustomChart(new SingleLineChart("menu_count", () -> this.menu.menus().size()));
 
-        instance = this;
+        // Update checker
+        Bukkit.getScheduler().runTaskLater(this, () -> this.updates.checkForUpdates(), 20L);
 
+        // API
         VMenuAPI.init(this);
 
+        instance = this;
         this.enabled = true;
     }
 

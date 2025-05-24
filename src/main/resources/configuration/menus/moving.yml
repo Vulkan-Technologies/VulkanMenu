@@ -8,7 +8,7 @@ refresh:
   delay: 0
   interval: 40
   actions:
-    - "[set-variable] slot (slot+1)"0-
+    - "[set-variable] slot (slot+1)"
 
 items:
   moving:

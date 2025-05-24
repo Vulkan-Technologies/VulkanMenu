@@ -1,9 +1,11 @@
-package com.vulkantechnologies.menu.configuration;
+package com.vulkantechnologies.menu.configuration.menu;
 
 import java.nio.file.Path;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
+
+import com.vulkantechnologies.menu.configuration.ConfigurationFile;
 
 import lombok.Getter;
 import lombok.Setter;

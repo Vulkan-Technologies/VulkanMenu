@@ -1,4 +1,4 @@
-package com.vulkantechnologies.menu.configuration;
+package com.vulkantechnologies.menu.configuration.menu;
 
 import java.util.List;
 import java.util.Map;

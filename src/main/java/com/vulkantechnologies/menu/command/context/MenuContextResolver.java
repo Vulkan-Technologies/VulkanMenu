@@ -1,8 +1,8 @@
 package com.vulkantechnologies.menu.command.context;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
-import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfigurationFile;
 
 import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.InvalidCommandArgument;
