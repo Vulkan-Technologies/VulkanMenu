@@ -21,7 +21,7 @@ public record ComponentWrapper(String content) {
     }
 
     public Component build(Player player, Menu menu) {
-        String formatted = VulkanMenu.get().processPlaceholders(player, this.content);
+        String formatted = VulkanMenu.get().processPlaceholders(player, menu, this.content);
         return MINI_MESSAGE.deserialize(formatted, menu.variableResolver());
     }
 
