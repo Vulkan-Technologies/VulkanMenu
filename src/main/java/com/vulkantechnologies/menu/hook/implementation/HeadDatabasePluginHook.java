@@ -19,11 +19,6 @@ public class HeadDatabasePluginHook implements PluginHook {
     }
 
     @Override
-    public void onFailure() {
-
-    }
-
-    @Override
     public String pluginName() {
         return "HeadDatabase";
     }

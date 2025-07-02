@@ -29,7 +29,7 @@ public class ConfigurationService {
     private final Map<String, MenuConfigurationFile> menus = new HashMap<>();
 
     public void load() {
-        Path dataFolder = this.plugin.getDataPath();
+        Path dataFolder = this.plugin.getDataFolder().toPath();
         this.createDataFolder();
 
         this.plugin.getSLF4JLogger().info("Loading menus...");
@@ -143,7 +143,7 @@ public class ConfigurationService {
     }
 
     private void createDataFolder() {
-        Path dataFolder = this.plugin.getDataPath();
+        Path dataFolder = this.plugin.getDataFolder().toPath();
         if (Files.exists(dataFolder))
             return;
 

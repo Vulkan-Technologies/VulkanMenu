@@ -35,7 +35,7 @@ public class FileWatcherService {
     public void start() {
         try {
             this.watchService = FileSystems.getDefault().newWatchService();
-            this.key = this.plugin.getDataPath()
+            this.key = this.plugin.getDataFolder().toPath()
                     .register(
                             watchService,
                             StandardWatchEventKinds.ENTRY_CREATE,
@@ -53,7 +53,7 @@ public class FileWatcherService {
                                 if (this.fileCache.containsKey(fileName))
                                     continue;
                                 this.fileCache.put(fileName, true);
-                                Path path = this.plugin.getDataPath().resolve(fileName);
+                                Path path = this.plugin.getDataFolder().toPath().resolve(fileName);
 
                                 this.plugin.configuration()
                                         .findByPath(path)

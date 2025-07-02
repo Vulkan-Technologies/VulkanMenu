@@ -20,11 +20,6 @@ public class OraxenPluginHook implements PluginHook {
     }
 
     @Override
-    public void onFailure() {
-        this.plugin.getSLF4JLogger().warn("Oraxen plugin not found, some features may not work.");
-    }
-
-    @Override
     public String pluginName() {
         return "Oraxen";
     }

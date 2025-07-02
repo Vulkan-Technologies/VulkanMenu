@@ -71,7 +71,7 @@ public final class VulkanMenu extends JavaPlugin {
         this.configuration.load();
 
         // Main configuration
-        this.mainConfiguration = new MainConfiguration(this.getDataPath().resolve("config.yml"));
+        this.mainConfiguration = new MainConfiguration(this.getDataFolder().toPath().resolve("config.yml"));
         this.mainConfiguration.load();
 
         // Services

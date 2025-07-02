@@ -20,11 +20,6 @@ public class NexoPluginHook implements PluginHook {
     }
 
     @Override
-    public void onFailure() {
-        this.plugin.getSLF4JLogger().warn("Failed to hook into Nexo!");
-    }
-
-    @Override
     public String pluginName() {
         return "Nexo";
     }

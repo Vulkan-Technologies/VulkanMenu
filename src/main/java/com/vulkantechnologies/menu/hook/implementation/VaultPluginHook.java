@@ -58,12 +58,6 @@ public class VaultPluginHook implements PluginHook {
     }
 
     @Override
-    public void onFailure() {
-        this.plugin.getSLF4JLogger().error("Failed to hook into Vault!");
-        this.plugin.getSLF4JLogger().warn("\"money\" requirements will not work!");
-    }
-
-    @Override
     public String pluginName() {
         return "Vault";
     }
