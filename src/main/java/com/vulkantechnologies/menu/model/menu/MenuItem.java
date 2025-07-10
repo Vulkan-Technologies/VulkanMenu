@@ -47,11 +47,12 @@ public record MenuItem(String id, ItemSlot slot, int priority, ItemWrapper item,
         }
 
         // Requirements
-        if (clickRequirements.values()
-                .stream()
-                .anyMatch(requirement -> !requirement.test(player, menu)))
+        if (!this.canClick(player, menu)) {
+            System.out.println("CLICK REQUIREMENTS NOT MET for " + this.id);
             return;
+        }
 
+        System.out.println("CLICK REQUIREMENTS MET for " + this.id);
         for (Action action : actions) {
             action.accept(player, menu);
         }
@@ -63,7 +64,7 @@ public record MenuItem(String id, ItemSlot slot, int priority, ItemWrapper item,
 
         return this.clickRequirements.values()
                 .stream()
-                .anyMatch(requirement -> requirement.test(player, menu));
+                .allMatch(requirement -> requirement.test(player, menu));
     }
 
     public boolean shouldShow(Player player, Menu menu) {
@@ -72,6 +73,6 @@ public record MenuItem(String id, ItemSlot slot, int priority, ItemWrapper item,
 
         return this.viewRequirements
                 .stream()
-                .anyMatch(requirement -> requirement.test(player, menu));
+                .allMatch(requirement -> requirement.test(player, menu));
     }
 }

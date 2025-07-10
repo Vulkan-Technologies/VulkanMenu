@@ -18,11 +18,13 @@ public record CompareRequirement(String raw) implements Requirement {
 
     @Override
     public boolean test(Player player, Menu menu) {
+        VulkanMenu plugin = VulkanMenu.get();
+        String raw = plugin.processPlaceholders(player, menu, this.raw).trim();
+
         Matcher matcher = PATTERN.matcher(raw);
         if (!matcher.matches() || matcher.groupCount() != 3)
             throw new IllegalArgumentException("Invalid placeholder format: " + raw);
 
-        VulkanMenu plugin = VulkanMenu.get();
         String rawStart = plugin.processPlaceholders(player, menu, matcher.group(1)).trim();
         String operator = matcher.group(2).trim();
         String rawEnd = plugin.processPlaceholders(player, menu, matcher.group(3)).trim();
