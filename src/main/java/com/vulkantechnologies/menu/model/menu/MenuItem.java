@@ -48,11 +48,9 @@ public record MenuItem(String id, ItemSlot slot, int priority, ItemWrapper item,
 
         // Requirements
         if (!this.canClick(player, menu)) {
-            System.out.println("CLICK REQUIREMENTS NOT MET for " + this.id);
             return;
         }
 
-        System.out.println("CLICK REQUIREMENTS MET for " + this.id);
         for (Action action : actions) {
             action.accept(player, menu);
         }
