@@ -45,12 +45,14 @@ public class MenuService {
             this.menus.add(menu);
 
             // Open
-            player.openInventory(menu.getInventory());
+            Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                player.openInventory(menu.getInventory());
 
-            // Actions
-            List<Action> openActions = configuration.openActions();
-            if (openActions != null)
-                openActions.forEach(action -> action.accept(player, menu));
+                // Actions
+                List<Action> openActions = configuration.openActions();
+                if (openActions != null)
+                    openActions.forEach(action -> action.accept(player, menu));
+            }, 1L);
         });
     }
 

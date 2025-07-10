@@ -38,11 +38,11 @@ public record ItemSlot(String placeholder, int slot, List<Integer> slots) {
     }
 
     public static ItemSlot empty() {
-        return new ItemSlot(null, 0, null);
+        return new ItemSlot(null, -1, null);
     }
 
     public static ItemSlot of(String placeholder) {
-        return new ItemSlot(placeholder, 0, null);
+        return new ItemSlot(placeholder, -1, null);
     }
 
     public static ItemSlot of(int slot) {
@@ -50,6 +50,6 @@ public record ItemSlot(String placeholder, int slot, List<Integer> slots) {
     }
 
     public static ItemSlot of(List<Integer> slots) {
-        return new ItemSlot(null, 0, slots);
+        return new ItemSlot(null, -1, slots);
     }
 }
