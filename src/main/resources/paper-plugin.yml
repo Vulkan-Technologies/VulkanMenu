@@ -1,0 +1,28 @@
+name: VulkanMenu
+version: ${project.version}
+main: com.vulkantechnologies.menu.VulkanMenu
+description: ${project.description}
+api-version: '1.20'
+author: Vulkan Technologies
+bootstrapper: com.vulkantechnologies.menu.VulkanMenuBootstrap
+loader: com.vulkantechnologies.menu.VulkanMenuLoader
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: AFTER
+      required: false
+    Vault:
+      load: AFTER
+      required: false
+    ItemsAdder:
+      load: AFTER
+      required: false
+    Nexo:
+      load: AFTER
+      required: false
+    packetevents:
+      load: AFTER
+      required: false
+    HeadDatabase:
+      load: AFTER
+      required: false

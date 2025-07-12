@@ -1,7 +1,9 @@
 name: VulkanMenu
 version: ${project.version}
 main: com.vulkantechnologies.menu.VulkanMenu
+description: ${project.description}
 api-version: '1.20'
+author: Vulkan Technologies
 libraries:
   - org.spongepowered:configurate-yaml:${configurate.version}
 softdepend:
