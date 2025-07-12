@@ -44,8 +44,6 @@ public class MenuRefreshTask extends BukkitRunnable {
             }
 
             menu.refresh();
-
-            menu.lastRefreshTime(currentTime);
         }
     }
 }

@@ -84,7 +84,7 @@ public class Menu implements InventoryHolder {
             this.setItem(slot, itemStack);
         }
 
-        player.updateInventory();
+        this.lastRefreshTime = System.currentTimeMillis();
     }
 
     public List<ItemStack> build() {
