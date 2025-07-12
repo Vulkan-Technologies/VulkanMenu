@@ -13,4 +13,5 @@ public record RefreshSlotAction(int slot) implements Action {
     public void accept(Player player, Menu menu) {
         menu.refresh(slot);
     }
+
 }

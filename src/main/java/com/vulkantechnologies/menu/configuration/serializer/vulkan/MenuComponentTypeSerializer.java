@@ -119,82 +119,87 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
     }
 
     private Optional<WrappedConstructor> findSuitableConstructor(Class<?> componentClass) {
-        Constructor<?> constructor = Arrays.stream(componentClass.getDeclaredConstructors())
-                .filter(c -> Arrays.stream(c.getGenericParameterTypes())
-                        .allMatch(paramType -> {
-                            Class<?> rawType = paramType instanceof ParameterizedType
-                                    ? (Class<?>) ((ParameterizedType) paramType).getRawType()
-                                    : (Class<?>) paramType;
+        Constructor<?>[] constructors = componentClass.getDeclaredConstructors();
 
-                            return Registries.COMPACT_ADAPTER.findEntry(deserializer -> {
-                                if (deserializer.type().equals(rawType))
-                                    return true;
+        for (Constructor<?> constructor : constructors) {
+            Type[] parameterTypes = constructor.getGenericParameterTypes();
 
-                                Class<?> genericType = ReflectionUtils.getGenericType(paramType);
-                                if (genericType != null)
-                                    return deserializer.type().equals(genericType);
+            boolean allMatch = true;
+            for (Type parameterType : parameterTypes) {
+                Class<?> rawType = getRawType(parameterType);
+                Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
 
-                                return false;
-                            }).isPresent();
-                        }))
-                .findFirst()
-                .orElse(null);
-        if (constructor == null)
-            return Optional.empty();
+                boolean found = Registries.COMPACT_ADAPTER.findEntry(deserializer ->
+                        matchesType(deserializer.type(), rawType, genericType)
+                ).isPresent();
 
-        int index = 0;
-        Annotation[][] annotations = constructor.getParameterAnnotations();
-        WrappedConstructor wrappedConstructor = new WrappedConstructor(componentClass, constructor);
-        for (Type parameterType : constructor.getGenericParameterTypes()) {
-            Class<?> rawType = parameterType instanceof ParameterizedType
-                    ? (Class<?>) ((ParameterizedType) parameterType).getRawType()
-                    : (Class<?>) parameterType;
+                if (!found) {
+                    allMatch = false;
+                    break;
+                }
+            }
 
-            Annotation[] parameterAnnotations = annotations[index++];
+            if (!allMatch) continue;
 
-            Registries.COMPACT_ADAPTER
-                    .findEntry(deserializer -> {
-                        if (deserializer.type().equals(rawType)
-                            || deserializer.type().equals(getWrapperType(rawType)))
-                            return true;
+            // Valid constructor found
+            Annotation[][] annotations = constructor.getParameterAnnotations();
+            WrappedConstructor wrappedConstructor = new WrappedConstructor(componentClass, constructor);
 
-                        Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
-                        if (genericType != null)
-                            return deserializer.type().equals(genericType);
-                        return false;
-                    }).ifPresent(deserializer -> {
-                        if (deserializer.type().equals(rawType)) {
-                            wrappedConstructor.parameters().add(WrappedConstructorParameter.of(rawType, parameterAnnotations, deserializer));
-                            return;
-                        }
+            for (int i = 0; i < parameterTypes.length; i++) {
+                Type parameterType = parameterTypes[i];
+                Class<?> rawType = getRawType(parameterType);
+                Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
+                Annotation[] paramAnnotations = annotations[i];
 
-                        Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
-                        if (genericType != null)
-                            wrappedConstructor.parameters().add(WrappedConstructorParameter.of(rawType, parameterAnnotations, deserializer, genericType));
-                    });
+                Registries.COMPACT_ADAPTER.findEntry(deserializer ->
+                        matchesType(deserializer.type(), rawType, genericType)
+                ).ifPresent(deserializer -> {
+                    if (deserializer.type().equals(rawType)) {
+                        wrappedConstructor.parameters().add(
+                                WrappedConstructorParameter.of(rawType, paramAnnotations, deserializer)
+                        );
+                    } else {
+                        wrappedConstructor.parameters().add(
+                                WrappedConstructorParameter.of(rawType, paramAnnotations, deserializer, genericType)
+                        );
+                    }
+                });
+            }
+
+            return Optional.of(wrappedConstructor);
         }
-        return Optional.of(wrappedConstructor);
+
+        return Optional.empty();
+    }
+
+    private boolean matchesType(Class<?> candidate, Class<?> raw, Class<?> generic) {
+        return candidate.equals(raw)
+               || candidate.equals(getWrapperType(raw))
+               || candidate.equals(generic);
+    }
+
+    private Class<?> getRawType(Type type) {
+        if (type instanceof ParameterizedType) {
+            Type raw = ((ParameterizedType) type).getRawType();
+            if (raw instanceof Class<?>) {
+                return (Class<?>) raw;
+            }
+        } else if (type instanceof Class<?>) {
+            return (Class<?>) type;
+        }
+        return Object.class; // Fallback
     }
 
     private Class<?> getWrapperType(Class<?> type) {
-        if (type.equals(Integer.class))
-            return int.class;
-        if (type.equals(Long.class))
-            return long.class;
-        if (type.equals(Double.class))
-            return double.class;
-        if (type.equals(Float.class))
-            return float.class;
-        if (type.equals(Short.class))
-            return short.class;
-        if (type.equals(Byte.class))
-            return byte.class;
-        if (type.equals(Character.class))
-            return char.class;
-        if (type.equals(Boolean.class))
-            return boolean.class;
+        if (type == int.class) return Integer.class;
+        if (type == long.class) return Long.class;
+        if (type == double.class) return Double.class;
+        if (type == float.class) return Float.class;
+        if (type == short.class) return Short.class;
+        if (type == byte.class) return Byte.class;
+        if (type == char.class) return Character.class;
+        if (type == boolean.class) return Boolean.class;
         return type;
     }
-
 
 }
