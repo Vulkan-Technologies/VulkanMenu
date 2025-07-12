@@ -21,7 +21,7 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
                                 Map<String, MenuItem> items,
                                 @Nullable List<Action> openActions, @Nullable List<Action> closeActions,
                                 @Nullable Map<String, RequirementWrapper> openRequirements,
-                                Map<String, String> variables, Refresh refresh) {
+                                Map<String, String> variables, @Nullable Refresh refresh) {
 
     @ConfigSerializable
     public record Refresh(int interval, int delay, List<Action> actions) {

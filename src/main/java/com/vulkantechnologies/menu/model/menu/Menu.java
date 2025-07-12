@@ -36,8 +36,6 @@ public class Menu implements InventoryHolder {
     private long creationTime;
     private long lastRefreshTime;
 
-    // TODO: Implement menu item caching
-
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
         this.player = player;
@@ -85,39 +83,45 @@ public class Menu implements InventoryHolder {
             ItemStack itemStack = items.get(slot);
             this.setItem(slot, itemStack);
         }
+
+        player.updateInventory();
     }
 
     public List<ItemStack> build() {
-        List<ItemStack> items = new ArrayList<>();
-
         int size = this.configuration.size();
-        Arrays.fill(this.cachedItems, new ItemStack(Material.AIR));
+        int totalSize = size + 36;
+
+        List<ItemStack> items = new ArrayList<>(totalSize);
+        ItemStack air = new ItemStack(Material.AIR);
+
+        Arrays.fill(this.cachedItems, air);
+
+        long startTime = System.currentTimeMillis();
 
         // Top inventory
         for (int i = 0; i < size; i++) {
-            ItemStack itemStack = this.getShownItem(i)
-                    .map(item -> item.item().build(player, this))
-                    .orElse(new ItemStack(Material.AIR));
-            items.add(itemStack);
-            this.setItem(i, itemStack);
+            MenuItem shown = this.getShownItem(i).orElse(null);
+            ItemStack stack = (shown != null) ? shown.item().build(player, this) : air;
 
-            // Cache the item
-            this.cachedItems[i] = itemStack;
+            items.add(stack);
+            this.setItem(i, stack);
+            this.cachedItems[i] = stack;
         }
 
-        for (int i = size; i < size + 36; i++) {
-            this.getShownItem(i)
-                    .filter(item -> item.shouldShow(player, this))
-                    .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
-                            () -> items.add(new ItemStack(Material.AIR)));
+        // Bottom inventory
+        for (int i = size; i < totalSize; i++) {
+            MenuItem shown = this.getShownItem(i).orElse(null);
+            ItemStack stack = (shown != null && shown.shouldShow(player, this))
+                    ? shown.item().build(player, this)
+                    : air;
 
-            // Cache the item
-            this.cachedItems[i] = items.get(i);
+            items.add(stack);
+            this.cachedItems[i] = stack;
         }
-
 
         return items;
     }
+
 
     public Optional<MenuItem> getShownItem(int slot) {
         List<MenuItem> menuItems = new ArrayList<>();
