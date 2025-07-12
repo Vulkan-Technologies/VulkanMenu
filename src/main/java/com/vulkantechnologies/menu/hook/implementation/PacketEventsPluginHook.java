@@ -20,11 +20,6 @@ public class PacketEventsPluginHook implements PluginHook {
     }
 
     @Override
-    public void onFailure() {
-        this.plugin.getSLF4JLogger().warn("PacketEvents plugin hook failed to load.");
-    }
-
-    @Override
     public String pluginName() {
         return "packetevents";
     }

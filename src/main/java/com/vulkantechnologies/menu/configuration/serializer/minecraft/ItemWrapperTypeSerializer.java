@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vulkantechnologies.menu.utils.Version;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -78,14 +79,20 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
         boolean unbreakable = node.node("unbreakable").getBoolean();
         meta.setUnbreakable(unbreakable);
 
-        // Max stack size
-        int maxStackSize = node.node("max-stack-size").getInt(-1);
-        if (maxStackSize > 0)
-            meta.setMaxStackSize(maxStackSize);
+        if (Version.CURRENT.more(Version.V_1_20_5)) {
+            // Max stack size
+            int maxStackSize = node.node("max-stack-size").getInt(-1);
+            if (maxStackSize > 0)
+                meta.setMaxStackSize(maxStackSize);
 
-        // Hide tooltip
-        boolean hideTooltip = node.node("hide-tooltip").getBoolean();
-        meta.setHideTooltip(hideTooltip);
+            // Hide tooltip
+            boolean hideTooltip = node.node("hide-tooltip").getBoolean();
+            meta.setHideTooltip(hideTooltip);
+
+            // Enchantments glint override
+            boolean enchantmentGlintOverride = node.node("enchantment-glint-override").getBoolean();
+            meta.setEnchantmentGlintOverride(enchantmentGlintOverride);
+        }
 
         // Custom model data
         int customModelData = node.node("custom-model-data").getInt();
@@ -112,10 +119,6 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
         // Version
         int version = node.node("version").getInt();
         meta.setVersion(version);
-
-        // Enchantments glint override
-        boolean enchantmentGlintOverride = node.node("enchantment-glint-override").getBoolean();
-        meta.setEnchantmentGlintOverride(enchantmentGlintOverride);
 
         item.setItemMeta(meta);
 

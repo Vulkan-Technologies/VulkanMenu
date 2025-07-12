@@ -63,9 +63,11 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
 
     private Map<String, RequirementWrapper> deserializeRequirements(ConfigurationNode node, String id) throws SerializationException {
         Map<String, RequirementWrapper> requirements = new HashMap<>();
-        for (ConfigurationNode requirement : node.node(id).childrenList()) {
-            String name = requirement.key().toString();
-            RequirementWrapper wrapper = requirement.get(RequirementWrapper.class);
+        ConfigurationNode parent = node.node(id);
+        for (Map.Entry<Object, ? extends ConfigurationNode> entry : parent.childrenMap().entrySet()) {
+            String name = entry.getKey().toString();
+            ConfigurationNode reqNode = entry.getValue();
+            RequirementWrapper wrapper = reqNode.get(RequirementWrapper.class);
             if (wrapper != null) {
                 requirements.put(name, wrapper);
             }
