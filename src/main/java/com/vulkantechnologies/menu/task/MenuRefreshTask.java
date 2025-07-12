@@ -20,16 +20,17 @@ public class MenuRefreshTask extends BukkitRunnable {
     public void run() {
         List<Menu> menus = this.plugin.menu().menus();
         for (Menu menu : menus) {
+
             MenuConfiguration configuration = menu.configuration();
             MenuConfiguration.Refresh refresh = configuration.refresh();
-            if (refresh == null)
+            if (refresh == null || !refresh.isValid())
                 continue;
 
             long currentTime = System.currentTimeMillis();
             if (refresh.hasDelay()
                 && currentTime - menu.creationTime() < refresh.delay() * 50L)
                 continue;
-            
+
             long elapsedTimeSinceLastRefresh = currentTime - menu.lastRefreshTime();
             if (refresh.hasInterval()
                 && elapsedTimeSinceLastRefresh < refresh.interval() * 50L)
@@ -46,6 +47,5 @@ public class MenuRefreshTask extends BukkitRunnable {
 
             menu.lastRefreshTime(currentTime);
         }
-
     }
 }

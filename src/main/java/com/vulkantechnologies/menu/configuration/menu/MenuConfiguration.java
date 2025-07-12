@@ -26,6 +26,10 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
     @ConfigSerializable
     public record Refresh(int interval, int delay, List<Action> actions) {
 
+        public boolean isValid() {
+            return (this.interval > 0 || this.delay > 0) && (this.actions != null && !this.actions.isEmpty());
+        }
+
         public boolean hasInterval() {
             return this.interval > 0;
         }
