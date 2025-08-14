@@ -1,5 +1,7 @@
 package com.vulkantechnologies.menu.command.menu;
 
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,14 +14,12 @@ import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 public class MenuCommand extends Command {
 
     private final VulkanMenu plugin;
-    private final MenuConfiguration configuration;
+    private final String id;
 
-    public MenuCommand(VulkanMenu plugin, MenuConfiguration configuration) {
-        super(configuration.openCommand().name());
+    public MenuCommand(VulkanMenu plugin, String id, CommandConfiguration command) {
+        super(command.name());
+        this.id = id;
         this.plugin = plugin;
-        this.configuration = configuration;
-
-        CommandConfiguration command = configuration.openCommand();
         if (command.hasAliases())
             this.setAliases(command.aliases());
         if (command.hasDescription())
@@ -34,8 +34,11 @@ public class MenuCommand extends Command {
             this.plugin.mainConfiguration().sendMessage(sender, "player-only-command");
             return true;
         }
-
-        this.plugin.menu().openMenu(player, this.configuration);
+        this.plugin.configuration().findByName(this.id).ifPresentOrElse((configFile) -> {
+            this.plugin.menu().openMenu(player, configFile.menu());
+        }, () -> {
+            this.plugin.mainConfiguration().sendMessage(player, "menu-not-found", Placeholder.parsed("menu", this.id));
+        });
         return true;
     }
 }
