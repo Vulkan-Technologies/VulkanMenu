@@ -15,5 +15,6 @@ public class RefreshAction implements Action {
     @Override
     public void accept(Player player, Menu menu) {
         menu.refresh();
+        menu.refreshTitle(player);
     }
 }

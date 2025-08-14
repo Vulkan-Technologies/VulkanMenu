@@ -3,11 +3,15 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.vulkantechnologies.menu.utils.InventoryUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -23,6 +27,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 @Data
 public class Menu implements InventoryHolder {
+
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     private final UUID uniqueId;
     private final Player player;
@@ -41,15 +47,15 @@ public class Menu implements InventoryHolder {
         this.player = player;
         this.configuration = configuration;
         this.variables = new CopyOnWriteArrayList<>();
-        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
-        this.items = new ArrayList<>(configuration.items().values());
-        this.cachedItems = new ItemStack[configuration.size() + 36];
-
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
 
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
+
+        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
+        this.items = new ArrayList<>(configuration.items().values());
+        this.cachedItems = new ItemStack[configuration.size() + 36];
 
         this.creationTime = System.currentTimeMillis();
         this.lastRefreshTime = System.currentTimeMillis();
@@ -73,6 +79,11 @@ public class Menu implements InventoryHolder {
             this.setItem(slot, itemStack);
             this.cachedItems[slot] = itemStack;
         });
+    }
+
+    public void refreshTitle(Player player) {
+        Component title = this.configuration.title().build(player, this);
+        InventoryUtil.setTitle(player, LEGACY_SERIALIZER.serialize(title));
     }
 
     public void refresh() {

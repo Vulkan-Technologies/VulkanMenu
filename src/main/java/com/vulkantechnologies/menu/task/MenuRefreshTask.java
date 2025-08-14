@@ -2,6 +2,8 @@ package com.vulkantechnologies.menu.task;
 
 import java.util.List;
 
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
@@ -44,6 +46,12 @@ public class MenuRefreshTask extends BukkitRunnable {
             }
 
             menu.refresh();
+            for (HumanEntity viewer : menu.getInventory().getViewers()) {
+                if(!(viewer instanceof Player player)) {
+                    continue;
+                }
+                menu.refreshTitle(player);
+            }
         }
     }
 }

@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
@@ -47,7 +51,7 @@ public class MenuService {
             // Open
             Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                 player.openInventory(menu.getInventory());
-
+                menu.refreshTitle(player);
                 // Actions
                 List<Action> openActions = configuration.openActions();
                 if (openActions != null)
