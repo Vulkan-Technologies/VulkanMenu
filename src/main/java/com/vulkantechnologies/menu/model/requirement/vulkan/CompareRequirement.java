@@ -14,7 +14,7 @@ import com.vulkantechnologies.menu.utils.VariableUtils;
 @ComponentName("compare")
 public record CompareRequirement(String raw) implements Requirement {
 
-    public static final Pattern PATTERN = Pattern.compile("(.*)(>=|<=|==|>|<|!=)(.*)");
+    public static final Pattern PATTERN = Pattern.compile("(.*)(>=|<=|==|>|<|!=|=<|=>)(.*)");
 
     @Override
     public boolean test(Player player, Menu menu) {
