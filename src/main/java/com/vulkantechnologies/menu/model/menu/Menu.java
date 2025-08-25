@@ -3,6 +3,8 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.vulkantechnologies.menu.VMenuAPI;
+import com.vulkantechnologies.menu.utils.InventoryUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -10,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -39,6 +40,7 @@ public class Menu implements InventoryHolder {
     private Inventory inventory;
 
     // Refresh
+    private boolean refreshing;
     private long creationTime;
     private long lastRefreshTime;
 
@@ -59,6 +61,7 @@ public class Menu implements InventoryHolder {
 
         this.creationTime = System.currentTimeMillis();
         this.lastRefreshTime = System.currentTimeMillis();
+        this.refreshing = false;
         this.build();
     }
 
@@ -83,12 +86,13 @@ public class Menu implements InventoryHolder {
 
     public void refreshTitle(Player player) {
         Component newTitle = this.configuration.title().build(player, this);
-        InventoryView view = player.getOpenInventory();
-        if (view.getTopInventory().getHolder() != this)
+        if (!InventoryUtil.isOnMenu(player, this)) {
             return;
+        }
         Inventory newInventory = Bukkit.createInventory(this, configuration.size(), newTitle);
         newInventory.setContents(inventory.getContents());
         inventory = newInventory;
+        this.refreshing = true;
         player.openInventory(newInventory);
     }
 

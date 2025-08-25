@@ -40,6 +40,10 @@ public class InventoryListener implements Listener {
             || !(e.getInventory().getHolder() instanceof Menu menu))
             return;
 
+        if(menu.refreshing()) {
+            return;
+        }
+
         this.plugin.menu().closeMenu(player, menu);
     }
 }
