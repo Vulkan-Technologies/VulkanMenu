@@ -3,24 +3,37 @@ package com.vulkantechnologies.menu.utils;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class InventoryUtil {
 
+    private static Method getTopInventoryMethod;
+    private static Method getHolderMethod;
+
     public static boolean isOnMenu(Player player, Menu menu) {
+        if (player == null || menu == null) return false;
+
         try {
             Object view = player.getOpenInventory();
-            Method getTopInventory = view.getClass().getMethod("getTopInventory");
-            getTopInventory.setAccessible(true);
-            Object inventory = getTopInventory.invoke(view);
-            Method getHolder = inventory.getClass().getMethod("getHolder");
-            getHolder.setAccessible(true);
-            Object holder = getHolder.invoke(inventory);
+
+            if (getTopInventoryMethod == null) {
+                getTopInventoryMethod = view.getClass().getMethod("getTopInventory");
+                getTopInventoryMethod.setAccessible(true);
+            }
+
+            Object inventory = getTopInventoryMethod.invoke(view);
+            if (inventory == null) return false;
+
+            if (getHolderMethod == null) {
+                getHolderMethod = inventory.getClass().getMethod("getHolder");
+                getHolderMethod.setAccessible(true);
+            }
+
+            Object holder = getHolderMethod.invoke(inventory);
             return holder != null && holder.equals(menu);
+
         } catch (Exception e) {
             return false;
         }
     }
-
 }

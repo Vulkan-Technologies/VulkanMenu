@@ -96,7 +96,7 @@ public class Menu implements InventoryHolder {
         inventory = newInventory;
         this.refreshing = true;
         player.openInventory(newInventory);
-        Bukkit.getScheduler().runTaskLater(VulkanMenu.get(), () -> this.refreshing = false, 1L);
+        this.refreshing = false;
     }
 
     public void refresh() {
