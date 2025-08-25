@@ -24,7 +24,7 @@ import com.vulkantechnologies.menu.model.configuration.WrappedConstructorParamet
 import com.vulkantechnologies.menu.registry.ComponentAdapterRegistry;
 import com.vulkantechnologies.menu.registry.ComponentRegistry;
 import com.vulkantechnologies.menu.registry.Registries;
-import com.vulkantechnologies.menu.utils.ReflectionUtils;
+import com.vulkantechnologies.menu.utils.ReflectionUtilsNew;
 
 import lombok.RequiredArgsConstructor;
 
@@ -127,7 +127,7 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
             boolean allMatch = true;
             for (Type parameterType : parameterTypes) {
                 Class<?> rawType = getRawType(parameterType);
-                Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
+                Class<?> genericType = ReflectionUtilsNew.getGenericType(parameterType);
 
                 boolean found = Registries.COMPACT_ADAPTER.findEntry(deserializer ->
                         matchesType(deserializer.type(), rawType, genericType)
@@ -148,7 +148,7 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
             for (int i = 0; i < parameterTypes.length; i++) {
                 Type parameterType = parameterTypes[i];
                 Class<?> rawType = getRawType(parameterType);
-                Class<?> genericType = ReflectionUtils.getGenericType(parameterType);
+                Class<?> genericType = ReflectionUtilsNew.getGenericType(parameterType);
                 Annotation[] paramAnnotations = annotations[i];
 
                 Registries.COMPACT_ADAPTER.findEntry(deserializer ->

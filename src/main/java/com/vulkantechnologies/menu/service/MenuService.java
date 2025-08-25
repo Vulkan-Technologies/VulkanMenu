@@ -51,7 +51,6 @@ public class MenuService {
             // Open
             Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
                 player.openInventory(menu.getInventory());
-                menu.refreshTitle(player);
                 // Actions
                 List<Action> openActions = configuration.openActions();
                 if (openActions != null)

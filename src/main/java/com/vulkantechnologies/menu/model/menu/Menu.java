@@ -3,7 +3,6 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.vulkantechnologies.menu.utils.InventoryUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -33,10 +32,11 @@ public class Menu implements InventoryHolder {
     private final UUID uniqueId;
     private final Player player;
     private final MenuConfiguration configuration;
-    private final Inventory inventory;
     private final List<MenuItem> items;
     private final List<MenuVariable<?>> variables;
     private final ItemStack[] cachedItems;
+
+    private Inventory inventory;
 
     // Refresh
     private long creationTime;
@@ -82,8 +82,14 @@ public class Menu implements InventoryHolder {
     }
 
     public void refreshTitle(Player player) {
-        Component title = this.configuration.title().build(player, this);
-        InventoryUtil.setTitle(player, LEGACY_SERIALIZER.serialize(title));
+        Component newTitle = this.configuration.title().build(player, this);
+        InventoryView view = player.getOpenInventory();
+        if (view.getTopInventory().getHolder() != this)
+            return;
+        Inventory newInventory = Bukkit.createInventory(this, configuration.size(), newTitle);
+        newInventory.setContents(inventory.getContents());
+        inventory = newInventory;
+        player.openInventory(newInventory);
     }
 
     public void refresh() {

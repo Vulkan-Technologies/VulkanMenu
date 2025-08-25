@@ -38,19 +38,13 @@ public class MenuRefreshTask extends BukkitRunnable {
                 && elapsedTimeSinceLastRefresh < refresh.interval() * 50L)
                 continue;
 
+            menu.refresh();
+
             List<Action> actions = refresh.actions();
             if (actions != null) {
                 for (Action action : actions) {
                     action.accept(menu.player(), menu);
                 }
-            }
-
-            menu.refresh();
-            for (HumanEntity viewer : menu.getInventory().getViewers()) {
-                if(!(viewer instanceof Player player)) {
-                    continue;
-                }
-                menu.refreshTitle(player);
             }
         }
     }
