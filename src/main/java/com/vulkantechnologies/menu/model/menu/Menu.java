@@ -4,7 +4,9 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vulkantechnologies.menu.VMenuAPI;
+import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.utils.InventoryUtil;
+import com.vulkantechnologies.menu.utils.TaskUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -94,6 +96,7 @@ public class Menu implements InventoryHolder {
         inventory = newInventory;
         this.refreshing = true;
         player.openInventory(newInventory);
+        Bukkit.getScheduler().runTaskLater(VulkanMenu.get(), () -> this.refreshing = false, 1L);
     }
 
     public void refresh() {
