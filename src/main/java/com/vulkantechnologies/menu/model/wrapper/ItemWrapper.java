@@ -2,6 +2,9 @@ package com.vulkantechnologies.menu.model.wrapper;
 
 import java.util.List;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,21 +24,25 @@ public record ItemWrapper(ItemStack itemStack, String displayName, List<String> 
         item.editMeta(itemMeta -> {
             if (itemMeta.hasDisplayName()) {
                 String formattedName = format(player, this.displayName);
-                itemMeta.displayName(MINI_MESSAGE.deserialize(formattedName, menu.variableResolver()));
+                itemMeta.displayName(this.deserializeWithReset(formattedName, menu.variableResolver()));
             }
 
             if (itemMeta.hasLore()) {
-                List<String> formattedLore = this.lore.stream()
+                List<Component> formattedLore = this.lore.stream()
                         .map(line -> format(player, line))
+                        .map(line -> this.deserializeWithReset(line, menu.variableResolver()))
                         .toList();
 
-                itemMeta.lore(formattedLore.stream()
-                        .map(line -> MINI_MESSAGE.deserialize(line, menu.variableResolver()))
-                        .toList());
+                itemMeta.lore(formattedLore);
             }
         });
         ItemMarker.mark(item);
         return item;
+    }
+
+    private Component deserializeWithReset(String text, TagResolver resolver) {
+        return MINI_MESSAGE.deserialize(text, resolver)
+                .decoration(TextDecoration.ITALIC, false);
     }
 
     private String format(Player player, String text) {

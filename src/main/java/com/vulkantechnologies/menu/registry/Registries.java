@@ -10,6 +10,7 @@ import com.vulkantechnologies.menu.model.action.minecraft.meta.SetMetaAction;
 import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
+import com.vulkantechnologies.menu.model.action.vulkan.RefreshTitleAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
@@ -49,6 +50,7 @@ public class Registries {
                 SetVariableAction.class,
                 RemoveVariableAction.class,
                 RefreshAction.class,
+                RefreshTitleAction.class,
                 RefreshSlotAction.class,
                 TeleportAction.class,
                 ActionBarAction.class,

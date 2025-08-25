@@ -3,6 +3,7 @@ package com.vulkantechnologies.menu.command;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import com.vulkantechnologies.menu.event.VMenuReloadEvent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -92,6 +93,9 @@ public class VMenuCommand extends BaseCommand {
         try {
             this.plugin.configuration().load();
             this.plugin.mainConfiguration().load();
+
+            VMenuReloadEvent reloadEvent = new VMenuReloadEvent();
+            reloadEvent.callEvent();
 
             this.plugin.mainConfiguration().sendMessage(sender, "reload-success");
         } catch (Exception e) {

@@ -1,5 +1,8 @@
 package com.vulkantechnologies.menu.listener;
 
+import com.vulkantechnologies.menu.hook.implementation.PacketEventsPluginHook;
+import com.vulkantechnologies.menu.model.menu.MenuItem;
+import com.vulkantechnologies.menu.service.PluginHookService;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,6 +13,8 @@ import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.menu.Menu;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class InventoryListener implements Listener {
@@ -23,12 +28,10 @@ public class InventoryListener implements Listener {
             || !(e.getInventory().getHolder(false) instanceof Menu menu))
             return;
 
-        if (e.getCurrentItem() != null && !e.getCurrentItem().isEmpty())
-            e.setCancelled(true);
+        e.setCancelled(true);
 
         int slot = e.getRawSlot();
-        menu.getItem(slot)
-                .ifPresent(item -> item.handleClick(player, menu, e.getClick()));
+        menu.getItem(slot).ifPresent(item -> item.handleClick(player, menu, e.getClick()));
     }
 
     @EventHandler
@@ -36,6 +39,10 @@ public class InventoryListener implements Listener {
         if (!(e.getPlayer() instanceof Player player)
             || !(e.getInventory().getHolder() instanceof Menu menu))
             return;
+
+        if(menu.refreshing()) {
+            return;
+        }
 
         this.plugin.menu().closeMenu(player, menu);
     }

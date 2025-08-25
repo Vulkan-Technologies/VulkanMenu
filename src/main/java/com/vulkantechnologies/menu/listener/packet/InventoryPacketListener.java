@@ -3,7 +3,12 @@ package com.vulkantechnologies.menu.listener.packet;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.simple.PacketPlayReceiveEvent;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientWindowConfirmation;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowConfirmation;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.retrooper.packetevents.event.SimplePacketListenerAbstract;
@@ -39,16 +44,47 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
 
             int slot = packet.getSlot();
             this.handle(player, menu -> {
-                if (slot < menu.configuration().size())
+                if (slot >= menu.cachedItems().length) {
                     return;
+                }
+                if (slot < menu.configuration().size()) {
+                    return;
+                }
 
-                menu.getItem(packet.getSlot())
-                        .ifPresent(item -> {
-                            packet.setItem(SpigotConversionUtil.fromBukkitItemStack(menu.cachedItems()[slot]));
-                            event.markForReEncode(true);
-                        });
+                menu.getItem(slot).ifPresent(item -> {
+                    ItemStack cachedItem = menu.cachedItems()[slot];
+                    if (cachedItem != null) {
+                        packet.setItem(SpigotConversionUtil.fromBukkitItemStack(cachedItem));
+                        event.markForReEncode(true);
+                    }
+                });
             });
         }
+    }
+
+    @Override
+    public void onPacketPlayReceive(@NotNull PacketPlayReceiveEvent event) {
+        Player player = event.getPlayer();
+
+        if (event.getPacketType().equals(PacketType.Play.Client.WINDOW_CONFIRMATION)) {
+            this.handleWindowConfirmation(player, event);
+        }
+    }
+
+
+    private void handleWindowConfirmation(Player player, PacketPlayReceiveEvent event) {
+        this.handle(player, menu -> {
+            event.setCancelled(true);
+            WrapperPlayClientWindowConfirmation confirmationPacket = new WrapperPlayClientWindowConfirmation(event);
+
+            WrapperPlayServerWindowConfirmation resend =
+                    new WrapperPlayServerWindowConfirmation(
+                           confirmationPacket.getWindowId(),
+                            confirmationPacket.getActionId(),
+                            true
+                    );
+            PacketEvents.getAPI().getPlayerManager().sendPacket(player, resend);
+        });
     }
 
     private void handle(Player player, Consumer<Menu> menuConsumer) {

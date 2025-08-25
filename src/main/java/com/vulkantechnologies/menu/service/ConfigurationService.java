@@ -73,14 +73,15 @@ public class ConfigurationService {
             this.menus.put(id, file);
 
             // Register command
-            this.registerCommand(file.menu());
+            this.registerCommand(file);
         } catch (Exception e) {
             throw new MenuConfigurationLoadException("Failed to load configuration", e);
         }
         return file;
     }
 
-    public void registerCommand(MenuConfiguration configuration) {
+    public void registerCommand(MenuConfigurationFile file) {
+        MenuConfiguration configuration = file.menu();
         if (configuration.openCommand() == null)
             return;
 
@@ -91,7 +92,7 @@ public class ConfigurationService {
             || commandMap.getCommand(command) != null)
             return;
 
-        MenuCommand cmd = new MenuCommand(this.plugin, configuration);
+        MenuCommand cmd = new MenuCommand(this.plugin, file.id(), configuration.openCommand());
         commandMap.register("vulkanmenu", cmd);
 
         Map<String, Command> knownCommands = commandMap.getKnownCommands();

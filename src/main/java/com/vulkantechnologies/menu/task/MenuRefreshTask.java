@@ -2,6 +2,8 @@ package com.vulkantechnologies.menu.task;
 
 import java.util.List;
 
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
@@ -36,14 +38,14 @@ public class MenuRefreshTask extends BukkitRunnable {
                 && elapsedTimeSinceLastRefresh < refresh.interval() * 50L)
                 continue;
 
+            menu.refresh();
+
             List<Action> actions = refresh.actions();
             if (actions != null) {
                 for (Action action : actions) {
                     action.accept(menu.player(), menu);
                 }
             }
-
-            menu.refresh();
         }
     }
 }

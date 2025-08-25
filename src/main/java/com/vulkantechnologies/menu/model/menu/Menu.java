@@ -3,6 +3,12 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.vulkantechnologies.menu.VMenuAPI;
+import com.vulkantechnologies.menu.VulkanMenu;
+import com.vulkantechnologies.menu.utils.InventoryUtil;
+import com.vulkantechnologies.menu.utils.TaskUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,15 +30,19 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 @Data
 public class Menu implements InventoryHolder {
 
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
+
     private final UUID uniqueId;
     private final Player player;
     private final MenuConfiguration configuration;
-    private final Inventory inventory;
     private final List<MenuItem> items;
     private final List<MenuVariable<?>> variables;
     private final ItemStack[] cachedItems;
 
+    private Inventory inventory;
+
     // Refresh
+    private boolean refreshing;
     private long creationTime;
     private long lastRefreshTime;
 
@@ -41,18 +51,19 @@ public class Menu implements InventoryHolder {
         this.player = player;
         this.configuration = configuration;
         this.variables = new CopyOnWriteArrayList<>();
-        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
-        this.items = new ArrayList<>(configuration.items().values());
-        this.cachedItems = new ItemStack[configuration.size() + 36];
-
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
 
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
 
+        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
+        this.items = new ArrayList<>(configuration.items().values());
+        this.cachedItems = new ItemStack[configuration.size() + 36];
+
         this.creationTime = System.currentTimeMillis();
         this.lastRefreshTime = System.currentTimeMillis();
+        this.refreshing = false;
         this.build();
     }
 
@@ -73,6 +84,19 @@ public class Menu implements InventoryHolder {
             this.setItem(slot, itemStack);
             this.cachedItems[slot] = itemStack;
         });
+    }
+
+    public void refreshTitle(Player player) {
+        Component newTitle = this.configuration.title().build(player, this);
+        if (!InventoryUtil.isOnMenu(player, this)) {
+            return;
+        }
+        Inventory newInventory = Bukkit.createInventory(this, configuration.size(), newTitle);
+        newInventory.setContents(inventory.getContents());
+        inventory = newInventory;
+        this.refreshing = true;
+        player.openInventory(newInventory);
+        Bukkit.getScheduler().runTaskLater(VulkanMenu.get(), () -> this.refreshing = false, 1L);
     }
 
     public void refresh() {
