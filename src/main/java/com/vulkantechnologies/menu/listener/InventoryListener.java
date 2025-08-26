@@ -31,7 +31,7 @@ public class InventoryListener implements Listener {
         e.setCancelled(true);
 
         int slot = e.getRawSlot();
-        menu.getItem(slot).ifPresent(item -> item.handleClick(player, menu, e.getClick()));
+        menu.getShownItem(slot).ifPresent(item -> item.handleClick(player, menu, e.getClick()));
     }
 
     @EventHandler

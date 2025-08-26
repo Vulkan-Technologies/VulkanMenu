@@ -28,25 +28,23 @@ public record MenuItem(String id, ItemSlot slot, int priority, ItemWrapper item,
     }
 
     public void handleClick(Player player, Menu menu, ClickType clickType) {
+        this.handleClick(player, menu, this.actions);
         switch (clickType) {
-            case LEFT -> handleClick(player, menu, this.leftClickActions, true);
-            case RIGHT -> handleClick(player, menu, this.rightClickActions, true);
-            case MIDDLE -> handleClick(player, menu, this.middleClickActions, true);
-            case SHIFT_LEFT -> handleClick(player, menu, this.leftShiftClickActions, true);
-            case SHIFT_RIGHT -> handleClick(player, menu, this.rightShiftClickActions, true);
-            default -> handleClick(player, menu, this.actions, false);
+            case LEFT -> handleClick(player, menu, this.leftClickActions);
+            case RIGHT -> handleClick(player, menu, this.rightClickActions);
+            case MIDDLE -> handleClick(player, menu, this.middleClickActions);
+            case SHIFT_LEFT -> handleClick(player, menu, this.leftShiftClickActions);
+            case SHIFT_RIGHT -> handleClick(player, menu, this.rightShiftClickActions);
         }
     }
 
-    private void handleClick(Player player, Menu menu, List<Action> actions, boolean useDefault) {
+    private void handleClick(Player player, Menu menu, List<Action> actions) {
+        // Requirements
         if (actions == null
             || actions.isEmpty()) {
-            if (useDefault)
-                handleClick(player, menu, this.actions, false);
             return;
         }
 
-        // Requirements
         if (!this.canClick(player, menu)) {
             return;
         }

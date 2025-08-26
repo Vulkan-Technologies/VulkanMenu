@@ -51,7 +51,7 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
                     return;
                 }
 
-                menu.getItem(slot).ifPresent(item -> {
+                menu.getShownItem(slot).ifPresent(item -> {
                     ItemStack cachedItem = menu.cachedItems()[slot];
                     if (cachedItem != null) {
                         packet.setItem(SpigotConversionUtil.fromBukkitItemStack(cachedItem));
