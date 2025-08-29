@@ -184,13 +184,6 @@ public class Menu implements InventoryHolder {
                 .toList();
     }
 
-    public Optional<MenuItem> getItem(int slot) {
-        return this.items
-                .stream()
-                .filter(item -> item.hasSlot(this.player, this, slot))
-                .findFirst();
-    }
-
     public Optional<MenuVariable<?>> variable(String name) {
         return this.variables
                 .stream()

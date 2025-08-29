@@ -14,7 +14,7 @@ import com.vulkantechnologies.menu.utils.VariableUtils;
 @ComponentName("compare")
 public record CompareRequirement(String raw) implements Requirement {
 
-    public static final Pattern PATTERN = Pattern.compile("(.*)(>=|<=|==|>|<|!=|=<|=>)(.*)");
+    public static final Pattern PATTERN = Pattern.compile("(.+?)\\s*(>=|<=|==|!=|=>|=<|>|<)\\s*(.+)");
 
     @Override
     public boolean test(Player player, Menu menu) {
@@ -46,8 +46,8 @@ public record CompareRequirement(String raw) implements Requirement {
         double end = Double.parseDouble(rawEnd);
 
         return switch (operator) {
-            case ">=" -> start >= end;
-            case "<=" -> start <= end;
+            case ">=", "=>" -> start >= end;
+            case "<=", "=<" -> start <= end;
             case ">" -> start > end;
             case "<" -> start < end;
             default -> false;
