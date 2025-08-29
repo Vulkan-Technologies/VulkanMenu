@@ -42,6 +42,9 @@ public class Menu implements InventoryHolder {
     private boolean refreshing;
     private long creationTime;
     private long lastRefreshTime;
+
+    // Packet handling
+    private int windowId;
     private int stateId;
 
     public Menu(Player player, MenuConfiguration configuration) {

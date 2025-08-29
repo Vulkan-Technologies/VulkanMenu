@@ -13,6 +13,7 @@ import com.github.retrooper.packetevents.event.simple.PacketPlayReceiveEvent;
 import com.github.retrooper.packetevents.event.simple.PacketPlaySendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientWindowConfirmation;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerOpenWindow;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowConfirmation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems;
@@ -44,11 +45,13 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
             WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event);
 
             int slot = packet.getSlot();
-
+            System.out.println("Set Slot Packet Slot: " + slot);
             this.handle(player, menu -> {
                 if (slot >= menu.cachedItems().length || slot < menu.configuration().size())
                     return;
 
+                packet.setStateId(menu.stateId());
+                event.markForReEncode(true);
 
                 menu.getShownItem(slot).ifPresent(item -> {
                     ItemStack cachedItem = menu.cachedItems()[slot];
@@ -56,10 +59,11 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
                         return;
 
                     packet.setItem(SpigotConversionUtil.fromBukkitItemStack(cachedItem));
-                    packet.setStateId(menu.stateId());
-                    event.markForReEncode(true);
                 });
             });
+        } else if (event.getPacketType().equals(PacketType.Play.Server.OPEN_WINDOW)) {
+            WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(event);
+            this.handle(player, menu -> menu.windowId(packet.getContainerId()));
         }
     }
 

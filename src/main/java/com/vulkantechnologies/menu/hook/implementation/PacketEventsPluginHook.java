@@ -1,19 +1,17 @@
 package com.vulkantechnologies.menu.hook.implementation;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems;
-import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.hook.PluginHook;
-import com.vulkantechnologies.menu.listener.packet.InventoryPacketListener;
-
-import com.vulkantechnologies.menu.model.menu.Menu;
-import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
+import com.vulkantechnologies.menu.VulkanMenu;
+import com.vulkantechnologies.menu.hook.PluginHook;
+import com.vulkantechnologies.menu.listener.packet.InventoryPacketListener;
+import com.vulkantechnologies.menu.model.menu.Menu;
+
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class PacketEventsPluginHook implements PluginHook {
@@ -31,4 +29,10 @@ public class PacketEventsPluginHook implements PluginHook {
     public String pluginName() {
         return "packetevents";
     }
+
+    public void sendItemUpdate(Player player, Menu menu, int slot, ItemStack item) {
+        WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(menu.windowId(), menu.incrementStateId(), slot, SpigotConversionUtil.fromBukkitItemStack(item));
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, packet);
+    }
+
 }
