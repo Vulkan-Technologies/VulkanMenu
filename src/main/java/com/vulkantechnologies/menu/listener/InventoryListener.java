@@ -24,14 +24,11 @@ public class InventoryListener implements Listener {
             return;
 
 
+        e.setCancelled(true);
+
         int slot = e.getRawSlot();
         menu.getShownItem(slot)
-                .ifPresent(item -> {
-                    if (slot < e.getInventory().getSize())
-                        e.setCancelled(true);
-
-                    item.handleClick(player, menu, e.getClick());
-                });
+                .ifPresent(item -> item.handleClick(player, menu, e.getClick()));
     }
 
     @EventHandler

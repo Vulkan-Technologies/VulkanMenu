@@ -3,18 +3,18 @@ package com.vulkantechnologies.menu.listener.packet;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.simple.PacketPlayReceiveEvent;
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientWindowConfirmation;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowConfirmation;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.SimplePacketListenerAbstract;
+import com.github.retrooper.packetevents.event.simple.PacketPlayReceiveEvent;
 import com.github.retrooper.packetevents.event.simple.PacketPlaySendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientWindowConfirmation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowConfirmation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems;
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.menu.Menu;
@@ -34,6 +34,7 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
         if (event.getPacketType().equals(PacketType.Play.Server.WINDOW_ITEMS)) {
             WrapperPlayServerWindowItems packet = new WrapperPlayServerWindowItems(event);
             this.handle(player, menu -> {
+                packet.setStateId(menu.incrementStateId());
                 packet.setItems(Arrays.stream(menu.cachedItems())
                         .map(SpigotConversionUtil::fromBukkitItemStack)
                         .toList());
@@ -43,20 +44,20 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
             WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event);
 
             int slot = packet.getSlot();
+
             this.handle(player, menu -> {
-                if (slot >= menu.cachedItems().length) {
+                if (slot >= menu.cachedItems().length || slot < menu.configuration().size())
                     return;
-                }
-                if (slot < menu.configuration().size()) {
-                    return;
-                }
+
 
                 menu.getShownItem(slot).ifPresent(item -> {
                     ItemStack cachedItem = menu.cachedItems()[slot];
-                    if (cachedItem != null) {
-                        packet.setItem(SpigotConversionUtil.fromBukkitItemStack(cachedItem));
-                        event.markForReEncode(true);
-                    }
+                    if (cachedItem == null)
+                        return;
+
+                    packet.setItem(SpigotConversionUtil.fromBukkitItemStack(cachedItem));
+                    packet.setStateId(menu.stateId());
+                    event.markForReEncode(true);
                 });
             });
         }
@@ -79,7 +80,7 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
 
             WrapperPlayServerWindowConfirmation resend =
                     new WrapperPlayServerWindowConfirmation(
-                           confirmationPacket.getWindowId(),
+                            confirmationPacket.getWindowId(),
                             confirmationPacket.getActionId(),
                             true
                     );

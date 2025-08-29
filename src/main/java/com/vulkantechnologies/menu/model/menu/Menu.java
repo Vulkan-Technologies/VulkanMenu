@@ -3,12 +3,6 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.vulkantechnologies.menu.VMenuAPI;
-import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.utils.InventoryUtil;
-import com.vulkantechnologies.menu.utils.TaskUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,10 +16,13 @@ import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
+import com.vulkantechnologies.menu.utils.InventoryUtil;
 import com.vulkantechnologies.menu.utils.VariableUtils;
 
 import lombok.Data;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 @Data
 public class Menu implements InventoryHolder {
@@ -45,6 +42,7 @@ public class Menu implements InventoryHolder {
     private boolean refreshing;
     private long creationTime;
     private long lastRefreshTime;
+    private int stateId;
 
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
@@ -194,6 +192,11 @@ public class Menu implements InventoryHolder {
     private void setItem(int slot, ItemStack item) {
         if (slot < this.configuration.size())
             this.inventory.setItem(slot, item);
+    }
+
+    public int incrementStateId() {
+        this.stateId = this.stateId + 1 & 32767;
+        return this.stateId;
     }
 
     public boolean hasVariable(String name) {
