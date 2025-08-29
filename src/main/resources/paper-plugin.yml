@@ -9,20 +9,20 @@ loader: com.vulkantechnologies.menu.VulkanMenuLoader
 dependencies:
   server:
     PlaceholderAPI:
-      load: AFTER
+      load: BEFORE
       required: false
     Vault:
-      load: AFTER
+      load: BEFORE
       required: false
     ItemsAdder:
-      load: AFTER
+      load: BEFORE
       required: false
     Nexo:
-      load: AFTER
+      load: BEFORE
       required: false
     packetevents:
-      load: AFTER
+      load: BEFORE
       required: false
     HeadDatabase:
-      load: AFTER
+      load: BEFORE
       required: false
