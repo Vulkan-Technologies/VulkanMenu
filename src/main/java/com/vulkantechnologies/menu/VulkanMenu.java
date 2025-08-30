@@ -22,6 +22,7 @@ import com.vulkantechnologies.menu.listener.InventoryListener;
 import com.vulkantechnologies.menu.listener.MarkerListener;
 import com.vulkantechnologies.menu.listener.UpdateListener;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
+import com.vulkantechnologies.menu.model.importer.ConfigurationImporter;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.service.*;
 import com.vulkantechnologies.menu.task.MenuRefreshTask;

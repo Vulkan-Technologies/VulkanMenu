@@ -7,6 +7,10 @@ import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.action.minecraft.*;
 import com.vulkantechnologies.menu.model.action.minecraft.meta.RemoveMetaAction;
 import com.vulkantechnologies.menu.model.action.minecraft.meta.SetMetaAction;
+import com.vulkantechnologies.menu.model.action.vault.economy.DepositMoneyAction;
+import com.vulkantechnologies.menu.model.action.vault.economy.WithdrawMoneyAction;
+import com.vulkantechnologies.menu.model.action.vault.permission.AddPermissionAction;
+import com.vulkantechnologies.menu.model.action.vault.permission.RemovePermissionAction;
 import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
@@ -18,6 +22,7 @@ import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequire
 import com.vulkantechnologies.menu.model.requirement.minecraft.HasMetaRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
+import com.vulkantechnologies.menu.model.requirement.vault.MoneyRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.CompareRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.ContainsRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
@@ -45,7 +50,6 @@ public class Registries {
                 PlayerCommandAction.class,
                 MessageAction.class,
                 CloseInventoryAction.class,
-                PlayerCommandAction.class,
                 OpenMenuAction.class,
                 SetVariableAction.class,
                 RemoveVariableAction.class,
@@ -84,7 +88,6 @@ public class Registries {
                 CompactBooleanAdapter.INSTANCE,
                 CompactDoubleAdapter.INSTANCE,
                 CompactIntegerAdapter.INSTANCE,
-                CompactBooleanAdapter.INSTANCE,
                 CompactStringAdapter.INSTANCE,
                 CompactComponentAdapter.INSTANCE,
                 CompactLocationAdapter.INSTANCE,

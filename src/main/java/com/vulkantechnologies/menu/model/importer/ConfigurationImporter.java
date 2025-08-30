@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 import org.spongepowered.configurate.CommentedConfigurationNode;
 
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 
 public interface ConfigurationImporter {
 

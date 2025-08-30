@@ -62,16 +62,40 @@ public class CompactContext {
         return !this.arguments.isEmpty() ? this.arguments.getLast() : null;
     }
 
+    /**
+     * Checks if there is exactly one argument remaining
+     * @return true if exactly one argument remains, false otherwise
+     */
     public boolean isLastArg() {
+        return this.arguments.size() == 1;
+    }
+    
+    /**
+     * Checks if there are any arguments remaining
+     * @return true if there are arguments remaining, false if empty
+     */
+    public boolean hasArgs() {
         return !this.arguments.isEmpty();
+    }
+    
+    /**
+     * Gets the number of arguments that remain to be consumed
+     * @return the number of remaining arguments
+     */
+    public int remainingArgCount() {
+        return this.arguments.size();
     }
 
     public String remainingArgs() {
         return String.join(" ", this.arguments);
     }
 
+    /**
+     * Gets the index of how many arguments have been consumed
+     * @return the number of arguments consumed from the original count
+     */
     public int index() {
-        return this.arguments.size() - 1;
+        return this.argumentCount - this.arguments.size();
     }
 
     @Unmodifiable

@@ -12,9 +12,9 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.DefaultConfigurationFile;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
-import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
 import com.vulkantechnologies.menu.configuration.importer.DeluxeMenuImporter;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfigurationFile;
 import com.vulkantechnologies.menu.model.importer.ConfigurationImporter;
 
 public class ImportService {

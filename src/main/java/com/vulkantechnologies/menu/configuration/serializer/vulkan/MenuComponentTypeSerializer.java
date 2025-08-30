@@ -5,11 +5,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +15,7 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import com.vulkantechnologies.menu.annotation.ComponentName;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.component.MenuComponent;
 import com.vulkantechnologies.menu.model.configuration.WrappedConstructor;
@@ -45,17 +44,19 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
             throw new SerializationException("MenuComponent cannot be empty");
 
         // Get the action type
+        final String originalRaw = raw;  // Keep original for error messages
         String componentName = TYPE_PATTERN.matcher(raw)
                 .results()
                 .findFirst()
                 .map(match -> match.group(1))
-                .orElseThrow(() -> new SerializationException("No component type defined"));
+                .orElseThrow(() -> new SerializationException(type, "No component type defined in: '" + originalRaw + "'"));
 
         // Get action class
         Class<? extends T> componentType = this.registry
                 .get(componentName)
-                .orElseThrow(() -> new SerializationException("Unknown component type: " + componentName));
+                .orElseThrow(() -> new SerializationException(type, "Unknown component type: " + componentName));
 
+        // Remove the type prefix from the raw string
         raw = raw.replaceFirst(TYPE_PATTERN.pattern(), "");
         if (raw.startsWith(" "))
             raw = raw.substring(1);
@@ -72,50 +73,141 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
         // Parse arguments
         List<Object> constructorArguments = new ArrayList<>();
         String finalRaw = raw;
-        for (WrappedConstructorParameter parameter : componentConstructor.parameters()) {
-            Object argument = parseArgument(context, parameter, finalRaw);
-            if (argument == null && !parameter.type().isAnnotationPresent(Nullable.class))
-                throw new SerializationException("Argument cannot be null: " + parameter.type().getSimpleName());
-            constructorArguments.add(argument);
+        for (int i = 0; i < componentConstructor.parameters().size(); i++) {
+            WrappedConstructorParameter parameter = componentConstructor.parameters().get(i);
+            try {
+                Object argument = parseArgument(context, parameter, finalRaw);
+                if (argument == null && !parameter.type().isAnnotationPresent(Nullable.class))
+                    throw new SerializationException("Argument " + (i + 1) + " (" + parameter.type().getSimpleName() + 
+                        ") cannot be null for component: " + componentName);
+                constructorArguments.add(argument);
+            } catch (SerializationException e) {
+                throw e; // Re-throw with original message
+            } catch (Exception e) {
+                throw new SerializationException(type, "Failed to parse argument " + (i + 1) + " (" + 
+                    parameter.type().getSimpleName() + ") for component " + componentName + ": " + e.getMessage());
+            }
         }
 
         try {
             return (T) componentConstructor.constructor().newInstance(constructorArguments.toArray());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException("Failed to instantiate component: " + componentName, e);
+            throw new SerializationException(type, "Failed to instantiate component: " + componentName + 
+                " with arguments: " + constructorArguments);
         }
     }
 
     @Override
-    public void serialize(@NotNull Type type, @Nullable MenuComponent obj, @NotNull ConfigurationNode node) {
-        throw new UnsupportedOperationException("Serialization is not supported");
+    public void serialize(@NotNull Type type, @Nullable MenuComponent obj, @NotNull ConfigurationNode node) throws SerializationException {
+        if (obj == null) {
+            node.set(null);
+            return;
+        }
+
+        // Get the component name from annotation
+        Class<?> componentClass = obj.getClass();
+        if (!componentClass.isAnnotationPresent(ComponentName.class)) {
+            throw new SerializationException("Component " + componentClass.getName() + " does not have @ComponentName annotation");
+        }
+        
+        ComponentName componentName = componentClass.getAnnotation(ComponentName.class);
+        String name = componentName.value();
+        
+        // Build the serialized string
+        StringBuilder builder = new StringBuilder();
+        builder.append("[").append(name).append("]");
+        
+        // Serialize constructor arguments
+        // Note: This is a basic implementation that assumes components store their constructor args
+        // For full serialization, components would need to expose their state or we'd need to use reflection
+        // For now, we'll just store the type tag
+        
+        node.set(builder.toString());
     }
 
     private Object parseArgument(CompactContext context, WrappedConstructorParameter parameter, String raw) throws SerializationException {
-        // Regular deserialization
+        // Regular deserialization for non-generic types
         if (!parameter.hasGenericType()) {
             try {
                 return parameter.deserializer().adapt(context);
             } catch (Exception e) {
-                throw new SerializationException("Failed to deserialize argument: " + parameter.type().getSimpleName());
+                throw new SerializationException(parameter.type(), "Failed to deserialize argument of type " + 
+                    parameter.type().getSimpleName() + ": " + e.getMessage());
             }
         }
 
         // Generic deserialization
-        if (parameter.type().equals(List.class))
-            return Arrays.stream(raw.split(","))
+        if (parameter.type().equals(List.class)) {
+            Class<?> elementType = parameter.genericType();
+            String remaining = context.remainingArgs();
+            
+            if (remaining == null || remaining.isEmpty()) {
+                return new ArrayList<>();
+            }
+            
+            // Split by comma for list elements
+            return Arrays.stream(remaining.split(","))
+                    .map(String::trim)
                     .map(s -> {
                         try {
-                            return parseArgument(context, WrappedConstructorParameter.of(parameter.genericType(), parameter.annotations(), parameter.deserializer()), s);
+                            CompactContext elementContext = new CompactContext(s);
+                            return parseArgument(elementContext, 
+                                WrappedConstructorParameter.of(elementType, parameter.annotations(), parameter.deserializer()), s);
                         } catch (SerializationException e) {
-                            throw new RuntimeException(e);
+                            throw new RuntimeException("Failed to parse list element: " + e.getMessage(), e);
                         }
                     })
-                    .toList();
+                    .collect(Collectors.toList());
+        }
+        
+        if (parameter.type().equals(Map.class)) {
+            // Parse Map<K,V> - format: "key1=value1,key2=value2"
+            String remaining = context.remainingArgs();
+            if (remaining == null || remaining.isEmpty()) {
+                return new HashMap<>();
+            }
+            
+            Map<Object, Object> map = new HashMap<>();
+            String[] entries = remaining.split(",");
+            
+            for (String entry : entries) {
+                String[] keyValue = entry.split("=", 2);
+                if (keyValue.length != 2) {
+                    throw new SerializationException("Invalid map entry format: " + entry + ". Expected 'key=value'");
+                }
+                
+                // For simplicity, assuming String keys and values
+                // A full implementation would need to handle generic key/value types
+                map.put(keyValue[0].trim(), keyValue[1].trim());
+            }
+            
+            return map;
+        }
+        
+        if (parameter.type().equals(Set.class)) {
+            // Parse Set<T> - similar to List but return as Set
+            Class<?> elementType = parameter.genericType();
+            String remaining = context.remainingArgs();
+            
+            if (remaining == null || remaining.isEmpty()) {
+                return new HashSet<>();
+            }
+            
+            return Arrays.stream(remaining.split(","))
+                    .map(String::trim)
+                    .map(s -> {
+                        try {
+                            CompactContext elementContext = new CompactContext(s);
+                            return parseArgument(elementContext, 
+                                WrappedConstructorParameter.of(elementType, parameter.annotations(), parameter.deserializer()), s);
+                        } catch (SerializationException e) {
+                            throw new RuntimeException("Failed to parse set element: " + e.getMessage(), e);
+                        }
+                    })
+                    .collect(Collectors.toSet());
+        }
 
-        // TODO: Implement map, set, collections, ... deserialization
-
-        throw new SerializationException("Unsupported generic type: " + parameter.genericType());
+        throw new SerializationException("Unsupported generic type: " + parameter.type().getName());
     }
 
     private Optional<WrappedConstructor> findSuitableConstructor(Class<?> componentClass) {

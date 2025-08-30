@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.model.importer.ConfigurationImporter;
 import com.vulkantechnologies.menu.utils.DumpUtils;
 
 import co.aikar.commands.BaseCommand;

@@ -2,9 +2,6 @@ package com.vulkantechnologies.menu.model.wrapper;
 
 import java.util.List;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,8 +9,13 @@ import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.utils.ItemMarker;
 
+import lombok.Builder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
+@Builder
 public record ItemWrapper(ItemStack itemStack, String displayName, List<String> lore) {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
