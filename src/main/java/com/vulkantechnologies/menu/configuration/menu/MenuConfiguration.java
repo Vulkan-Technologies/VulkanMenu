@@ -1,5 +1,6 @@
-package com.vulkantechnologies.menu.configuration;
+package com.vulkantechnologies.menu.configuration.menu;
 
+import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -18,9 +19,26 @@ import net.kyori.adventure.key.Key;
 @ConfigSerializable
 public record MenuConfiguration(ComponentWrapper title, int size, @Nullable CommandConfiguration openCommand,
                                 Map<String, MenuItem> items,
-                                @Nullable Map<String, Action> openActions, @Nullable Map<String, Action> closeActions,
+                                @Nullable List<Action> openActions, @Nullable List<Action> closeActions,
                                 @Nullable Map<String, RequirementWrapper> openRequirements,
-                                Map<String, String> variables) {
+                                Map<String, String> variables, @Nullable Refresh refresh) {
+
+    @ConfigSerializable
+    public record Refresh(int interval, int delay, List<Action> actions) {
+
+        public boolean isValid() {
+            return (this.interval > 0 || this.delay > 0) && (this.actions != null && !this.actions.isEmpty());
+        }
+
+        public boolean hasInterval() {
+            return this.interval > 0;
+        }
+
+        public boolean hasDelay() {
+            return this.delay > 0;
+        }
+
+    }
 
     public boolean validate(VulkanMenu plugin) {
         // Size validation
@@ -45,8 +63,8 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
         }
 
         // Open command validation
-        if (this.openCommand != null) {
-            if (this.openCommand.name() == null || this.openCommand.name().isEmpty()) {
+        if (this.openCommand != null && this.openCommand.name() != null) {
+            if (this.openCommand.name().isEmpty()) {
                 plugin.getLogger().warning("Menu open command name cannot be null or empty.");
                 return false;
             }

@@ -2,6 +2,8 @@ package com.vulkantechnologies.menu.model.action.vulkan.variable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
 
@@ -11,7 +13,6 @@ import com.vulkantechnologies.menu.annotation.Single;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
-import com.vulkantechnologies.menu.utils.VariableUtils;
 
 import redempt.crunch.CompiledExpression;
 import redempt.crunch.Crunch;
@@ -19,6 +20,8 @@ import redempt.crunch.functional.EvaluationEnvironment;
 
 @ComponentName("set-variable")
 public record SetVariableAction(@Single String name, @Single String value) implements Action {
+
+    private static final Pattern PATTERN = Pattern.compile("[a-zA-Z]+");
 
     @Override
     public void accept(Player player, Menu menu) {
@@ -30,20 +33,17 @@ public record SetVariableAction(@Single String name, @Single String value) imple
 
         // Check if the value contains any operators
         if (formattedValue.matches(".*[+\\-*/%].*")) {
-            // Parse variables name
-            String[] parts = formattedValue.split("[+\\-*/%]");
+            // Extract variable names
             List<String> variablesName = new ArrayList<>();
-            for (String part : parts) {
-                part = part.trim();
-                if (part.isEmpty()
-                    || VariableUtils.isNumeric(part))
-                    continue;
+            Matcher matcher = PATTERN.matcher(formattedValue);
+            while (matcher.find()) {
+                String variableName = matcher.group();
 
-                String filteredPart = part.replaceAll("[^a-zA-Z0-9]", "");
-                if (!menu.hasVariable(filteredPart))
-                    throw new IllegalArgumentException("Variable not found: " + filteredPart);
-
-                variablesName.add(filteredPart);
+                // Check if the variable exists in the menu
+                if (menu.variable(variableName).isPresent())
+                    variablesName.add(variableName);
+                else
+                    throw new IllegalArgumentException("Variable not found: " + variableName);
             }
 
             // Compile expression

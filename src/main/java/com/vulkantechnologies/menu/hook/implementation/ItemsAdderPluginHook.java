@@ -29,12 +29,6 @@ public class ItemsAdderPluginHook implements PluginHook, PlaceholderProcessor {
     }
 
     @Override
-    public void onFailure() {
-        this.plugin.getSLF4JLogger().warn("Failed to hook into ItemsAdder!");
-        this.plugin.getSLF4JLogger().warn("Some features will be disabled.");
-    }
-
-    @Override
     public String pluginName() {
         return "ItemsAdder";
     }

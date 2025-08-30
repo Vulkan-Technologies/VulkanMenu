@@ -21,7 +21,7 @@ public class CompactLocationAdapter implements CompactAdapter<Location> {
         double z = Double.parseDouble(context.popFirstArg());
         float yaw = 0;
         float pitch = 0;
-        String worldName = context.popFirstArg();
+        String worldName;
         if (context.argumentCount() == 3) {
             worldName = context.popFirstArg();
         } else if (context.argumentCount() == 6) {

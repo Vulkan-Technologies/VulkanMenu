@@ -1,0 +1,54 @@
+title: <gradient:#521C0D:#FF9B45>I discovered fire
+size: 9
+
+open-command:
+  name: variables
+
+variables:
+  amount: 1.0
+
+items:
+  minus-10:
+    slot: 0
+    material: "red_wool"
+    name: "<red>Remove 10"
+    lore:
+      - "<gray>Click to remove 10 from"
+      - "<gray>the total amount amount"
+    actions:
+      - "[set-variable] amount (amount-10)"
+  minus-1:
+    slot: 1
+    material: "red_wool"
+    name: "<red>Remove 1"
+    lore:
+      - "<gray>Click to remove 1 from"
+      - "<gray>the total amount amount"
+    actions:
+      - "[set-variable] amount (amount-1)"
+  result:
+    slot: 4
+    material: "anvil"
+    name: "<blue>Result <gray>|</gray> <green><variable-amount>"
+    lore:
+      - "<gray>Click to display the amount"
+    actions:
+      - "[message] <gray>The amount is <green><variable-amount>"
+  plus-1:
+    slot: 7
+    material: "green_wool"
+    name: "<green>Add 1"
+    lore:
+      - "<gray>Click to add 1 to"
+      - "<gray>the total amount amount"
+    actions:
+      - "[set-variable] amount (amount+1)"
+  plus-10:
+    slot: 8
+    material: "green_wool"
+    name: "<green>Add 10"
+    lore:
+      - "<gray>Click to add 10 to"
+      - "<gray>the total amount amount"
+    actions:
+      - "[set-variable] amount (amount+10)"

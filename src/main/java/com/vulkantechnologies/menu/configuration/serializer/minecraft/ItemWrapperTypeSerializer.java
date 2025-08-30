@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vulkantechnologies.menu.utils.Version;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -28,15 +29,17 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
     @Override
     public ItemWrapper deserialize(@NotNull Type type, @NotNull ConfigurationNode node) throws SerializationException {
-        String rawMaterial = node.node("material").getString();
         ItemStack item;
+
+        ConfigurationNode materialNode = node.node("material");
+        String rawMaterial = materialNode.getString();
         if (rawMaterial.contains(":")) {
             String[] materialParts = rawMaterial.split(":");
             ItemStackProvider provider = Registries.ITEM_PROVIDERS.findByPrefix(materialParts[0])
                     .orElseThrow(() -> new SerializationException("Invalid item provider: " + materialParts[0]));
             item = provider.provide(materialParts[1]);
         } else {
-            Material material = Material.matchMaterial(rawMaterial);
+            Material material = materialNode.get(Material.class);
             if (material == null)
                 throw new SerializationException("Invalid material: " + rawMaterial);
             item = new ItemStack(material);
@@ -76,14 +79,20 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
         boolean unbreakable = node.node("unbreakable").getBoolean();
         meta.setUnbreakable(unbreakable);
 
-        // Max stack size
-        int maxStackSize = node.node("max-stack-size").getInt(-1);
-        if (maxStackSize > 0)
-            meta.setMaxStackSize(maxStackSize);
+        if (Version.CURRENT.more(Version.V_1_20_5)) {
+            // Max stack size
+            int maxStackSize = node.node("max-stack-size").getInt(-1);
+            if (maxStackSize > 0)
+                meta.setMaxStackSize(maxStackSize);
 
-        // Hide tooltip
-        boolean hideTooltip = node.node("hide-tooltip").getBoolean();
-        meta.setHideTooltip(hideTooltip);
+            // Hide tooltip
+            boolean hideTooltip = node.node("hide-tooltip").getBoolean();
+            meta.setHideTooltip(hideTooltip);
+
+            // Enchantments glint override
+            boolean enchantmentGlintOverride = node.node("enchantment-glint-override").getBoolean();
+            meta.setEnchantmentGlintOverride(enchantmentGlintOverride);
+        }
 
         // Custom model data
         int customModelData = node.node("custom-model-data").getInt();
@@ -110,10 +119,6 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
         // Version
         int version = node.node("version").getInt();
         meta.setVersion(version);
-
-        // Enchantments glint override
-        boolean enchantmentGlintOverride = node.node("enchantment-glint-override").getBoolean();
-        meta.setEnchantmentGlintOverride(enchantmentGlintOverride);
 
         item.setItemMeta(meta);
 

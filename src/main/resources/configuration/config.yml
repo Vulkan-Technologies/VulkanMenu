@@ -1,0 +1,31 @@
+update-checker:
+  enabled: true
+  notification: true
+
+# If set to true, the live reload feature will be enabled by default.
+live-reload-enabled: false
+
+messages:
+  # Reload
+  reloading: "<gray>Reloading <aqua>VulkanMenu</aqua> configuration..."
+  reload-success: "<green>Configuration reloaded successfully!"
+  reload-failed: "<red>Failed to reload configuration! Check the console for errors."
+  # Menu reload
+  reloading-menu: "<gray>Reloading menu <aqua><menu></aqua>..."
+  reload-menu-success: "<green>Menu <aqua><menu></aqua> reloaded successfully!"
+  reload-menu-failed: "<red>Failed to reload menu <aqua><menu></aqua>! Check the console for errors."
+  # Dump
+  dumping-menu: "<gray>Dumping menu <aqua><menu></aqua>..."
+  dump-menu-success: "<green>Menu <aqua><menu></aqua> dumped successfully to <aqua><url></aqua>!"
+  dump-menu-failed: "<red>Failed to dump menu <aqua><menu></aqua>! Check the console for errors."
+  # Menu list
+  menu-list-header: "<gray>Available menus:"
+  menu-list-item: " <gray>- <aqua><menu></aqua>"
+  # Live reload
+  live-reload-status: "<gray>Live reload is <aqua><status></aqua>."
+  live-reload-toggle: "<gray>Live reload has been <aqua><status></aqua>."
+  # Misc
+  menu-not-found: "<red>Menu <aqua><menu></aqua> not found!"
+  enabled: "<green>enabled"
+  disabled: "<red>disabled"
+  player-only-command: "<red>This command can only be executed by a player!"

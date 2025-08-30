@@ -1,9 +1,6 @@
 package com.vulkantechnologies.menu.model.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
@@ -15,42 +12,60 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
+import com.vulkantechnologies.menu.utils.InventoryUtil;
 import com.vulkantechnologies.menu.utils.VariableUtils;
 
 import lombok.Data;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 @Data
 public class Menu implements InventoryHolder {
 
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
+
     private final UUID uniqueId;
     private final Player player;
     private final MenuConfiguration configuration;
-    private final Inventory inventory;
     private final List<MenuItem> items;
     private final List<MenuVariable<?>> variables;
     private final ItemStack[] cachedItems;
+
+    private Inventory inventory;
+
+    // Refresh
+    private boolean refreshing;
+    private long creationTime;
+    private long lastRefreshTime;
+
+    // Packet handling
+    private int windowId;
+    private int stateId;
 
     public Menu(Player player, MenuConfiguration configuration) {
         this.uniqueId = UUID.randomUUID();
         this.player = player;
         this.configuration = configuration;
         this.variables = new CopyOnWriteArrayList<>();
-        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
-        this.items = new ArrayList<>(configuration.items().values());
-        this.cachedItems = new ItemStack[configuration.size() + 36];
-
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
 
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
 
-        this.build(true);
+        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
+        this.items = new ArrayList<>(configuration.items().values());
+        this.cachedItems = new ItemStack[configuration.size() + 36];
+
+        this.creationTime = System.currentTimeMillis();
+        this.lastRefreshTime = System.currentTimeMillis();
+        this.refreshing = false;
+        this.build();
     }
 
     public boolean canOpen(Player player) {
@@ -65,61 +80,109 @@ public class Menu implements InventoryHolder {
 
     public void refresh(int slot) {
         this.inventory.clear(slot);
-        this.getItem(slot).ifPresent(item -> {
+        this.getShownItem(slot).ifPresent(item -> {
             ItemStack itemStack = item.item().build(player, this);
-            if (item.slot() < this.configuration.size())
-                this.inventory.setItem(slot, itemStack);
+            this.setItem(slot, itemStack);
             this.cachedItems[slot] = itemStack;
         });
+    }
+
+    public void refreshTitle(Player player) {
+        Component newTitle = this.configuration.title().build(player, this);
+        if (!InventoryUtil.isOnMenu(player, this)) {
+            return;
+        }
+        Inventory newInventory = Bukkit.createInventory(this, configuration.size(), newTitle);
+        newInventory.setContents(inventory.getContents());
+        inventory = newInventory;
+        this.refreshing = true;
+        player.openInventory(newInventory);
+        this.refreshing = false;
     }
 
     public void refresh() {
         this.inventory.clear();
 
-        List<ItemStack> items = this.build(false);
-        for (int i = 0; i < items.size(); i++) {
-            this.inventory.setItem(i, items.get(i));
+        List<ItemStack> items = this.build();
+        for (int slot = 0; slot < items.size(); slot++) {
+            ItemStack itemStack = items.get(slot);
+            this.setItem(slot, itemStack);
         }
+
+        this.lastRefreshTime = System.currentTimeMillis();
     }
 
-    public List<ItemStack> build(boolean bottom) {
-        List<ItemStack> items = new ArrayList<>();
-
+    public List<ItemStack> build() {
         int size = this.configuration.size();
+        int totalSize = size + 36;
+
+        List<ItemStack> items = new ArrayList<>(totalSize);
+        ItemStack air = new ItemStack(Material.AIR);
+
+        Arrays.fill(this.cachedItems, air);
+
+        long startTime = System.currentTimeMillis();
 
         // Top inventory
         for (int i = 0; i < size; i++) {
-            this.getItem(i)
-                    .filter(item -> item.shouldShow(player, this))
-                    .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
-                            () -> items.add(new ItemStack(Material.AIR)));
+            MenuItem shown = this.getShownItem(i).orElse(null);
+            ItemStack stack = (shown != null) ? shown.item().build(player, this) : air;
 
-            // Cache the item
-            this.cachedItems[i] = items.get(i);
+            items.add(stack);
+            this.setItem(i, stack);
+            this.cachedItems[i] = stack;
         }
 
         // Bottom inventory
-        if (!bottom)
-            return items;
+        for (int i = size; i < totalSize; i++) {
+            MenuItem shown = this.getShownItem(i).orElse(null);
+            ItemStack stack = (shown != null && shown.shouldShow(player, this))
+                    ? shown.item().build(player, this)
+                    : air;
 
-        for (int i = 0; i < 36; i++) {
-            this.getItem(i + size)
-                    .filter(item -> item.shouldShow(player, this))
-                    .ifPresentOrElse(item -> items.add(item.item().build(player, this)),
-                            () -> items.add(new ItemStack(Material.AIR)));
-
-            // Cache the item
-            this.cachedItems[i] = items.get(i);
+            items.add(stack);
+            this.cachedItems[i] = stack;
         }
 
         return items;
     }
 
-    public Optional<MenuItem> getItem(int slot) {
+
+    public Optional<MenuItem> getShownItem(int slot) {
+        List<MenuItem> menuItems = new ArrayList<>();
+
+        // Search by slot
+        for (MenuItem item : this.items) {
+            if (item.hasSlot(this.player, this, slot))
+                menuItems.add(item);
+        }
+
+        if (menuItems.isEmpty())
+            return Optional.empty();
+
+        // Sort by priority
+        menuItems.sort((item1, item2) -> {
+            if (item1.priority() == item2.priority())
+                return 0;
+            return item1.priority() > item2.priority() ? -1 : 1;
+        });
+
+        // Filter by requirements
+        menuItems.removeIf(item -> !item.shouldShow(player, this));
+
+        // Return the first item
+        if (menuItems.isEmpty())
+            return Optional.empty();
+
+        // Return the first item
+        return Optional.of(menuItems.getFirst());
+    }
+
+    public List<MenuItem> items(int slot) {
         return this.items
                 .stream()
-                .filter(item -> item.slot() == slot)
-                .findFirst();
+                .filter(item -> item.hasSlot(this.player, this, slot))
+                .toList();
     }
 
     public Optional<MenuVariable<?>> variable(String name) {
@@ -127,6 +190,16 @@ public class Menu implements InventoryHolder {
                 .stream()
                 .filter(variable -> variable.name().equals(name))
                 .findFirst();
+    }
+
+    private void setItem(int slot, ItemStack item) {
+        if (slot < this.configuration.size())
+            this.inventory.setItem(slot, item);
+    }
+
+    public int incrementStateId() {
+        this.stateId = this.stateId + 1 & 32767;
+        return this.stateId;
     }
 
     public boolean hasVariable(String name) {

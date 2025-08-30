@@ -16,7 +16,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.command.menu.MenuCommand;
-import com.vulkantechnologies.menu.configuration.MenuConfigurationFile;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfigurationFile;
 import com.vulkantechnologies.menu.exception.MenuConfigurationLoadException;
 
 import lombok.RequiredArgsConstructor;
@@ -28,25 +29,21 @@ public class ConfigurationService {
     private final Map<String, MenuConfigurationFile> menus = new HashMap<>();
 
     public void load() {
-        Path dataFolder = this.plugin.getDataPath();
+        Path dataFolder = this.plugin.getDataFolder().toPath();
         this.createDataFolder();
 
         this.plugin.getSLF4JLogger().info("Loading menus...");
         this.menus.clear();
 
+        // Unregister commands
+        this.unregisterCommands();
+
         try (Stream<Path> pathStream = Files.walk(dataFolder)) {
             pathStream.filter(path -> path.toString().endsWith(".yml"))
+                    .filter(path -> !path.getFileName().toString().equals("config.yml"))
                     .forEach(path -> {
                         try {
-                            MenuConfigurationFile file = this.load(path);
-
-                            // Validate
-                            if (file.menu() == null
-                                || !file.menu().validate(this.plugin))
-                                return;
-
-                            String id = path.getFileName().toString().replace(".yml", "");
-                            this.menus.put(id, file);
+                            this.load(path);
                         } catch (MenuConfigurationLoadException e) {
                             this.plugin.getSLF4JLogger().error("Failed to load menu configuration: {}", path, e);
                         }
@@ -64,35 +61,66 @@ public class ConfigurationService {
         MenuConfigurationFile file = new MenuConfigurationFile(path);
         try {
             file.load();
+
+            // Validate configuration
+            if (file.menu() == null
+                || !file.menu().validate(this.plugin))
+                throw new MenuConfigurationLoadException("Invalid menu configuration");
+
+            // Register menu
+            String id = path.getFileName().toString().replace(".yml", "");
+            file.id(id);
+            this.menus.put(id, file);
+
+            // Register command
+            this.registerCommand(file);
         } catch (Exception e) {
             throw new MenuConfigurationLoadException("Failed to load configuration", e);
         }
         return file;
     }
 
-    public void registerCommands() {
+    public void registerCommand(MenuConfigurationFile file) {
+        MenuConfiguration configuration = file.menu();
+        if (configuration.openCommand() == null)
+            return;
+
         CommandMap commandMap = Bukkit.getCommandMap();
+        String command = configuration.openCommand().name();
+        if (command == null
+            || command.isEmpty()
+            || commandMap.getCommand(command) != null)
+            return;
 
-        for (MenuConfigurationFile value : this.menus.values()) {
-            String command = value.menu().openCommand().name();
-            if (command == null || command.isEmpty())
-                continue;
+        MenuCommand cmd = new MenuCommand(this.plugin, file.id(), configuration.openCommand());
+        commandMap.register("vulkanmenu", cmd);
 
-            commandMap.register("vulkanmenu", new MenuCommand(this.plugin, value.menu()));
-        }
+        Map<String, Command> knownCommands = commandMap.getKnownCommands();
+        if (!knownCommands.containsKey(command))
+            knownCommands.put(command, cmd);
+    }
+
+    public void unregisterCommands(MenuConfiguration configuration) {
+        if (configuration.openCommand() == null)
+            return;
+
+        CommandMap commandMap = Bukkit.getCommandMap();
+        String command = configuration.openCommand().name();
+        if (command == null || command.isEmpty())
+            return;
+
+        Command cmd = commandMap.getCommand(command);
+        if (cmd != null)
+            cmd.unregister(commandMap);
+
+        Map<String, Command> knownCommands = commandMap.getKnownCommands();
+        knownCommands.remove(command);
+        knownCommands.remove("vulkanmenu:" + command);
     }
 
     public void unregisterCommands() {
-        CommandMap commandMap = Bukkit.getCommandMap();
-
         for (MenuConfigurationFile value : this.menus.values()) {
-            String command = value.menu().openCommand().name();
-            if (command == null || command.isEmpty())
-                continue;
-
-            Command cmd = commandMap.getCommand(command);
-            if (cmd != null)
-                cmd.unregister(commandMap);
+            this.unregisterCommands(value.menu());
         }
     }
 
@@ -108,18 +136,34 @@ public class ConfigurationService {
     }
 
     public void unregister(String id) {
-        this.menus.remove(id);
+        MenuConfigurationFile file = this.menus.remove(id);
+        if (file == null)
+            return;
+
+        this.unregisterCommands(file.menu());
+    }
+
+    public Optional<MenuConfigurationFile> findByPath(Path path) {
+        return this.menus.values()
+                .stream()
+                .filter(menu -> menu.path().equals(path))
+                .findFirst();
     }
 
     private void createDataFolder() {
-        Path dataFolder = this.plugin.getDataPath();
+        Path dataFolder = this.plugin.getDataFolder().toPath();
         if (Files.exists(dataFolder))
             return;
 
         try {
             Files.createDirectories(dataFolder);
 
-            this.saveResource("configuration/default.yml", dataFolder.resolve("default.yml"));
+            Path menusFolder = dataFolder.resolve("menus");
+
+            this.saveResource("configuration/config.yml", dataFolder.resolve("config.yml"));
+            this.saveResource("configuration/menus/default.yml", menusFolder.resolve("default.yml"));
+            this.saveResource("configuration/menus/variables.yml", menusFolder.resolve("variables.yml"));
+            this.saveResource("configuration/menus/moving.yml", menusFolder.resolve("moving.yml"));
         } catch (IOException e) {
             this.plugin.getSLF4JLogger().error("Failed to create data folder", e);
         }
@@ -128,6 +172,15 @@ public class ConfigurationService {
     private void saveResource(String resourcePath, Path path) {
         if (Files.exists(path))
             return;
+
+        if (!Files.isDirectory(path.getParent())) {
+            try {
+                Files.createDirectories(path.getParent());
+            } catch (IOException e) {
+                this.plugin.getSLF4JLogger().error("Failed to create directories for resource: {}", resourcePath, e);
+                return;
+            }
+        }
 
         try (InputStream inputStream = this.plugin.getResource(resourcePath)) {
             if (inputStream == null) {

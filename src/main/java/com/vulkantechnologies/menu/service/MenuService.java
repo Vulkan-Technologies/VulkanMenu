@@ -1,18 +1,25 @@
 package com.vulkantechnologies.menu.service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
-import com.vulkantechnologies.menu.configuration.MenuConfiguration;
+import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.event.VMenuCloseEvent;
+import com.vulkantechnologies.menu.event.VMenuOpenEvent;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.Menu;
+import com.vulkantechnologies.menu.utils.TaskUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,34 +37,71 @@ public class MenuService {
     }
 
     public void openMenu(Player player, MenuConfiguration configuration) {
-        Menu menu = new Menu(player, configuration);
-        if (!menu.canOpen(player))
-            return;
+        TaskUtils.runSync(() -> {
+            Menu menu = new Menu(player, configuration);
 
-        this.menus.add(menu);
+            // Event & requirements check
+            VMenuOpenEvent event = new VMenuOpenEvent(player, menu);
+            if (!event.callEvent() || !menu.canOpen(player))
+                return;
 
-        player.openInventory(menu.getInventory());
+            // Register
+            this.menus.add(menu);
 
-        Map<String, Action> openActions = configuration.openActions();
-        if (openActions != null)
-            openActions.values().forEach(action -> action.accept(player, menu));
+            // Open
+            Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+                player.openInventory(menu.getInventory());
+                // Actions
+                List<Action> openActions = configuration.openActions();
+                if (openActions != null)
+                    openActions.forEach(action -> action.accept(player, menu));
+            }, 1L);
+        });
     }
 
     public void closeMenu(Player player, Menu menu) {
-        Map<String, Action> closeActions = menu.configuration().closeActions();
+        TaskUtils.runSync(() -> {
+            // Action
+            List<Action> closeActions = menu.configuration().closeActions();
+            if (closeActions != null)
+                closeActions.forEach(action -> action.accept(player, menu));
 
-        if (closeActions != null)
-            closeActions.values().forEach(action -> action.accept(player, menu));
+            // Event
+            new VMenuCloseEvent(player, menu).callEvent();
 
-        Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
+            // Update inventory
+            Bukkit.getScheduler().runTaskLater(plugin, player::updateInventory, 1);
 
-        this.menus.remove(menu);
+            // Remove menu
+            this.menus.remove(menu);
+        });
     }
 
     public Optional<Menu> findByPlayer(Player player) {
         return this.menus.stream()
                 .filter(menu -> menu.player().getUniqueId().equals(player.getUniqueId()))
                 .findFirst();
+    }
+
+    public List<Player> closeAll(MenuConfiguration configuration) {
+        List<Player> players = new ArrayList<>();
+        this.menus.stream()
+                .filter(menu -> menu.configuration().equals(configuration))
+                .forEach(menu -> {
+                    Player player = menu.player();
+                    players.add(player);
+
+                    TaskUtils.runSync(player::closeInventory);
+
+                    this.closeMenu(player, menu);
+                });
+        return players;
+    }
+
+    public List<Menu> findById(MenuConfiguration configuration) {
+        return this.menus.stream()
+                .filter(menu -> menu.configuration().equals(configuration))
+                .toList();
     }
 
     public void addMenu(Menu menu) {

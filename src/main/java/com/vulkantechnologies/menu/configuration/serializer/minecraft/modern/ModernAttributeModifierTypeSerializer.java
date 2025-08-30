@@ -1,4 +1,4 @@
-package com.vulkantechnologies.menu.configuration.serializer.minecraft;
+package com.vulkantechnologies.menu.configuration.serializer.minecraft.modern;
 
 import java.lang.reflect.Type;
 
@@ -12,9 +12,9 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import net.kyori.adventure.key.Key;
 
-public class AttributeModifierTypeSerializer implements TypeSerializer<AttributeModifier> {
+public class ModernAttributeModifierTypeSerializer implements TypeSerializer<AttributeModifier> {
 
-    public static final AttributeModifierTypeSerializer INSTANCE = new AttributeModifierTypeSerializer();
+    public static final ModernAttributeModifierTypeSerializer INSTANCE = new ModernAttributeModifierTypeSerializer();
 
     @Override
     public AttributeModifier deserialize(Type type, ConfigurationNode node) throws SerializationException {
