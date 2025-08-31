@@ -8,7 +8,7 @@ public class CompactIntegerAdapter implements CompactAdapter<Integer> {
     public static final CompactIntegerAdapter INSTANCE = new CompactIntegerAdapter();
 
     @Override
-    public Integer adapt(CompactContext context) {
+    public Integer deserialize(CompactContext context) {
         String raw = context.popFirstArg();
 
         try {
@@ -16,6 +16,11 @@ public class CompactIntegerAdapter implements CompactAdapter<Integer> {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid integer value: " + raw, e);
         }
+    }
+
+    @Override
+    public String serialize(Integer object) {
+        return object.toString();
     }
 
     @Override

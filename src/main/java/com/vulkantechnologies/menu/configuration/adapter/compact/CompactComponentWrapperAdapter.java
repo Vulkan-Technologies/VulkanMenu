@@ -11,7 +11,7 @@ public class CompactComponentWrapperAdapter implements CompactAdapter<ComponentW
     public static final CompactComponentWrapperAdapter INSTANCE = new CompactComponentWrapperAdapter();
 
     @Override
-    public ComponentWrapper adapt(CompactContext context) {
+    public ComponentWrapper deserialize(CompactContext context) {
         if (context.hasConstructor() && context.constructor().parameters().size() > 1) {
             WrappedConstructorParameter parameter = context.constructor().parameters().get(context.index());
             if (parameter.hasAnnotation(Single.class))
@@ -19,6 +19,11 @@ public class CompactComponentWrapperAdapter implements CompactAdapter<ComponentW
         }
 
         return new ComponentWrapper(context.remainingArgs());
+    }
+
+    @Override
+    public String serialize(ComponentWrapper object) {
+        return object.content();
     }
 
     @Override

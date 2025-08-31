@@ -10,7 +10,7 @@ public class CompactTitleWrapperAdapter implements CompactAdapter<TitleWrapper> 
     public static final CompactTitleWrapperAdapter INSTANCE = new CompactTitleWrapperAdapter();
 
     @Override
-    public TitleWrapper adapt(CompactContext context) {
+    public TitleWrapper deserialize(CompactContext context) {
         String title;
         String subTitle = null;
         int fadeIn = 10;
@@ -37,6 +37,17 @@ public class CompactTitleWrapperAdapter implements CompactAdapter<TitleWrapper> 
                 fadeIn,
                 stay,
                 fadeOut
+        );
+    }
+
+    @Override
+    public String serialize(TitleWrapper object) {
+        return "%s;%s;%d;%d;%d".formatted(
+                object.title().content(),
+                object.subtitle() == null ? "" : object.subtitle().content(),
+                object.fadeIn(),
+                object.stay(),
+                object.fadeOut()
         );
     }
 

@@ -8,7 +8,7 @@ public class CompactDoubleAdapter implements CompactAdapter<Double> {
     public static final CompactDoubleAdapter INSTANCE = new CompactDoubleAdapter();
 
     @Override
-    public Double adapt(CompactContext context) {
+    public Double deserialize(CompactContext context) {
         String raw = context.popFirstArg();
 
         try {
@@ -16,6 +16,11 @@ public class CompactDoubleAdapter implements CompactAdapter<Double> {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid double value: " + raw, e);
         }
+    }
+
+    @Override
+    public String serialize(Double object) {
+        return object.toString();
     }
 
     @Override

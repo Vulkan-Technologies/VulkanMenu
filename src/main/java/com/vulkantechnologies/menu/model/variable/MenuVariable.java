@@ -21,7 +21,7 @@ public class MenuVariable<T> implements TagResolver.Single {
     private T value;
 
     public MenuVariable<T> value(String value) {
-        this.value = this.adapter.adapt(new CompactContext(value));
+        this.value = this.adapter.deserialize(new CompactContext(value));
         return this;
     }
 

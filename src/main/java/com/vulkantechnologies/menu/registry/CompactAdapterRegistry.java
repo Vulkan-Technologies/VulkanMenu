@@ -29,6 +29,13 @@ public class CompactAdapterRegistry {
         this.adapters.remove(type);
     }
 
+    public Optional<CompactAdapter<?>> findByClass(Class<?> clazz) {
+        return this.adapters.values()
+                .stream()
+                .filter(adapter -> adapter.type().isAssignableFrom(clazz))
+                .findFirst();
+    }
+
     public Optional<CompactAdapter<?>> findEntry(Predicate<CompactAdapter<?>> predicate) {
         return this.adapters.values()
                 .stream()

@@ -45,7 +45,6 @@ public class InventoryPacketListener extends SimplePacketListenerAbstract {
             WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event);
 
             int slot = packet.getSlot();
-            System.out.println("Set Slot Packet Slot: " + slot);
             this.handle(player, menu -> {
                 if (slot >= menu.cachedItems().length || slot < menu.configuration().size())
                     return;

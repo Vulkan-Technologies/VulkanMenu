@@ -58,7 +58,26 @@ public class MenuItemTypeSerializer implements TypeSerializer<MenuItem> {
 
     @Override
     public void serialize(@NotNull Type type, @Nullable MenuItem obj, @NotNull ConfigurationNode node) throws SerializationException {
+        if (obj == null) {
+            node.raw(null);
+            return;
+        }
 
+        node.node("slot").set(obj.slot());
+        node.node("priority").set(obj.priority());
+        node.set(obj.item());
+        node.node("actions").setList(Action.class, obj.actions());
+        node.node("right-click-actions").setList(Action.class, obj.rightClickActions());
+        node.node("left-click-actions").setList(Action.class, obj.leftClickActions());
+        node.node("middle-click-actions").setList(Action.class, obj.middleClickActions());
+        node.node("left-shift-click-actions").setList(Action.class, obj.leftShiftClickActions());
+        node.node("right-shift-click-actions").setList(Action.class, obj.rightShiftClickActions());
+        node.node("view-requirements").setList(Requirement.class, obj.viewRequirements());
+
+        ConfigurationNode clickReqNode = node.node("click-requirements");
+        for (Map.Entry<String, RequirementWrapper> entry : obj.clickRequirements().entrySet()) {
+            clickReqNode.node(entry.getKey()).set(entry.getValue());
+        }
     }
 
     private Map<String, RequirementWrapper> deserializeRequirements(ConfigurationNode node, String id) throws SerializationException {

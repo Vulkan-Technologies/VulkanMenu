@@ -4,7 +4,9 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -17,22 +19,36 @@ import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.importer.ConfigurationImporter;
 import com.vulkantechnologies.menu.model.menu.ItemSlot;
 import com.vulkantechnologies.menu.model.menu.MenuItem;
+import com.vulkantechnologies.menu.model.provider.ItemStackProvider;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
+import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
+import com.vulkantechnologies.menu.model.requirement.minecraft.HasMetaRequirement;
+import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
+import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
+import com.vulkantechnologies.menu.model.requirement.vault.MoneyRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.CompareRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.ContainsRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
+import com.vulkantechnologies.menu.model.requirement.vulkan.StringLengthRequirement;
 import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
+import com.vulkantechnologies.menu.utils.ComponentUtils;
 
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.key.Key;
 
 @RequiredArgsConstructor
 public class DeluxeMenuImporter implements ConfigurationImporter {
+
 
     private final VulkanMenu plugin;
 
     @Override
     public MenuConfiguration process(CommentedConfigurationNode node) {
-        MenuConfiguration.MenuConfigurationBuilder builder = MenuConfiguration.builder();
+        MenuConfiguration.MenuConfigurationBuilder builder = MenuConfiguration.builder()
+                .variables(new HashMap<>());
 
         // Size
         CommentedConfigurationNode sizeNode = node.node("size");
@@ -46,7 +62,7 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
             throw new IllegalArgumentException("Title is required");
         try {
             String title = titleNode.getString();
-            builder.title(new ComponentWrapper(title));
+            builder.title(new ComponentWrapper(ComponentUtils.legacyToMiniMessage(title)));
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse title", e);
         }
@@ -56,65 +72,42 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
         if (!openCommandNode.virtual()) {
             CommandConfiguration.CommandConfigurationBuilder commandBuilder = CommandConfiguration.builder();
 
-            // Handle single command string or command object
-            if (openCommandNode.isMap()) {
-                CommentedConfigurationNode nameNode = openCommandNode.node("command");
-                if (!nameNode.virtual()) {
-                    commandBuilder.name(nameNode.getString());
-                }
+            if (openCommandNode.isList()) {
+                try {
+                    List<String> commands = openCommandNode.getList(String.class);
+                    if (commands != null && !commands.isEmpty()) {
+                        String firstCommand = commands.get(0);
+                        commandBuilder.name(firstCommand);
 
-                CommentedConfigurationNode aliasesNode = openCommandNode.node("aliases");
-                if (!aliasesNode.virtual() && aliasesNode.isList()) {
-                    try {
-                        List<String> aliases = aliasesNode.getList(String.class);
-                        if (aliases != null && !aliases.isEmpty()) {
-                            commandBuilder.aliases(aliases);
-                        }
-                    } catch (SerializationException e) {
-                        plugin.getLogger().warning("Failed to parse command aliases: " + e.getMessage());
+                        if (commands.size() > 1)
+                            commandBuilder.aliases(commands.subList(1, commands.size()));
                     }
-                }
-
-                CommentedConfigurationNode permissionNode = openCommandNode.node("permission");
-                if (!permissionNode.virtual()) {
-                    commandBuilder.permission(permissionNode.getString());
+                } catch (SerializationException e) {
+                    throw new RuntimeException("Failed to parse open_command list", e);
                 }
             } else {
                 String openCommand = openCommandNode.getString();
-                if (openCommand != null && !openCommand.isEmpty()) {
+                if (openCommand != null && !openCommand.isEmpty())
                     commandBuilder.name(openCommand);
-                }
             }
 
             builder.openCommand(commandBuilder.build());
         }
 
-        // Open requirements
-        CommentedConfigurationNode openRequirementsNode = node.node("open_requirements");
-        if (!openRequirementsNode.virtual()) {
-            Map<String, RequirementWrapper> openRequirements = parseRequirements(openRequirementsNode);
-            if (!openRequirements.isEmpty()) {
-                builder.openRequirements(openRequirements);
-            }
-        }
-
         // Open actions
-        CommentedConfigurationNode openActionsNode = node.node("open_actions");
-        if (!openActionsNode.virtual()) {
-            List<Action> openActions = parseActions(openActionsNode);
-            if (!openActions.isEmpty()) {
-                builder.openActions(openActions);
-            }
-        }
+        CommentedConfigurationNode openActionNode = node.node("open_commands");
+        if (!openActionNode.virtual())
+            builder.openActions(parseActions(openActionNode));
+
+        // Open requirements
+        CommentedConfigurationNode openRequirementsNode = node.node("open_requirement");
+        if (!openRequirementsNode.virtual())
+            builder.openRequirements(parseRequirements(openRequirementsNode));
 
         // Close actions
         CommentedConfigurationNode closeActionsNode = node.node("close_actions");
-        if (!closeActionsNode.virtual()) {
-            List<Action> closeActions = parseActions(closeActionsNode);
-            if (!closeActions.isEmpty()) {
-                builder.closeActions(closeActions);
-            }
-        }
+        if (!closeActionsNode.virtual())
+            builder.closeActions(parseActions(closeActionsNode));
 
         // Items
         CommentedConfigurationNode itemsNode = node.node("items");
@@ -128,7 +121,7 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
                         items.put(key.toString(), item);
                     }
                 } catch (Exception e) {
-                    plugin.getLogger().warning("Failed to parse item " + key + ": " + e.getMessage());
+                    plugin.getSLF4JLogger().warn("Failed to parse item {}: ", key, e);
                 }
             });
 
@@ -142,14 +135,14 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
         // Parse slot(s)
         ItemSlot slot = parseSlot(node);
         if (slot == null) {
-            plugin.getLogger().warning("Item " + id + " has no valid slot");
+            plugin.getSLF4JLogger().warn("Item '{}' has no valid slot", id);
             return null;
         }
 
         // Parse item wrapper
         ItemWrapper itemWrapper = parseItemWrapper(node);
         if (itemWrapper == null) {
-            plugin.getLogger().warning("Item " + id + " has no valid material");
+            plugin.getSLF4JLogger().warn("Item '{}' has no valid material", id);
             return null;
         }
 
@@ -158,14 +151,14 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
 
         // Parse actions for different click types
         List<Action> actions = parseActions(node.node("actions"));
-        List<Action> leftClickActions = parseActions(node.node("left_click_actions"));
-        List<Action> rightClickActions = parseActions(node.node("right_click_actions"));
-        List<Action> middleClickActions = parseActions(node.node("middle_click_actions"));
-        List<Action> leftShiftClickActions = parseActions(node.node("shift_left_click_actions"));
-        List<Action> rightShiftClickActions = parseActions(node.node("shift_right_click_actions"));
+        List<Action> leftClickActions = parseActions(node.node("left_click_commands"));
+        List<Action> rightClickActions = parseActions(node.node("right_click_commands"));
+        List<Action> middleClickActions = parseActions(node.node("middle_click_commands"));
+        List<Action> leftShiftClickActions = parseActions(node.node("shift_left_click_commands"));
+        List<Action> rightShiftClickActions = parseActions(node.node("shift_right_click_commands"));
 
         // Parse view requirements
-        List<Requirement> viewRequirements = parseViewRequirements(node.node("view_requirements"));
+        Map<String, RequirementWrapper> viewRequirements = parseRequirements(node.node("view_requirement"));
 
         // Parse click requirements
         Map<String, RequirementWrapper> clickRequirements = parseRequirements(node.node("click_requirements"));
@@ -181,7 +174,11 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
                 middleClickActions.isEmpty() ? null : middleClickActions,
                 leftShiftClickActions.isEmpty() ? null : leftShiftClickActions,
                 rightShiftClickActions.isEmpty() ? null : rightShiftClickActions,
-                viewRequirements.isEmpty() ? null : viewRequirements,
+                viewRequirements.isEmpty() ? null : viewRequirements.values()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(RequirementWrapper::requirement)
+                        .collect(Collectors.toList()),
                 clickRequirements
         );
     }
@@ -205,7 +202,7 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
                     return ItemSlot.of(Collections.singletonList(slot));
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to parse slot: " + e.getMessage());
+                plugin.getSLF4JLogger().warn("Failed to parse slot: ", e);
             }
         } else if (!slotsNode.virtual()) {
             try {
@@ -226,7 +223,7 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
                     }
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to parse slots: " + e.getMessage());
+                plugin.getSLF4JLogger().warn("Failed to parse slots: ", e);
             }
         }
 
@@ -244,22 +241,28 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
             return null;
         }
 
-        String materialStr = materialNode.getString();
-        if (materialStr == null) {
+        String rawMaterial = materialNode.getString();
+        if (rawMaterial == null)
             return null;
-        }
 
-        Material material;
-        try {
-            material = Material.valueOf(materialStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            plugin.getLogger().warning("Unknown material: " + materialStr);
-            return null;
+        ItemStack item;
+        if (rawMaterial.contains("-")) {
+            String[] materialParts = rawMaterial.split("-");
+            ItemStackProvider provider;
+            try {
+                String rawProvider = materialParts[0];
+                provider = Registries.ITEM_PROVIDERS.findByPrefix(rawProvider)
+                        .orElseThrow(() -> new SerializationException("Invalid item provider: " + materialParts[0]));
+                item = provider.provide(materialParts[1]);
+            } catch (SerializationException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Material material = Registry.MATERIAL.getOrThrow(Key.key(materialNode.getString().toLowerCase()));
+            item = new ItemStack(material);
         }
-
 
         ItemWrapper.ItemWrapperBuilder builder = ItemWrapper.builder();
-        ItemStack item = new ItemStack(material);
 
         // Parse amount
         CommentedConfigurationNode amountNode = node.node("amount");
@@ -275,7 +278,7 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
         if (!nameNode.virtual()) {
             String name = nameNode.getString();
             if (name != null) {
-                builder.displayName(name);
+                builder.displayName(ComponentUtils.legacyToMiniMessage(name));
             }
         }
 
@@ -285,10 +288,12 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
             try {
                 List<String> loreStrings = loreNode.getList(String.class);
                 if (loreStrings != null && !loreStrings.isEmpty()) {
-                    builder.lore(loreStrings);
+                    builder.lore(loreStrings.stream()
+                            .map(ComponentUtils::legacyToMiniMessage)
+                            .collect(Collectors.toList()));
                 }
             } catch (SerializationException e) {
-                plugin.getLogger().warning("Failed to parse lore: " + e.getMessage());
+                plugin.getSLF4JLogger().warn("Failed to parse lore: ", e);
             }
         }
 
@@ -320,111 +325,118 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
     private List<Action> parseActions(CommentedConfigurationNode node) {
         List<Action> actions = new ArrayList<>();
 
-        if (node.virtual()) {
+        if (node.virtual() || !node.isList())
             return actions;
-        }
 
-        if (node.isList()) {
-            try {
-                List<String> actionStrings = node.getList(String.class);
-                if (actionStrings != null) {
-                    for (String actionStr : actionStrings) {
-                        String converted = convertDeluxeMenuAction(actionStr);
-                        if (converted != null) {
-                            try {
-                                // Create a temporary node with the converted action string
-                                CommentedConfigurationNode tempNode = CommentedConfigurationNode.root();
-                                tempNode.set(converted);
-                                
-                                // Parse the action using the MenuComponentTypeSerializer
-                                MenuComponentTypeSerializer<Action> serializer = 
-                                    new MenuComponentTypeSerializer<>(Registries.ACTION, Registries.ACTION_ADAPTER);
-                                Action action = serializer.deserialize(Action.class, tempNode);
-                                if (action != null) {
-                                    actions.add(action);
-                                    plugin.getLogger().fine("Successfully parsed action: " + converted);
-                                }
-                            } catch (SerializationException e) {
-                                plugin.getLogger().warning("Failed to parse action '" + actionStr + "': " + e.getMessage());
-                            }
-                        }
-                    }
+        try {
+            List<String> actionStrings = node.getList(String.class);
+            if (actionStrings == null)
+                return actions;
+
+            for (String actionStr : actionStrings) {
+                String converted = convertDeluxeMenuAction(actionStr);
+                if (converted == null)
+                    continue;
+
+                converted = ComponentUtils.legacyToMiniMessage(converted);
+
+                try {
+                    // Create a temporary node with the converted action string
+                    CommentedConfigurationNode tempNode = CommentedConfigurationNode.root();
+                    tempNode.set(converted);
+
+                    // Parse the action using the MenuComponentTypeSerializer
+                    MenuComponentTypeSerializer<Action> serializer = new MenuComponentTypeSerializer<>(Registries.ACTION, Registries.ACTION_ADAPTER);
+                    Action action = serializer.deserialize(Action.class, tempNode);
+                    if (action == null)
+                        continue;
+
+                    actions.add(action);
+                    plugin.getLogger().fine("Successfully parsed action: " + converted);
+                } catch (SerializationException e) {
+                    plugin.getSLF4JLogger().warn("Failed to parse action '{}': ", actionStr, e);
                 }
-            } catch (SerializationException e) {
-                plugin.getLogger().warning("Failed to parse actions: " + e.getMessage());
             }
+        } catch (SerializationException e) {
+            plugin.getSLF4JLogger().warn("Failed to parse actions: ", e);
         }
 
         return actions;
     }
 
-    private List<Requirement> parseViewRequirements(CommentedConfigurationNode node) {
-        List<Requirement> requirements = new ArrayList<>();
-
-        if (node.virtual()) {
-            return requirements;
-        }
-
-        if (node.isList()) {
-            try {
-                List<String> requirementStrings = node.getList(String.class);
-                if (requirementStrings != null) {
-                    for (String reqStr : requirementStrings) {
-                        String converted = convertDeluxeMenuRequirement(reqStr);
-                        if (converted != null) {
-                            try {
-                                CommentedConfigurationNode tempNode = CommentedConfigurationNode.root();
-                                tempNode.set(converted);
-                                
-                                MenuComponentTypeSerializer<Requirement> serializer = 
-                                    new MenuComponentTypeSerializer<>(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER);
-                                Requirement requirement = serializer.deserialize(Requirement.class, tempNode);
-                                if (requirement != null) {
-                                    requirements.add(requirement);
-                                    plugin.getLogger().fine("Successfully parsed requirement: " + converted);
-                                }
-                            } catch (SerializationException e) {
-                                plugin.getLogger().warning("Failed to parse requirement '" + reqStr + "': " + e.getMessage());
-                            }
-                        }
-                    }
-                }
-            } catch (SerializationException e) {
-                plugin.getLogger().warning("Failed to parse view requirements: " + e.getMessage());
-            }
-        }
-
-        return requirements;
-    }
-
     private Map<String, RequirementWrapper> parseRequirements(CommentedConfigurationNode node) {
         Map<String, RequirementWrapper> requirements = new HashMap<>();
-
-        if (node.virtual()) {
+        if (node.virtual())
             return requirements;
-        }
 
-        node.childrenMap().forEach((key, reqNode) -> {
-            try {
-                CommentedConfigurationNode requirementNode = reqNode.node("requirement");
-                CommentedConfigurationNode denyActionsNode = reqNode.node("deny_actions");
+        CommentedConfigurationNode requirementsNode = node.node("requirements");
+        if (requirementsNode.childrenMap().isEmpty())
+            return requirements;
 
-                if (!requirementNode.virtual()) {
-                    String reqStr = requirementNode.getString();
-                    if (reqStr != null) {
-                        String converted = convertDeluxeMenuRequirement(reqStr);
-                        if (converted != null) {
-                            // Parse deny actions
-                            List<Action> denyActions = parseActions(denyActionsNode);
+        for (Map.Entry<Object, CommentedConfigurationNode> entry : requirementsNode.childrenMap().entrySet()) {
+            String key = entry.getKey().toString();
+            CommentedConfigurationNode requirementNode = entry.getValue();
 
-                            plugin.getLogger().info("Parsed requirement " + key + ": " + converted);
-                        }
-                    }
+            String type = requirementNode.node("type").getString();
+            Requirement requirement = switch (type) {
+                case "has permission" -> new PermissionRequirement(requirementNode.node("permission").getString());
+                case "has money" -> new MoneyRequirement(requirementNode.node("amount").getDouble(0));
+                case "has meta" ->
+                        new HasMetaRequirement(requirementNode.node("key").getString(), requirementNode.node("meta_type").getString("STRING"));
+                case "has exp" -> new ExperienceRequirement(requirementNode.node("amount").getInt(0));
+                case "is near" -> {
+                    String rawLocation = requirementNode.node("location").getString();
+                    double distance = requirementNode.node("distance").getDouble(0);
+
+                    Location location;
+                    String[] parts = rawLocation != null ? rawLocation.split(",") : new String[0];
+                    if (parts.length == 4) {
+                        String worldName = parts[0].trim();
+                        double x = Double.parseDouble(parts[1].trim());
+                        double y = Double.parseDouble(parts[2].trim());
+                        double z = Double.parseDouble(parts[3].trim());
+                        location = new Location(plugin.getServer().getWorld(worldName), x, y, z);
+                    } else
+                        throw new RuntimeException("Invalid location: " + rawLocation);
+
+                    yield new IsNearRequirement(location, distance);
                 }
-            } catch (Exception e) {
-                plugin.getLogger().warning("Failed to parse requirement " + key + ": " + e.getMessage());
-            }
-        });
+                case "string equals" -> {
+                    String input = requirementNode.node("input").getString();
+                    String compareTo = requirementNode.node("output").getString();
+
+                    yield new CompareRequirement("%s == %s".formatted(input, compareTo));
+                }
+                case "string contains" ->
+                        new ContainsRequirement(requirementsNode.node("input").getString(), requirementNode.node("output").getString());
+                case "string length" ->
+                        new StringLengthRequirement(requirementsNode.node("min").getInt(0), requirementsNode.node("max").getInt(Integer.MAX_VALUE), requirementNode.node("input").getString());
+                case "regex matches" ->
+                        new RegexRequirement(node.node("regex").getString(), requirementNode.node("input").getString());
+                case "==" ->
+                        new CompareRequirement("%s == %s".formatted(requirementNode.node("input").getString(), requirementNode.node("output").getString()));
+                case "!=" ->
+                        new CompareRequirement("%s != %s".formatted(requirementNode.node("input").getString(), requirementNode.node("output").getString()));
+                case ">=", "=>" ->
+                        new CompareRequirement("%s >= %s".formatted(requirementNode.node("input").getString(), requirementNode.node("output").getString()));
+                case "<=", "=<" ->
+                        new CompareRequirement("%s <= %s".formatted(requirementNode.node("input").getString(), requirementNode.node("output").getString()));
+                case ">" ->
+                        new CompareRequirement("%s > %s".formatted(requirementNode.node("input").getString(), requirementNode.node("output").getString()));
+                case "<" ->
+                        new CompareRequirement("%s < %s".formatted(requirementNode.node("input").getString(), requirementNode.node("output").getString()));
+                default -> {
+                    this.plugin.getSLF4JLogger().warn("Unknown requirement type: {}", type);
+                    yield null;
+                    // throw new IllegalArgumentException("Invalid requirement type: " + type);
+                }
+            };
+            if (requirement == null)
+                continue;
+
+            CommentedConfigurationNode denyActionsNode = requirementNode.node("deny_commands");
+            requirements.put(key, new RequirementWrapper(requirement, parseActions(denyActionsNode)));
+        }
 
         return requirements;
     }
@@ -436,7 +448,7 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
 
         // DeluxeMenus actions typically use format: [action_type] data
         // Most VulkanMenu actions use the same format
-        
+
         // Direct mappings (already compatible)
         if (deluxeAction.startsWith("[message]") ||
             deluxeAction.startsWith("[player]") ||
@@ -445,10 +457,9 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
             deluxeAction.startsWith("[sound]") ||
             deluxeAction.startsWith("[broadcast]") ||
             deluxeAction.startsWith("[title]") ||
-            deluxeAction.startsWith("[teleport]")) {
+            deluxeAction.startsWith("[teleport]"))
             return deluxeAction;  // These are already correct
-        }
-        
+
         // Actions that need conversion
         if (deluxeAction.startsWith("[openguimenu]")) {
             String menuName = deluxeAction.replace("[openguimenu]", "").trim();
@@ -459,42 +470,17 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
             // Server connection - not directly supported in VulkanMenu
             plugin.getLogger().warning("Server connection action not supported: " + deluxeAction);
             return null;
+        } else if (deluxeAction.startsWith("[takemoney]")) {
+            String amountStr = deluxeAction.replace("[takemoney]", "").trim();
+            return "[withdraw-money] " + amountStr;
+        } else if (deluxeAction.startsWith("[givemoney]")) {
+            String amountStr = deluxeAction.replace("[givemoney]", "").trim();
+            return "[deposit-money] " + amountStr;
         }
 
         // If no mapping found, try to use it as-is (might be a custom action)
         plugin.getLogger().fine("Using unknown action as-is: " + deluxeAction);
         return deluxeAction;
-    }
-
-    private String convertDeluxeMenuRequirement(String deluxeRequirement) {
-        if (deluxeRequirement == null || deluxeRequirement.isEmpty()) {
-            return null;
-        }
-
-        // Common requirement mappings
-        if (deluxeRequirement.startsWith("has permission:")) {
-            String permission = deluxeRequirement.replace("has permission:", "").trim();
-            return "[permission] " + permission;
-        } else if (deluxeRequirement.startsWith("has money:")) {
-            // Vault economy requirement - would need vault hook
-            return null;
-        } else if (deluxeRequirement.startsWith("has level:")) {
-            String level = deluxeRequirement.replace("has level:", "").trim();
-            return "[experience] " + level;
-        } else if (deluxeRequirement.startsWith("string equals:")) {
-            // String comparison requirement
-            return null;
-        } else if (deluxeRequirement.startsWith("string contains:")) {
-            String value = deluxeRequirement.replace("string contains:", "").trim();
-            return "[contains] " + value;
-        } else if (deluxeRequirement.startsWith("regex matches:")) {
-            String pattern = deluxeRequirement.replace("regex matches:", "").trim();
-            return "[regex] " + pattern;
-        }
-
-        // If no mapping found, log it
-        plugin.getLogger().warning("Unknown DeluxeMenus requirement type: " + deluxeRequirement);
-        return null;
     }
 
     @Override
@@ -504,14 +490,18 @@ public class DeluxeMenuImporter implements ConfigurationImporter {
 
     @Override
     public Path dataFolder() {
-        return this.plugin.getDataPath()
-                .getParent()
+        return this.plugin.getDataFolder()
+                .toPath()
+                .resolve("menus")
                 .resolve(this.pluginName());
     }
 
     @Override
     public Path menusFolder() {
-        return this.dataFolder()
+        return this.plugin.getDataFolder()
+                .toPath()
+                .getParent()
+                .resolve(this.pluginName())
                 .resolve("gui_menus");
     }
 }

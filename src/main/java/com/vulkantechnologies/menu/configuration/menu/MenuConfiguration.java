@@ -43,29 +43,29 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
     public boolean validate(VulkanMenu plugin) {
         // Size validation
         if (this.size % 9 != 0) {
-            plugin.getLogger().warning("Menu size must be a multiple of 9.");
+            plugin.getSLF4JLogger().warn("Menu size must be a multiple of 9.");
             return false;
         } else if (this.size > 54) {
-            plugin.getLogger().warning("Menu size must be less than or equal to 54.");
+            plugin.getSLF4JLogger().warn("Menu size must be less than or equal to 54.");
             return false;
         } else if (this.size <= 0) {
-            plugin.getLogger().warning("Menu size must be greater than 0.");
+            plugin.getSLF4JLogger().warn("Menu size must be greater than 0.");
             return false;
         }
 
         // Title validation
         if (this.title == null) {
-            plugin.getLogger().warning("Menu title cannot be null.");
+            plugin.getSLF4JLogger().warn("Menu title cannot be null.");
             return false;
         } else if (this.title.toString().isEmpty()) {
-            plugin.getLogger().warning("Menu title cannot be empty.");
+            plugin.getSLF4JLogger().warn("Menu title cannot be empty.");
             return false;
         }
 
         // Open command validation
         if (this.openCommand != null && this.openCommand.name() != null) {
             if (this.openCommand.name().isEmpty()) {
-                plugin.getLogger().warning("Menu open command name cannot be null or empty.");
+                plugin.getSLF4JLogger().warn("Menu open command name cannot be null or empty.");
                 return false;
             }
         }
@@ -77,13 +77,11 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
                 String value = entry.getValue();
 
                 if (!Key.parseable(name)) {
-                    plugin.getLogger().warning("Variable name '" + name + "' is not a valid Key.");
+                    plugin.getSLF4JLogger().warn("Variable name '{}' is not a valid Key.", name);
                     this.variables.remove(name);
-                    continue;
                 } else if (value == null || value.isEmpty()) {
-                    plugin.getLogger().warning("Variable value for '" + name + "' cannot be null or empty.");
+                    plugin.getSLF4JLogger().warn("Variable value for '{}' cannot be null or empty.", name);
                     this.variables.remove(name);
-                    continue;
                 }
             }
 

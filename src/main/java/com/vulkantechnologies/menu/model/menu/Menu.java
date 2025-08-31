@@ -55,7 +55,7 @@ public class Menu implements InventoryHolder {
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
 
-            this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
+            this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.deserialize(new CompactContext(value))));
         });
 
         this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));

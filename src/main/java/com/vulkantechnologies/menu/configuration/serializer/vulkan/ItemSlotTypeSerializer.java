@@ -35,6 +35,16 @@ public class ItemSlotTypeSerializer implements TypeSerializer<ItemSlot> {
 
     @Override
     public void serialize(@NotNull Type type, @Nullable ItemSlot obj, @NotNull ConfigurationNode node) throws SerializationException {
-
+        if (obj == null)
+            node.raw(null);
+        else if (!obj.slots().isEmpty()) {
+            if (obj.slots().size() == 1)
+                node.raw(obj.slots().iterator().next());
+            else
+                node.setList(Integer.class, obj.slots());
+        } else if (obj.placeholder() != null)
+            node.raw(obj.placeholder());
+        else
+            node.raw(obj.slot());
     }
 }

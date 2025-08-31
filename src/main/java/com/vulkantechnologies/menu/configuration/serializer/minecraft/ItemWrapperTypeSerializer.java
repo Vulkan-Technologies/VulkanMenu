@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vulkantechnologies.menu.utils.Version;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -22,6 +21,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 import com.vulkantechnologies.menu.model.provider.ItemStackProvider;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
+import com.vulkantechnologies.menu.utils.Version;
 
 public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
@@ -127,6 +127,70 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
     @Override
     public void serialize(@NotNull Type type, @Nullable ItemWrapper obj, @NotNull ConfigurationNode node) throws SerializationException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (obj == null) {
+            node.raw(null);
+            return;
+        }
+
+        ItemStack item = obj.itemStack();
+        node.node("material").set(item.getType().key().asMinimalString());
+
+        if (item.getAmount() != 1)
+            node.node("amount").set(item.getAmount());
+
+        if (obj.displayName() != null)
+            node.node("name").set(obj.displayName());
+
+        if (obj.lore() != null)
+            node.node("lore").setList(String.class, obj.lore());
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null)
+            return;
+
+        if (meta.hasEnchants()) {
+            ConfigurationNode enchantments = node.node("enchantments");
+            meta.getEnchants().forEach((enchantment, integer) -> {
+                ConfigurationNode enchantmentNode = enchantments.appendListNode();
+                try {
+                    enchantmentNode.node("enchantment").set(enchantment);
+                    enchantmentNode.node("level").set(integer);
+                } catch (SerializationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
+        if (meta.isUnbreakable())
+            node.node("unbreakable").set(true);
+
+        if (Version.CURRENT.more(Version.V_1_20_5)) {
+            if (meta.hasMaxStackSize() && meta.getMaxStackSize() != 64)
+                node.node("max-stack-size").set(meta.getMaxStackSize());
+
+            if (meta.isHideTooltip())
+                node.node("hide-tooltip").set(true);
+
+            if (meta.hasEnchantmentGlintOverride())
+                node.node("enchantment-glint-override").set(meta.hasEnchantmentGlintOverride());
+        }
+
+        if (meta.hasCustomModelData())
+            node.node("custom-model-data").set(meta.getCustomModelData());
+
+        if (!meta.getItemFlags().isEmpty())
+            node.node("item-flags").setList(ItemFlag.class, List.copyOf(meta.getItemFlags()));
+
+        if (meta.getAttributeModifiers() != null && !meta.getAttributeModifiers().isEmpty()) {
+            ConfigurationNode attributes = node.node("attributes");
+            meta.getAttributeModifiers().forEach((attribute, collection) -> {
+                ConfigurationNode attributeNode = attributes.appendListNode();
+                try {
+                    attributeNode.node("attribute").set(attribute);
+                } catch (SerializationException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 }

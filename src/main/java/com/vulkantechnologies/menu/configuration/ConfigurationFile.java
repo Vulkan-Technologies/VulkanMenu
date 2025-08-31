@@ -2,20 +2,20 @@ package com.vulkantechnologies.menu.configuration;
 
 import java.nio.file.Path;
 
-import com.vulkantechnologies.menu.configuration.serializer.minecraft.legacy.LegacyAttributeModifierTypeSerializer;
-import com.vulkantechnologies.menu.utils.Version;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import com.vulkantechnologies.menu.configuration.serializer.adventure.ComponentTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.adventure.KeyTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.minecraft.modern.ModernAttributeModifierTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.EnchantmentTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.ItemWrapperTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.MaterialTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.minecraft.legacy.LegacyAttributeModifierTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.minecraft.modern.ModernAttributeModifierTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.vulkan.ComponentWrapperTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.vulkan.ItemSlotTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.vulkan.MenuComponentTypeSerializer;
@@ -27,6 +27,7 @@ import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
+import com.vulkantechnologies.menu.utils.Version;
 
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -42,6 +43,8 @@ public abstract class ConfigurationFile {
         this.path = path;
         this.loader = YamlConfigurationLoader.builder()
                 .path(path)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(2)
                 .defaultOptions(options -> options.serializers(builder -> {
                     builder
                             .register(Component.class, ComponentTypeSerializer.INSTANCE)

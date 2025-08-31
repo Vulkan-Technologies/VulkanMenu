@@ -1,10 +1,7 @@
 package com.vulkantechnologies.menu.configuration.serializer.vulkan;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,6 +13,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import com.vulkantechnologies.menu.annotation.ComponentName;
+import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.component.MenuComponent;
 import com.vulkantechnologies.menu.model.configuration.WrappedConstructor;
@@ -78,22 +76,22 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
             try {
                 Object argument = parseArgument(context, parameter, finalRaw);
                 if (argument == null && !parameter.type().isAnnotationPresent(Nullable.class))
-                    throw new SerializationException("Argument " + (i + 1) + " (" + parameter.type().getSimpleName() + 
-                        ") cannot be null for component: " + componentName);
+                    throw new SerializationException("Argument " + (i + 1) + " (" + parameter.type().getSimpleName() +
+                                                     ") cannot be null for component: " + componentName);
                 constructorArguments.add(argument);
             } catch (SerializationException e) {
                 throw e; // Re-throw with original message
             } catch (Exception e) {
-                throw new SerializationException(type, "Failed to parse argument " + (i + 1) + " (" + 
-                    parameter.type().getSimpleName() + ") for component " + componentName + ": " + e.getMessage());
+                throw new SerializationException(type, "Failed to parse argument " + (i + 1) + " (" +
+                                                       parameter.type().getSimpleName() + ") for component " + componentName + ": " + e.getMessage());
             }
         }
 
         try {
             return (T) componentConstructor.constructor().newInstance(constructorArguments.toArray());
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new SerializationException(type, "Failed to instantiate component: " + componentName + 
-                " with arguments: " + constructorArguments);
+            throw new SerializationException(type, "Failed to instantiate component: " + componentName +
+                                                   " with arguments: " + constructorArguments);
         }
     }
 
@@ -109,30 +107,66 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
         if (!componentClass.isAnnotationPresent(ComponentName.class)) {
             throw new SerializationException("Component " + componentClass.getName() + " does not have @ComponentName annotation");
         }
-        
+
         ComponentName componentName = componentClass.getAnnotation(ComponentName.class);
         String name = componentName.value();
-        
+
         // Build the serialized string
         StringBuilder builder = new StringBuilder();
-        builder.append("[").append(name).append("]");
-        
-        // Serialize constructor arguments
-        // Note: This is a basic implementation that assumes components store their constructor args
-        // For full serialization, components would need to expose their state or we'd need to use reflection
-        // For now, we'll just store the type tag
-        
+        builder.append("[")
+                .append(name)
+                .append("]")
+                .append(" ");
+
+        Class<? extends MenuComponent> componentType = obj.getClass();
+        for (Field field : componentType.getDeclaredFields()) {
+            field.trySetAccessible();
+            Object value;
+            try {
+                value = field.get(obj);
+            } catch (IllegalAccessException e) {
+                throw new SerializationException("Failed to access field " + field.getName() + " of component " + name);
+            }
+
+            // Get adapter for field type
+            String serializedValue;
+            try {
+                serializedValue = deserialize(value);
+            } catch (Exception e) {
+                throw new SerializationException("Failed to serialize field " + field.getName() + " of component " + name + ": " + e.getMessage());
+            }
+            builder.append(serializedValue).append(" ");
+        }
+
+        if (!builder.isEmpty() && builder.charAt(builder.length() - 1) == ' ')
+            builder.setLength(builder.length() - 1);
+
         node.set(builder.toString());
+    }
+
+    private <T> String deserialize(T value) throws SerializationException {
+        if (value == null)
+            return "null";
+
+        Class<?> valueType = value.getClass();
+        CompactAdapter<T> adapter = Registries.COMPACT_ADAPTER.findByClass(valueType)
+                .map(a -> (CompactAdapter<T>) a)
+                .orElseThrow(() -> new SerializationException("No adapter found for type: " + valueType.getName()));
+
+        try {
+            return adapter.serialize(value);
+        } catch (Exception e) {
+            throw new SerializationException("Failed to serialize value of type " + valueType.getName() + ": " + e.getMessage());
+        }
     }
 
     private Object parseArgument(CompactContext context, WrappedConstructorParameter parameter, String raw) throws SerializationException {
         // Regular deserialization for non-generic types
         if (!parameter.hasGenericType()) {
             try {
-                return parameter.deserializer().adapt(context);
+                return parameter.deserializer().deserialize(context);
             } catch (Exception e) {
-                throw new SerializationException(parameter.type(), "Failed to deserialize argument of type " + 
-                    parameter.type().getSimpleName() + ": " + e.getMessage());
+                throw new SerializationException(parameter.type(), "Failed to deserialize argument of type " + parameter.type().getSimpleName() + ": " + e.getMessage());
             }
         }
 
@@ -140,66 +174,66 @@ public class MenuComponentTypeSerializer<T extends MenuComponent> implements Typ
         if (parameter.type().equals(List.class)) {
             Class<?> elementType = parameter.genericType();
             String remaining = context.remainingArgs();
-            
+
             if (remaining == null || remaining.isEmpty()) {
                 return new ArrayList<>();
             }
-            
+
             // Split by comma for list elements
             return Arrays.stream(remaining.split(","))
                     .map(String::trim)
                     .map(s -> {
                         try {
                             CompactContext elementContext = new CompactContext(s);
-                            return parseArgument(elementContext, 
-                                WrappedConstructorParameter.of(elementType, parameter.annotations(), parameter.deserializer()), s);
+                            return parseArgument(elementContext,
+                                    WrappedConstructorParameter.of(elementType, parameter.annotations(), parameter.deserializer()), s);
                         } catch (SerializationException e) {
                             throw new RuntimeException("Failed to parse list element: " + e.getMessage(), e);
                         }
                     })
                     .collect(Collectors.toList());
         }
-        
+
         if (parameter.type().equals(Map.class)) {
             // Parse Map<K,V> - format: "key1=value1,key2=value2"
             String remaining = context.remainingArgs();
             if (remaining == null || remaining.isEmpty()) {
                 return new HashMap<>();
             }
-            
+
             Map<Object, Object> map = new HashMap<>();
             String[] entries = remaining.split(",");
-            
+
             for (String entry : entries) {
                 String[] keyValue = entry.split("=", 2);
                 if (keyValue.length != 2) {
                     throw new SerializationException("Invalid map entry format: " + entry + ". Expected 'key=value'");
                 }
-                
+
                 // For simplicity, assuming String keys and values
                 // A full implementation would need to handle generic key/value types
                 map.put(keyValue[0].trim(), keyValue[1].trim());
             }
-            
+
             return map;
         }
-        
+
         if (parameter.type().equals(Set.class)) {
             // Parse Set<T> - similar to List but return as Set
             Class<?> elementType = parameter.genericType();
             String remaining = context.remainingArgs();
-            
+
             if (remaining == null || remaining.isEmpty()) {
                 return new HashSet<>();
             }
-            
+
             return Arrays.stream(remaining.split(","))
                     .map(String::trim)
                     .map(s -> {
                         try {
                             CompactContext elementContext = new CompactContext(s);
-                            return parseArgument(elementContext, 
-                                WrappedConstructorParameter.of(elementType, parameter.annotations(), parameter.deserializer()), s);
+                            return parseArgument(elementContext,
+                                    WrappedConstructorParameter.of(elementType, parameter.annotations(), parameter.deserializer()), s);
                         } catch (SerializationException e) {
                             throw new RuntimeException("Failed to parse set element: " + e.getMessage(), e);
                         }

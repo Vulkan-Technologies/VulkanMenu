@@ -8,13 +8,18 @@ public class CompactBooleanAdapter implements CompactAdapter<Boolean> {
     public static final CompactBooleanAdapter INSTANCE = new CompactBooleanAdapter();
 
     @Override
-    public Boolean adapt(CompactContext context) {
+    public Boolean deserialize(CompactContext context) {
         String raw = context.popFirstArg();
         try {
             return Boolean.parseBoolean(raw);
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid boolean value: " + raw, e);
         }
+    }
+
+    @Override
+    public String serialize(Boolean object) {
+        return object.toString();
     }
 
     @Override

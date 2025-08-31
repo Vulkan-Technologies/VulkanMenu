@@ -10,7 +10,7 @@ import com.vulkantechnologies.menu.model.menu.Menu;
 
 import net.milkbowl.vault.economy.Economy;
 
-@ComponentName("withdraw")
+@ComponentName("withdraw-money")
 public class WithdrawMoneyAction extends HookAction<VaultPluginHook> {
 
     private final double amount;

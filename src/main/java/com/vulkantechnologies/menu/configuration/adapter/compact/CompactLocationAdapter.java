@@ -12,7 +12,7 @@ public class CompactLocationAdapter implements CompactAdapter<Location> {
     public static final CompactLocationAdapter INSTANCE = new CompactLocationAdapter();
 
     @Override
-    public Location adapt(CompactContext context) {
+    public Location deserialize(CompactContext context) {
         // Check initial argument count
         int initialArgCount = context.remainingArgCount();
         if (initialArgCount < 4)
@@ -46,6 +46,13 @@ public class CompactLocationAdapter implements CompactAdapter<Location> {
             throw new IllegalArgumentException("World not found: " + worldName);
 
         return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    @Override
+    public String serialize(Location object) {
+        if (object.getYaw() == 0 && object.getPitch() == 0)
+            return String.format("%f %f %f %s", object.getX(), object.getY(), object.getZ(), object.getWorld().getName());
+        return String.format("%f %f %f %f %f %s", object.getX(), object.getY(), object.getZ(), object.getYaw(), object.getPitch(), object.getWorld().getName());
     }
 
     @Override

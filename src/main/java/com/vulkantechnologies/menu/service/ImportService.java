@@ -36,7 +36,7 @@ public class ImportService {
         }
 
         this.plugin.getLogger().info("Importing menus from " + menuFolder);
-        Path dataFolder = this.plugin.getDataPath().resolve(importer.dataFolder());
+        Path dataFolder = importer.dataFolder();
         if (!Files.isDirectory(dataFolder)) {
             try {
                 Files.createDirectories(dataFolder);
@@ -49,6 +49,8 @@ public class ImportService {
             pathStream.filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".yml") || path.toString().endsWith(".yaml"))
                     .forEach(path -> {
+                        String fileName = path.getFileName().toString();
+
                         // Load
                         DefaultConfigurationFile configurationFile = new DefaultConfigurationFile(path);
                         configurationFile.load();
@@ -56,19 +58,22 @@ public class ImportService {
                         // Import
                         MenuConfiguration menu = importer.process(configurationFile.root());
 
+                        // Prepare file path
+                        Path filePath = dataFolder.resolve(fileName);
+                        String id = path.getFileName().toString().replace(".yml", "");
+
                         // Export
-                        MenuConfigurationFile menuConfigurationFile = new MenuConfigurationFile(dataFolder.resolve(path.getFileName()));
+                        MenuConfigurationFile menuConfigurationFile = new MenuConfigurationFile(filePath);
                         menuConfigurationFile.menu(menu);
                         menuConfigurationFile.save();
 
                         // Load new menu
-                        String id = path.getFileName().toString().replace(".yml", "");
                         this.plugin.configuration().register(id, menuConfigurationFile);
 
-                        this.plugin.getLogger().info("Imported " + menuFolder + " to " + dataFolder);
+                        this.plugin.getLogger().info("Imported %s to %s".formatted(path.getFileName(), filePath));
                     });
 
-            this.plugin.getLogger().info("Imported " + menuFolder + " to " + dataFolder);
+            this.plugin.getLogger().info("Imported %s to %s".formatted(menuFolder, dataFolder));
         } catch (IOException e) {
             throw new RuntimeException("Failed to import menus from " + menuFolder, e);
         }

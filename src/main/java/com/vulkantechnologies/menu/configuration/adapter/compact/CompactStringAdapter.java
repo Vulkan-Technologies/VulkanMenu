@@ -10,7 +10,7 @@ public class CompactStringAdapter implements CompactAdapter<String> {
     public static final CompactStringAdapter INSTANCE = new CompactStringAdapter();
 
     @Override
-    public String adapt(CompactContext context) {
+    public String deserialize(CompactContext context) {
         if (context.hasConstructor() && context.constructor().parameters().size() > 1) {
             WrappedConstructorParameter parameter = context.constructor().parameters().get(context.index());
             if (parameter.hasAnnotation(Single.class))
@@ -18,6 +18,11 @@ public class CompactStringAdapter implements CompactAdapter<String> {
         }
 
         return context.remainingArgs();
+    }
+
+    @Override
+    public String serialize(String object) {
+        return object;
     }
 
     @Override

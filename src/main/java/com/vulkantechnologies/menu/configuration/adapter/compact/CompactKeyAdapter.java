@@ -10,10 +10,15 @@ public class CompactKeyAdapter implements CompactAdapter<Key> {
     public static final CompactKeyAdapter INSTANCE = new CompactKeyAdapter();
 
     @Override
-    public Key adapt(CompactContext context) {
+    public Key deserialize(CompactContext context) {
         String key = context.popFirstArg();
 
         return Key.key(key);
+    }
+
+    @Override
+    public String serialize(Key object) {
+        return object.asString();
     }
 
     @Override

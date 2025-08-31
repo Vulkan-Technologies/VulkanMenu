@@ -12,8 +12,13 @@ public class CompactComponentAdapter implements CompactAdapter<Component> {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     @Override
-    public Component adapt(CompactContext context) {
+    public Component deserialize(CompactContext context) {
         return MINI_MESSAGE.deserialize(context.remainingArgs());
+    }
+
+    @Override
+    public String serialize(Component object) {
+        return MINI_MESSAGE.serialize(object);
     }
 
     @Override
