@@ -15,10 +15,7 @@ public record RegexRequirement(@Single String regex, String value) implements Re
 
     @Override
     public boolean test(Player player, Menu menu) {
-        // Process placeholders
         String formattedValue = VulkanMenu.get().processPlaceholders(player, menu, value);
-
-
         Pattern pattern = Pattern.compile(regex);
         return pattern.matcher(formattedValue).find();
     }

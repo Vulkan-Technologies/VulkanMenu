@@ -45,7 +45,6 @@ public class Registries {
                 PlayerCommandAction.class,
                 MessageAction.class,
                 CloseInventoryAction.class,
-                PlayerCommandAction.class,
                 OpenMenuAction.class,
                 SetVariableAction.class,
                 RemoveVariableAction.class,
