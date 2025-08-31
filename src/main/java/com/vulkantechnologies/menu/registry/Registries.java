@@ -7,22 +7,18 @@ import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.action.minecraft.*;
 import com.vulkantechnologies.menu.model.action.minecraft.meta.RemoveMetaAction;
 import com.vulkantechnologies.menu.model.action.minecraft.meta.SetMetaAction;
-import com.vulkantechnologies.menu.model.action.vault.economy.DepositMoneyAction;
-import com.vulkantechnologies.menu.model.action.vault.economy.WithdrawMoneyAction;
-import com.vulkantechnologies.menu.model.action.vault.permission.AddPermissionAction;
-import com.vulkantechnologies.menu.model.action.vault.permission.RemovePermissionAction;
 import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
 import com.vulkantechnologies.menu.model.action.vulkan.RefreshTitleAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
+import com.vulkantechnologies.menu.model.provider.HeadItemProvider;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.ExperienceRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.HasMetaRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.IsNearRequirement;
 import com.vulkantechnologies.menu.model.requirement.minecraft.PermissionRequirement;
-import com.vulkantechnologies.menu.model.requirement.vault.MoneyRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.CompareRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.ContainsRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
@@ -96,5 +92,8 @@ public class Registries {
                 CompactTitleWrapperAdapter.INSTANCE,
                 CompactKeyAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
+
+        // ItemStackProvider
+        ITEM_PROVIDERS.register(new HeadItemProvider());
     }
 }
