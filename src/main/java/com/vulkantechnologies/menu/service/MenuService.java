@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.vulkantechnologies.menu.model.variable.MenuVariable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -29,16 +30,20 @@ public class MenuService {
     private final VulkanMenu plugin;
     private final List<Menu> menus = new CopyOnWriteArrayList<>();
 
-    public void openMenu(Player player, String menuId) {
+    public void openMenu(Player player, String menuId, MenuVariable<?>... variables) {
         this.plugin.configuration()
                 .findByName(menuId)
-                .ifPresentOrElse(menu -> this.openMenu(player, menu.menu()),
+                .ifPresentOrElse(menu -> this.openMenu(player, menu.menu(), variables),
                         () -> this.plugin.getSLF4JLogger().warn("Menu with ID {} not found", menuId));
     }
 
-    public void openMenu(Player player, MenuConfiguration configuration) {
+    public void openMenu(Player player, MenuConfiguration configuration, MenuVariable<?>... variables) {
         TaskUtils.runSync(() -> {
             Menu menu = new Menu(player, configuration);
+
+            for (MenuVariable<?> variable : variables) {
+                menu.addVariable(variable);
+            }
 
             // Event & requirements check
             VMenuOpenEvent event = new VMenuOpenEvent(player, menu);

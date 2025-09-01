@@ -2,6 +2,7 @@ package com.vulkantechnologies.menu;
 
 import java.util.Optional;
 
+import com.vulkantechnologies.menu.model.variable.MenuVariable;
 import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
@@ -54,7 +55,7 @@ public class VMenuAPI {
         return plugin.menu().findByPlayer(player);
     }
 
-    public static void openMenu(Player player, String menuId) {
-        plugin.menu().openMenu(player, menuId);
+    public static void openMenu(Player player, String menuId, MenuVariable<?>... variables) {
+        plugin.menu().openMenu(player, menuId, variables);
     }
 }
