@@ -39,11 +39,7 @@ public class MenuService {
 
     public void openMenu(Player player, MenuConfiguration configuration, MenuVariable<?>... variables) {
         TaskUtils.runSync(() -> {
-            Menu menu = new Menu(player, configuration);
-
-            for (MenuVariable<?> variable : variables) {
-                menu.addVariable(variable);
-            }
+            Menu menu = new Menu(player, configuration, variables);
 
             // Event & requirements check
             VMenuOpenEvent event = new VMenuOpenEvent(player, menu);

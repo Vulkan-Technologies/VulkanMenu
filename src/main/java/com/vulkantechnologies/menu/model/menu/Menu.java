@@ -3,6 +3,7 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.vulkantechnologies.menu.VulkanMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -47,7 +48,7 @@ public class Menu implements InventoryHolder {
     private int windowId;
     private int stateId;
 
-    public Menu(Player player, MenuConfiguration configuration) {
+    public Menu(Player player, MenuConfiguration configuration, MenuVariable<?>... initialVariables) {
         this.uniqueId = UUID.randomUUID();
         this.player = player;
         this.configuration = configuration;
@@ -57,6 +58,15 @@ public class Menu implements InventoryHolder {
 
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
+
+        if (initialVariables != null) {
+            Arrays.stream(initialVariables).forEach(variable -> {
+                if (this.removeVariable(variable.name())) {
+                    VulkanMenu.get().getLogger().warning("Removing variable from configuration " + variable.name() + " because it was already defined from the internal constructor.");
+                }
+                this.variables.add(variable);
+            });
+        }
 
         this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
         this.items = new ArrayList<>(configuration.items().values());
@@ -212,8 +222,8 @@ public class Menu implements InventoryHolder {
         this.variables.add(variable);
     }
 
-    public void removeVariable(String name) {
-        this.variables.removeIf(variable -> variable.name().equals(name));
+    public boolean removeVariable(String name) {
+        return this.variables.removeIf(variable -> variable.name().equals(name));
     }
 
     @Unmodifiable
