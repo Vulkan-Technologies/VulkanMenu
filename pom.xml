@@ -46,8 +46,9 @@
     <!-- scm -->
     <scm>
         <connection>scm:git:git://github.com/Vulkan-Technologies/VulkanMenu.git</connection>
-        <developerConnection>scm:git:ssh://github.com:Vulkan-Technologies/VulkanMenu.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/Vulkan-Technologies/VulkanMenu.git</developerConnection>
         <url>https://github.com/Vulkan-Technologies/VulkanMenu/tree/main</url>
+        <tag>HEAD</tag>
     </scm>
 
     <!-- issue management -->
@@ -329,6 +330,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <outputFile>/Volumes/Untitled/Development/Vulkan/VulkanMenu/server/plugins/VulkanMenu.jar</outputFile>
                    <relocations>
                         <relocation>
                             <pattern>co.aikar.commands</pattern>
@@ -376,6 +378,24 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- maven release plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <preparationGoals>clean verify</preparationGoals>
+                    <arguments>-DskipTests</arguments>
+                    <pushChanges>true</pushChanges>
+                    <localCheckout>false</localCheckout>
+                    <scmCommentPrefix>[RELEASE]</scmCommentPrefix>
+                </configuration>
             </plugin>
         </plugins>
         <!-- resources -->

@@ -31,6 +31,12 @@ cd server && java -jar paper-1.21.4-230.jar
 
 # Open a menu in-game
 /vmenu open <menu_name> [player]
+
+# Import menus from other plugins
+/vmenu import deluxemenu
+
+# Debug menu configuration
+/vmenu dump <menu_name>
 ```
 
 ## Architecture Overview
@@ -41,6 +47,7 @@ cd server && java -jar paper-1.21.4-230.jar
 - **PluginHookService**: Manages integrations with external plugins
 - **FileWatcherService**: Hot-reloads configurations when files change
 - **UpdateService**: Checks for plugin updates
+- **ImportService**: Imports menus from other plugins (DeluxeMenus)
 
 ### Menu System Architecture
 1. **Menu Configuration**: YAML files in `resources/configuration/menus/` define menu structure
