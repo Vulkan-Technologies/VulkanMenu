@@ -3,7 +3,6 @@ package com.vulkantechnologies.menu.model.action.vulkan.variable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
 
@@ -21,7 +20,6 @@ import redempt.crunch.functional.EvaluationEnvironment;
 @ComponentName("set-variable")
 public record SetVariableAction(@Single String name, @Single String value) implements Action {
 
-    private static final Pattern PATTERN = Pattern.compile("[a-zA-Z]+");
 
     @Override
     public void accept(Player player, Menu menu) {
@@ -35,7 +33,7 @@ public record SetVariableAction(@Single String name, @Single String value) imple
         if (formattedValue.matches(".*[+\\-*/%].*")) {
             // Extract variable names
             List<String> variablesName = new ArrayList<>();
-            Matcher matcher = PATTERN.matcher(formattedValue);
+            Matcher matcher = MenuVariable.VARIABLE_NAME_PATTERN.matcher(formattedValue);
             while (matcher.find()) {
                 String variableName = matcher.group();
 
@@ -43,7 +41,7 @@ public record SetVariableAction(@Single String name, @Single String value) imple
                 if (menu.variable(variableName).isPresent())
                     variablesName.add(variableName);
                 else
-                    throw new IllegalArgumentException("Variable not found: " + variableName);
+                    throw new IllegalArgumentException("Variable in expression not found: " + variableName);
             }
 
             // Compile expression
