@@ -67,6 +67,8 @@ public record SetVariableAction(@Single String name, @Single String value) imple
             // Set the variable value
             if (variable.type() == Integer.class) {
                 variable.value(String.valueOf((int) result));
+            } else if (variable.type() == Long.class) {
+                variable.value(String.valueOf((long) result));
             } else {
                 variable.value(String.valueOf(result));
             }
