@@ -83,6 +83,7 @@ public class Registries {
                 CompactBooleanAdapter.INSTANCE,
                 CompactDoubleAdapter.INSTANCE,
                 CompactIntegerAdapter.INSTANCE,
+                CompactLongAdapter.INSTANCE,
                 CompactBooleanAdapter.INSTANCE,
                 CompactStringAdapter.INSTANCE,
                 CompactComponentAdapter.INSTANCE,

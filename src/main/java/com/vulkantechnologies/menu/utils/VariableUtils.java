@@ -1,9 +1,6 @@
 package com.vulkantechnologies.menu.utils;
 
-import com.vulkantechnologies.menu.configuration.adapter.compact.CompactBooleanAdapter;
-import com.vulkantechnologies.menu.configuration.adapter.compact.CompactDoubleAdapter;
-import com.vulkantechnologies.menu.configuration.adapter.compact.CompactIntegerAdapter;
-import com.vulkantechnologies.menu.configuration.adapter.compact.CompactStringAdapter;
+import com.vulkantechnologies.menu.configuration.adapter.compact.*;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 
 import lombok.experimental.UtilityClass;
@@ -14,6 +11,8 @@ public class VariableUtils {
     public static CompactAdapter<?> findAdapter(String value) {
         if (isInteger(value))
             return CompactIntegerAdapter.INSTANCE;
+        else if (isLong(value))
+            return CompactLongAdapter.INSTANCE;
         else if (isDouble(value))
             return CompactDoubleAdapter.INSTANCE;
         else if (isBoolean(value))
