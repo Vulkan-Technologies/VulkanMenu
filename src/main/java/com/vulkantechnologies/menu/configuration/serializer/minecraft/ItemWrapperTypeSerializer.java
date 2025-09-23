@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.vulkantechnologies.menu.utils.Version;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -22,6 +21,7 @@ import org.spongepowered.configurate.serialize.TypeSerializer;
 import com.vulkantechnologies.menu.model.provider.ItemStackProvider;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
+import com.vulkantechnologies.menu.utils.Version;
 
 public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
@@ -33,8 +33,8 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
         ConfigurationNode materialNode = node.node("material");
         String rawMaterial = materialNode.getString();
-        if (rawMaterial.contains(":")) {
-            String[] materialParts = rawMaterial.split(":");
+        if (rawMaterial.contains("-")) {
+            String[] materialParts = rawMaterial.split("-");
             ItemStackProvider provider = Registries.ITEM_PROVIDERS.findByPrefix(materialParts[0])
                     .orElseThrow(() -> new SerializationException("Invalid item provider: " + materialParts[0]));
             item = provider.provide(materialParts[1]);
@@ -96,7 +96,8 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
 
         // Custom model data
         int customModelData = node.node("custom-model-data").getInt();
-        meta.setCustomModelData(customModelData);
+        if (customModelData != 0)
+            meta.setCustomModelData(customModelData);
 
         // Item flags
         List<ItemFlag> itemFlags = node.node("item-flags").getList(ItemFlag.class);
