@@ -93,7 +93,10 @@ public enum Version {
      */
     V_1_21_2(768, 57),
     V_1_21_4(769, 61),
-    V_1_21_5(770, 71);
+    V_1_21_5(770, 71),
+    V_1_21_6(771, 75),
+    V_1_21_7(772, 82),
+    V_1_21_8(773, 87);
 
     private static final Map<Integer, Version> VERSION_MAP;
     private static final Version MAX;
