@@ -21,6 +21,7 @@ import com.vulkantechnologies.menu.listener.MarkerListener;
 import com.vulkantechnologies.menu.listener.UpdateListener;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.menu.Menu;
+import com.vulkantechnologies.menu.placeholder.GlobalVariablePlaceholderProcessor;
 import com.vulkantechnologies.menu.service.*;
 import com.vulkantechnologies.menu.task.MenuRefreshTask;
 
@@ -73,6 +74,9 @@ public final class VulkanMenu extends JavaPlugin {
         // Main configuration
         this.mainConfiguration = new MainConfiguration(this.getDataFolder().toPath().resolve("config.yml"));
         this.mainConfiguration.load();
+
+        // Placeholders
+        this.placeholderProcessors.add(new GlobalVariablePlaceholderProcessor(this));
 
         // Services
         this.pluginHooks = new PluginHookService(this);

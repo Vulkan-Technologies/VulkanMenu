@@ -1,3 +1,4 @@
+# Configuration for the update checker.
 update-checker:
   enabled: true
   notification: true
@@ -5,6 +6,12 @@ update-checker:
 # If set to true, the live reload feature will be enabled by default.
 live-reload-enabled: false
 
+# Set global variables that can be used in all menus.
+global-variables:
+  primary-color: "<#00FFFF>"
+  secondary-color: "<#FF00FF>"
+
+# Messages used in the plugin, keyed by their identifier.
 messages:
   # Reload
   reloading: "<gray>Reloading <aqua>VulkanMenu</aqua> configuration..."

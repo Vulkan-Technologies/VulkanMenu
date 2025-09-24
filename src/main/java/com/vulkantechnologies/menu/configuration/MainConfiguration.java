@@ -18,6 +18,7 @@ import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import lombok.Getter;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
 @Getter
@@ -29,6 +30,8 @@ public class MainConfiguration extends ConfigurationFile {
     private final Map<String, ComponentWrapper> messages = new HashMap<>();
     @Comment("If set to true, the live reload feature will be enabled by default.")
     private boolean liveReloadEnabled;
+    @Comment("Set global variables that can be used in all menus.")
+    private Map<String, String> globalVariables = new HashMap<>();
 
     public MainConfiguration(Path path) {
         super(path);
@@ -39,6 +42,15 @@ public class MainConfiguration extends ConfigurationFile {
         try {
             this.updateChecker = root.node("update-checker").get(UpdateChecker.class);
             this.liveReloadEnabled = root.node("live-reload-enabled").getBoolean(false);
+            this.globalVariables = root.node("global-variables")
+                    .childrenMap()
+                    .entrySet()
+                    .stream()
+                    .collect(HashMap::new, (map, entry) -> {
+                        String key = entry.getKey().toString();
+                        String value = entry.getValue().getString("");
+                        map.put(key, value);
+                    }, HashMap::putAll);
 
             ConfigurationNode messagesNode = root.node("messages");
             for (Map.Entry<Object, ? extends ConfigurationNode> entry : messagesNode.childrenMap().entrySet()) {

@@ -322,7 +322,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                   <relocations>
+                    <relocations>
                         <relocation>
                             <pattern>co.aikar.commands</pattern>
                             <shadedPattern>com.vulkantechnologies.menu.shaded.acf</shadedPattern>
