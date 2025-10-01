@@ -144,7 +144,7 @@ public class Menu implements InventoryHolder {
 
         int index = (page - 1) * layout.slots().size();
         for (int slot : layout.slots()) {
-            if (slot < 0 || slot >= this.configuration.size())
+            if (slot < 0 || index >= layoutItem.size())
                 continue;
 
             ItemStack stack = layoutItem.get(index++);
