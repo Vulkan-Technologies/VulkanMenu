@@ -3,7 +3,6 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.vulkantechnologies.menu.VulkanMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,7 +12,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
+import com.vulkantechnologies.menu.hook.implementation.PacketEventsPluginHook;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
@@ -52,6 +53,8 @@ public class Menu implements InventoryHolder {
         this.uniqueId = UUID.randomUUID();
         this.player = player;
         this.configuration = configuration;
+
+        // Variables
         this.variables = new CopyOnWriteArrayList<>();
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
@@ -61,20 +64,23 @@ public class Menu implements InventoryHolder {
 
         if (initialVariables != null) {
             Arrays.stream(initialVariables).forEach(variable -> {
-                if (this.removeVariable(variable.name())) {
+                if (this.removeVariable(variable.name()))
                     VulkanMenu.get().getLogger().warning("Removing variable from configuration " + variable.name() + " because it was already defined from the internal constructor.");
-                }
                 this.variables.add(variable);
             });
         }
 
-        this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
+        // Inventory
+        this.inventory = Bukkit.createInventory(this, configuration.size(), this.buildTitle(player));
         this.items = new ArrayList<>(configuration.items().values());
         this.cachedItems = new ItemStack[configuration.size() + 36];
 
+        // Meta
         this.creationTime = System.currentTimeMillis();
         this.lastRefreshTime = System.currentTimeMillis();
         this.refreshing = false;
+
+        // Build
         this.build();
     }
 
@@ -88,6 +94,10 @@ public class Menu implements InventoryHolder {
                 .allMatch(requirement -> requirement.test(player, this));
     }
 
+    public Component buildTitle(Player player) {
+        return this.configuration.title().build(player, this);
+    }
+
     public void refresh(int slot) {
         this.inventory.clear(slot);
         this.getShownItem(slot).ifPresent(item -> {
@@ -98,16 +108,21 @@ public class Menu implements InventoryHolder {
     }
 
     public void refreshTitle(Player player) {
-        Component newTitle = this.configuration.title().build(player, this);
-        if (!InventoryUtil.isOnMenu(player, this)) {
+        if (!InventoryUtil.isOnMenu(player, this))
             return;
-        }
-        Inventory newInventory = Bukkit.createInventory(this, configuration.size(), newTitle);
-        newInventory.setContents(inventory.getContents());
-        inventory = newInventory;
-        this.refreshing = true;
-        player.openInventory(newInventory);
-        this.refreshing = false;
+
+        VulkanMenu.get()
+                .pluginHooks()
+                .hook(PacketEventsPluginHook.class)
+                .ifPresentOrElse(hook -> hook.setTitle(player, this),
+                        () -> {
+                            Inventory newInventory = Bukkit.createInventory(this, configuration.size(), this.buildTitle(player));
+                            newInventory.setContents(inventory.getContents());
+                            this.inventory = newInventory;
+                            this.refreshing = true;
+                            player.openInventory(newInventory);
+                            this.refreshing = false;
+                        });
     }
 
     public void refresh() {
