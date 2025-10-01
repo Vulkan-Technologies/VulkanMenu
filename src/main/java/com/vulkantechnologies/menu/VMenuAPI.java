@@ -2,7 +2,6 @@ package com.vulkantechnologies.menu;
 
 import java.util.Optional;
 
-import com.vulkantechnologies.menu.model.variable.MenuVariable;
 import org.bukkit.entity.Player;
 
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
@@ -12,6 +11,8 @@ import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.menu.Menu;
 import com.vulkantechnologies.menu.model.provider.ItemStackProvider;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
+import com.vulkantechnologies.menu.model.supplier.ItemStackSupplier;
+import com.vulkantechnologies.menu.model.variable.MenuVariable;
 import com.vulkantechnologies.menu.registry.Registries;
 
 import lombok.experimental.UtilityClass;
@@ -39,6 +40,10 @@ public class VMenuAPI {
 
     public static void registerCompactAdapter(CompactAdapter<?> adapter) {
         Registries.COMPACT_ADAPTER.register(adapter);
+    }
+
+    public static void registerItemStackSupplier(ItemStackSupplier supplier) {
+        Registries.ITEM_STACK_SUPPLIERS.register(supplier);
     }
 
     public static Optional<MenuConfiguration> findMenuConfiguration(String name) {

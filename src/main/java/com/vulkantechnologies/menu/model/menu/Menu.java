@@ -3,7 +3,6 @@ package com.vulkantechnologies.menu.model.menu;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.vulkantechnologies.menu.VulkanMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -13,9 +12,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
+import com.vulkantechnologies.menu.model.layout.Layout;
 import com.vulkantechnologies.menu.model.variable.MenuVariable;
 import com.vulkantechnologies.menu.utils.InventoryUtil;
 import com.vulkantechnologies.menu.utils.VariableUtils;
@@ -44,7 +45,6 @@ public class Menu implements InventoryHolder {
     private long creationTime;
     private long lastRefreshTime;
 
-    // Packet handling
     private int windowId;
     private int stateId;
 
@@ -99,15 +99,16 @@ public class Menu implements InventoryHolder {
 
     public void refreshTitle(Player player) {
         Component newTitle = this.configuration.title().build(player, this);
-        if (!InventoryUtil.isOnMenu(player, this)) {
+        if (!InventoryUtil.isInMenu(player, this))
             return;
-        }
+
         Inventory newInventory = Bukkit.createInventory(this, configuration.size(), newTitle);
         newInventory.setContents(inventory.getContents());
         inventory = newInventory;
         this.refreshing = true;
         player.openInventory(newInventory);
         this.refreshing = false;
+
     }
 
     public void refresh() {
@@ -122,6 +123,39 @@ public class Menu implements InventoryHolder {
         this.lastRefreshTime = System.currentTimeMillis();
     }
 
+    public void refreshLayout() {
+        Layout layout = this.configuration.layout();
+        if (layout == null)
+            return;
+
+        String pageVariable = layout.pageVariable() != null ? layout.pageVariable() : "page";
+        if (!hasVariable(pageVariable))
+            return;
+
+        int page = variable(pageVariable)
+                .map(variable -> variable.value() instanceof Number ? ((Number) variable.value()).intValue() : 1)
+                .orElse(1);
+        if (page < 1)
+            page = 1;
+
+        List<ItemStack> layoutItem = layout.supplier().get(this, player);
+        if (page > 1 && (page - 1) * layout.slots().size() >= layoutItem.size())
+            page = 1;
+
+        int index = (page - 1) * layout.slots().size();
+        for (int slot : layout.slots()) {
+            if (slot < 0 || slot >= this.configuration.size())
+                continue;
+
+            ItemStack stack = layoutItem.get(index++);
+            if (stack == null || stack.isEmpty())
+                continue;
+
+            this.setItem(slot, stack);
+            this.cachedItems[slot] = stack;
+        }
+    }
+
     public List<ItemStack> build() {
         int size = this.configuration.size();
         int totalSize = size + 36;
@@ -130,8 +164,6 @@ public class Menu implements InventoryHolder {
         ItemStack air = new ItemStack(Material.AIR);
 
         Arrays.fill(this.cachedItems, air);
-
-        long startTime = System.currentTimeMillis();
 
         // Top inventory
         for (int i = 0; i < size; i++) {
@@ -154,9 +186,11 @@ public class Menu implements InventoryHolder {
             this.cachedItems[i] = stack;
         }
 
+        // Apply layout if present
+        this.refreshLayout();
+
         return items;
     }
-
 
     public Optional<MenuItem> getShownItem(int slot) {
         List<MenuItem> menuItems = new ArrayList<>();

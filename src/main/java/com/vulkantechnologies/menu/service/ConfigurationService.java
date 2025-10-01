@@ -35,9 +35,10 @@ public class ConfigurationService {
         this.plugin.getSLF4JLogger().info("Loading menus...");
         this.menus.clear();
 
-        // Unregister commands
-        this.unregisterCommands();
+        // Unregister all commands
+        menus.forEach((menuName, menuConfigurationFile) -> this.unregisterCommands(menuConfigurationFile.menu()));
 
+        // Load all menu configurations
         try (Stream<Path> pathStream = Files.walk(dataFolder)) {
             pathStream.filter(path -> path.toString().endsWith(".yml"))
                     .filter(path -> !path.getFileName().toString().equals("config.yml"))
@@ -63,8 +64,7 @@ public class ConfigurationService {
             file.load();
 
             // Validate configuration
-            if (file.menu() == null
-                || !file.menu().validate(this.plugin))
+            if (file.menu() == null || !file.menu().validate(this.plugin))
                 throw new MenuConfigurationLoadException("Invalid menu configuration");
 
             // Register menu

@@ -16,7 +16,10 @@ public class HeadDatabaseItemProvider implements ItemStackProvider {
     public ItemStack provide(String value) {
         if (value == null || value.isEmpty())
             return this.api.getRandomHead();
-        return this.api.getItemHead(value);
+        ItemStack itemStack = this.api.getItemHead(value);
+        if (itemStack == null)
+            throw new RuntimeException("HeadDatabase item not found: " + value);
+        return itemStack;
     }
 
     @Override

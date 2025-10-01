@@ -7,10 +7,7 @@ import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.action.minecraft.*;
 import com.vulkantechnologies.menu.model.action.minecraft.meta.RemoveMetaAction;
 import com.vulkantechnologies.menu.model.action.minecraft.meta.SetMetaAction;
-import com.vulkantechnologies.menu.model.action.vulkan.OpenMenuAction;
-import com.vulkantechnologies.menu.model.action.vulkan.RefreshAction;
-import com.vulkantechnologies.menu.model.action.vulkan.RefreshSlotAction;
-import com.vulkantechnologies.menu.model.action.vulkan.RefreshTitleAction;
+import com.vulkantechnologies.menu.model.action.vulkan.*;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.RemoveVariableAction;
 import com.vulkantechnologies.menu.model.action.vulkan.variable.SetVariableAction;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
@@ -22,6 +19,7 @@ import com.vulkantechnologies.menu.model.requirement.vulkan.CompareRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.ContainsRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.StringLengthRequirement;
+import com.vulkantechnologies.menu.model.supplier.TestSupplier;
 
 public class Registries {
 
@@ -36,6 +34,7 @@ public class Registries {
 
     // Misc
     public static final ItemStackProviderRegistry ITEM_PROVIDERS = new ItemStackProviderRegistry();
+    public static final ItemStackSuppliersRegistry ITEM_STACK_SUPPLIERS = new ItemStackSuppliersRegistry();
 
     static {
         // -- MenuComponent
@@ -51,6 +50,7 @@ public class Registries {
                 RefreshAction.class,
                 RefreshTitleAction.class,
                 RefreshSlotAction.class,
+                RefreshLayoutAction.class,
                 TeleportAction.class,
                 ActionBarAction.class,
                 SoundAction.class,
@@ -93,5 +93,9 @@ public class Registries {
                 CompactTitleWrapperAdapter.INSTANCE,
                 CompactKeyAdapter.INSTANCE
         ).forEach(COMPACT_ADAPTER::register);
+
+        // -- Misc
+        // ItemStackProvider
+        ITEM_STACK_SUPPLIERS.register(new TestSupplier());
     }
 }

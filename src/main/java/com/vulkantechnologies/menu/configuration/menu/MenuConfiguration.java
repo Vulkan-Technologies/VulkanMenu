@@ -8,6 +8,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
 import com.vulkantechnologies.menu.model.action.Action;
+import com.vulkantechnologies.menu.model.layout.Layout;
 import com.vulkantechnologies.menu.model.menu.MenuItem;
 import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import com.vulkantechnologies.menu.model.wrapper.RequirementWrapper;
@@ -21,7 +22,7 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
                                 Map<String, MenuItem> items,
                                 @Nullable List<Action> openActions, @Nullable List<Action> closeActions,
                                 @Nullable Map<String, RequirementWrapper> openRequirements,
-                                Map<String, String> variables, @Nullable Refresh refresh) {
+                                Map<String, String> variables, @Nullable Refresh refresh, @Nullable Layout layout) {
 
     @ConfigSerializable
     public record Refresh(int interval, int delay, List<Action> actions) {
@@ -79,11 +80,9 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
                 if (!Key.parseable(name)) {
                     plugin.getLogger().warning("Variable name '" + name + "' is not a valid Key.");
                     this.variables.remove(name);
-                    continue;
                 } else if (value == null || value.isEmpty()) {
                     plugin.getLogger().warning("Variable value for '" + name + "' cannot be null or empty.");
                     this.variables.remove(name);
-                    continue;
                 }
             }
 

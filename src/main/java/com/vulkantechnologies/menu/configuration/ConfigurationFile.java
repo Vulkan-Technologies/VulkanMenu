@@ -2,8 +2,6 @@ package com.vulkantechnologies.menu.configuration;
 
 import java.nio.file.Path;
 
-import com.vulkantechnologies.menu.configuration.serializer.minecraft.legacy.LegacyAttributeModifierTypeSerializer;
-import com.vulkantechnologies.menu.utils.Version;
 import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
@@ -12,21 +10,21 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import com.vulkantechnologies.menu.configuration.serializer.adventure.ComponentTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.adventure.KeyTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.minecraft.modern.ModernAttributeModifierTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.EnchantmentTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.ItemWrapperTypeSerializer;
 import com.vulkantechnologies.menu.configuration.serializer.minecraft.MaterialTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.vulkan.ComponentWrapperTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.vulkan.ItemSlotTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.vulkan.MenuComponentTypeSerializer;
-import com.vulkantechnologies.menu.configuration.serializer.vulkan.MenuItemTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.minecraft.legacy.LegacyAttributeModifierTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.minecraft.modern.ModernAttributeModifierTypeSerializer;
+import com.vulkantechnologies.menu.configuration.serializer.vulkan.*;
 import com.vulkantechnologies.menu.model.action.Action;
 import com.vulkantechnologies.menu.model.menu.ItemSlot;
 import com.vulkantechnologies.menu.model.menu.MenuItem;
 import com.vulkantechnologies.menu.model.requirement.Requirement;
+import com.vulkantechnologies.menu.model.supplier.ItemStackSupplier;
 import com.vulkantechnologies.menu.model.wrapper.ComponentWrapper;
 import com.vulkantechnologies.menu.model.wrapper.ItemWrapper;
 import com.vulkantechnologies.menu.registry.Registries;
+import com.vulkantechnologies.menu.utils.Version;
 
 import lombok.Getter;
 import net.kyori.adventure.key.Key;
@@ -57,11 +55,11 @@ public abstract class ConfigurationFile {
                                     new MenuComponentTypeSerializer<>(Registries.REQUIREMENT, Registries.REQUIREMENT_ADAPTER))
                             .register(ComponentWrapper.class, ComponentWrapperTypeSerializer.INSTANCE)
                             .register(MenuItem.class, MenuItemTypeSerializer.INSTANCE)
-                            .register(ItemSlot.class, ItemSlotTypeSerializer.INSTANCE);
+                            .register(ItemSlot.class, ItemSlotTypeSerializer.INSTANCE)
+                            .register(ItemStackSupplier.class, ItemStackSupplierTypeSerializer.INSTANCE);
 
                     if (Version.CURRENT.more(Version.V_1_20_5)) {
-                        builder
-                                .register(Material.class, MaterialTypeSerializer.INSTANCE)
+                        builder.register(Material.class, MaterialTypeSerializer.INSTANCE)
                                 .register(Enchantment.class, EnchantmentTypeSerializer.INSTANCE);
                     }
                 }))

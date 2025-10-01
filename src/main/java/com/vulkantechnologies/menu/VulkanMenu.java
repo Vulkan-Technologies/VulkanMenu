@@ -69,7 +69,6 @@ public final class VulkanMenu extends JavaPlugin {
     public void onEnable() {
         // Configuration
         this.configuration = new ConfigurationService(this);
-        this.configuration.load();
 
         // Main configuration
         this.mainConfiguration = new MainConfiguration(this.getDataFolder().toPath().resolve("config.yml"));
@@ -101,7 +100,10 @@ public final class VulkanMenu extends JavaPlugin {
 
         // Hooks
         this.pluginHooks.check();
-        Bukkit.getScheduler().runTask(this, () -> this.pluginHooks.retry());
+        Bukkit.getScheduler().runTask(this, () -> {
+            this.pluginHooks.retry();
+            this.configuration.load();
+        });
 
         // Tasks
         this.refreshTask = new MenuRefreshTask(this);

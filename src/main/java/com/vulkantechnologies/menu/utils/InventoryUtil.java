@@ -1,16 +1,17 @@
 package com.vulkantechnologies.menu.utils;
 
-import com.vulkantechnologies.menu.model.menu.Menu;
+import java.lang.reflect.Method;
+
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Method;
+import com.vulkantechnologies.menu.model.menu.Menu;
 
 public class InventoryUtil {
 
     private static Method getTopInventoryMethod;
     private static Method getHolderMethod;
 
-    public static boolean isOnMenu(Player player, Menu menu) {
+    public static boolean isInMenu(Player player, Menu menu) {
         if (player == null || menu == null) return false;
 
         try {
