@@ -204,12 +204,8 @@ public class Menu implements InventoryHolder {
         if (menuItems.isEmpty())
             return Optional.empty();
 
-        // Sort by priority
-        menuItems.sort((item1, item2) -> {
-            if (item1.priority() == item2.priority())
-                return 0;
-            return item1.priority() > item2.priority() ? -1 : 1;
-        });
+        // Redo the sort by priority with a comparator
+        menuItems.sort(Comparator.comparingInt(MenuItem::priority).reversed());
 
         // Filter by requirements
         menuItems.removeIf(item -> !item.shouldShow(player, this));

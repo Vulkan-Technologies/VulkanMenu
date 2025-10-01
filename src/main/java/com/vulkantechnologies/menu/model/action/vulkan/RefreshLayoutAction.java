@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 @ComponentName("refresh-layout")
 @NoArgsConstructor
 public class RefreshLayoutAction implements Action {
+
     @Override
     public void accept(Player player, Menu menu) {
         menu.refreshLayout();
     }
+
 }
