@@ -193,29 +193,10 @@ public class Menu implements InventoryHolder {
     }
 
     public Optional<MenuItem> getShownItem(int slot) {
-        List<MenuItem> menuItems = new ArrayList<>();
-
-        // Search by slot
-        for (MenuItem item : this.items) {
-            if (item.hasSlot(this.player, this, slot))
-                menuItems.add(item);
-        }
-
-        if (menuItems.isEmpty())
-            return Optional.empty();
-
-        // Redo the sort by priority with a comparator
-        menuItems.sort(Comparator.comparingInt(MenuItem::priority).reversed());
-
-        // Filter by requirements
-        menuItems.removeIf(item -> !item.shouldShow(player, this));
-
-        // Return the first item
-        if (menuItems.isEmpty())
-            return Optional.empty();
-
-        // Return the first item
-        return Optional.of(menuItems.getFirst());
+        return this.items.stream()
+                .filter(item -> item.hasSlot(this.player, this, slot))
+                .filter(item -> item.shouldShow(player, this))
+                .max(Comparator.comparingInt(MenuItem::priority));
     }
 
     public List<MenuItem> items(int slot) {
