@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.vulkantechnologies.menu.VulkanMenu;
+import com.vulkantechnologies.menu.configuration.adapter.compact.CompactIntegerAdapter;
 import com.vulkantechnologies.menu.configuration.menu.MenuConfiguration;
 import com.vulkantechnologies.menu.model.adapter.CompactAdapter;
 import com.vulkantechnologies.menu.model.adapter.CompactContext;
@@ -53,12 +54,14 @@ public class Menu implements InventoryHolder {
         this.player = player;
         this.configuration = configuration;
         this.variables = new CopyOnWriteArrayList<>();
+        // Variables from configuration
         this.configuration.variables().forEach((key, value) -> {
             CompactAdapter<?> adapter = VariableUtils.findAdapter(value);
 
             this.variables.add(new MenuVariable(key, adapter.type(), adapter, adapter.adapt(new CompactContext(value))));
         });
 
+        // Initial variables from constructor
         if (initialVariables != null) {
             Arrays.stream(initialVariables).forEach(variable -> {
                 if (this.removeVariable(variable.name())) {
@@ -66,6 +69,17 @@ public class Menu implements InventoryHolder {
                 }
                 this.variables.add(variable);
             });
+        }
+
+        // Layout variables
+        Layout layout = this.configuration.layout();
+        if (layout != null) {
+            this.variables.add(new MenuVariable<>(
+                    "layout_max_page",
+                    Integer.class,
+                    CompactIntegerAdapter.INSTANCE,
+                    layout.maxPage(this, this.player)
+            ));
         }
 
         this.inventory = Bukkit.createInventory(this, configuration.size(), configuration.title().build(player, this));
@@ -113,13 +127,7 @@ public class Menu implements InventoryHolder {
 
     public void refresh() {
         this.inventory.clear();
-
-        List<ItemStack> items = this.build();
-        for (int slot = 0; slot < items.size(); slot++) {
-            ItemStack itemStack = items.get(slot);
-            this.setItem(slot, itemStack);
-        }
-
+        this.build();
         this.lastRefreshTime = System.currentTimeMillis();
     }
 
@@ -239,11 +247,13 @@ public class Menu implements InventoryHolder {
 
     @Unmodifiable
     public List<MenuVariable<?>> variables() {
-        return List.copyOf(this.variables);
+        return Collections.unmodifiableList(this.variables);
     }
 
     public TagResolver variableResolver() {
-        return TagResolver.resolver(this.variables.toArray(TagResolver[]::new));
+        return TagResolver.builder()
+                .resolvers(this.variables)
+                .build();
     }
 
     public String injectVariable(String text) {

@@ -19,7 +19,6 @@ import com.vulkantechnologies.menu.model.requirement.vulkan.CompareRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.ContainsRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.RegexRequirement;
 import com.vulkantechnologies.menu.model.requirement.vulkan.StringLengthRequirement;
-import com.vulkantechnologies.menu.model.supplier.TestSupplier;
 
 public class Registries {
 
@@ -96,6 +95,5 @@ public class Registries {
 
         // -- Misc
         // ItemStackProvider
-        ITEM_STACK_SUPPLIERS.register(new TestSupplier());
     }
 }

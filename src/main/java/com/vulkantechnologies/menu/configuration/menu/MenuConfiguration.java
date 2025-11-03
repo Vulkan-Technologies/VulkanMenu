@@ -88,4 +88,8 @@ public record MenuConfiguration(ComponentWrapper title, int size, @Nullable Comm
 
         return true;
     }
+
+    public MenuConfiguration withLayout(Layout layout) {
+        return new MenuConfiguration(this.title, this.size, this.openCommand, this.items, this.openActions, this.closeActions, this.openRequirements, this.variables, this.refresh, layout);
+    }
 }
