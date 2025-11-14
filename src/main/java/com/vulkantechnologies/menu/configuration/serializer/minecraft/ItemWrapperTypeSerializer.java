@@ -34,7 +34,7 @@ public class ItemWrapperTypeSerializer implements TypeSerializer<ItemWrapper> {
         ConfigurationNode materialNode = node.node("material");
         String rawMaterial = materialNode.getString();
         if (rawMaterial.contains("-")) {
-            String[] materialParts = rawMaterial.split("-");
+            String[] materialParts = rawMaterial.split("-", 2);
             ItemStackProvider provider = Registries.ITEM_PROVIDERS.findByPrefix(materialParts[0])
                     .orElseThrow(() -> new SerializationException("Invalid item provider: " + materialParts[0]));
             item = provider.provide(materialParts[1]);

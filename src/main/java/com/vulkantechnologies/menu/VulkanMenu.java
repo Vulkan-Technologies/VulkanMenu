@@ -112,7 +112,10 @@ public final class VulkanMenu extends JavaPlugin {
         this.metrics.addCustomChart(new SingleLineChart("menu_count", () -> this.menu.menus().size()));
 
         // Update checker
-        Bukkit.getScheduler().runTaskLater(this, () -> this.updates.checkForUpdates(), 20L);
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            this.updates.checkForUpdates();
+            this.configuration.load();
+        }, 20L);
 
         // API
         VMenuAPI.init(this);

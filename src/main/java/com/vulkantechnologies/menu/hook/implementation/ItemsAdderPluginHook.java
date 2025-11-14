@@ -10,6 +10,7 @@ import com.vulkantechnologies.menu.hook.PluginHook;
 import com.vulkantechnologies.menu.model.PlaceholderProcessor;
 import com.vulkantechnologies.menu.model.provider.ItemsAdderItemStackProvider;
 import com.vulkantechnologies.menu.registry.Registries;
+import com.vulkantechnologies.menu.utils.MiniMessageUtil;
 
 import dev.lone.itemsadder.api.FontImages.FontImageWrapper;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ public class ItemsAdderPluginHook implements PluginHook, PlaceholderProcessor {
         StringBuilder result = new StringBuilder();
         while (matcher.find()) {
             String replacement = FontImageWrapper.replaceFontImages(matcher.group(0));
-            matcher.appendReplacement(result, replacement);
+            matcher.appendReplacement(result, MiniMessageUtil.replaceLegacyColors(replacement));
         }
         matcher.appendTail(result);
         return result.toString();
